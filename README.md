@@ -55,7 +55,31 @@ progress does not sync between devices.
 ## Development
 
 The game uses HTML, CSS, and JavaScript with no build step or package dependencies.
-For developers with Python 3 installed:
+To play locally with automatic updates, install Git and Python 3, then run:
+
+```bash
+git clone https://github.com/samehmohamed88/magikarp-fishing.git
+cd magikarp-fishing
+python3 play_auto.py
+```
+
+Open **http://localhost:8000/** in your browser. On Windows, use
+`py play_auto.py` instead of `python3 play_auto.py`.
+The launcher checks GitHub every 60 seconds; refresh the browser after an update.
+Press Ctrl+C to stop. It skips updates when tracked files have local edits and
+refuses divergent history or conflicting untracked files. If GitHub is unreachable,
+the game keeps running with the current files.
+
+To use a different interval or port:
+
+```bash
+python3 play_auto.py --interval 120 --port 8001
+```
+
+Use the same port each time to keep using the same browser save. Restart the
+launcher after updates to the launcher itself.
+
+For a server without automatic updates:
 
 ```bash
 ./play.sh

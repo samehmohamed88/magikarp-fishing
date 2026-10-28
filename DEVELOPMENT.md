@@ -5,6 +5,15 @@ There are no npm dependencies, build steps, backend services, or required secret
 
 ## Launch
 
+For a local server with automatic GitHub updates, run `python3 play_auto.py`
+(Windows: `py play_auto.py`). It binds to loopback on port 8000 and checks
+`origin/main` immediately and every 60 seconds. Use `--interval 120 --port 8001`
+to customize. Run it from the main branch with a clean tracked working tree;
+otherwise updates are skipped. Git uses fast-forward-only pulls with auto-stash
+disabled. Conflicting untracked files are protected by Git. Network failures do
+not stop the server. Refresh the browser after updates. Ctrl+C stops the server
+and its update worker; restart to load changes to the launcher itself.
+
 From this checkout, run `./play.sh`. The default port is 8000; use
 `PORT=8001 ./play.sh` to choose another. Stop it with Ctrl+C.
 On your own computer, open the local server address printed by Python.
