@@ -43,7 +43,9 @@ Step from a dock into the water to board a boat; return to a dock to get out.
 When fishing, wait for the bite message, then press Space again quickly!
 
 Discover eight species, including Magikarp, Frog, Fox, and Bouldersaur.
-Some creatures have rare shiny forms. Check Collection to track your catches,
+Every species has a rare shiny form, including pink Bunny, blue Duck, purple
+Squirrel, blue Fox, and mint Hedgehog. Magikarp, Frog, and Bouldersaur keep their
+existing shiny colors. Check Collection to track your catches,
 and use Party to move creatures between your party and Box.
 
 ## Saved progress

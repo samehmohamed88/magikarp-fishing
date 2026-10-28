@@ -9,15 +9,16 @@ const SPECIES = [
   { id: 'magikarp', name: 'Magikarp', water: true, rate: 0.8 },
   { id: 'bunny', name: 'Bunny', emoji: '🐇', weight: 40, rate: 0.7 },
   { id: 'duck', name: 'Duck', emoji: '🦆', weight: 25, rate: 0.6 },
-  { id: 'frog', name: 'Frog', emoji: '🐸', weight: 45, rate: 0.55, canShiny: true },
+  { id: 'frog', name: 'Frog', emoji: '🐸', weight: 45, rate: 0.55 },
   { id: 'squirrel', name: 'Squirrel', emoji: '🐿️', weight: 12, rate: 0.5 },
   { id: 'fox', name: 'Fox', emoji: '🦊', weight: 6, rate: 0.35 },
   { id: 'hedgehog', name: 'Hedgehog', emoji: '🦔', weight: 2, rate: 0.25 },
-  { id: 'bouldersaur', name: 'Bouldersaur', weight: 4, rate: 0.2, canShiny: true, draw: (...a) => drawBoulder(...a) },
+  { id: 'bouldersaur', name: 'Bouldersaur', weight: 4, rate: 0.2, draw: (...a) => drawBoulder(...a) },
 ];
 const byId = id => SPECIES.find(s => s.id === id);
 
-// Render an emoji to a canvas; for shinies, recolor ONLY green pixels to blue
+// Each emoji species has its own shiny palette. Preserve the frog's blue form.
+const shinyHues = { '🐇': 300, '🦆': 205, '🐿️': 280, '🦊': 205, '🦔': 160 };
 const emojiCache = {};
 function emojiCanvas(emoji, size, shiny) {
   const key = emoji + size + shiny; if (emojiCache[key]) return emojiCache[key];
@@ -28,11 +29,19 @@ function emojiCanvas(emoji, size, shiny) {
     const img = x.getImageData(0, 0, c.width, c.height), d = img.data;
     for (let i = 0; i < d.length; i += 4) {
       if (!d[i + 3]) continue;
-      const r = d[i] / 255, g = d[i + 1] / 255, b = d[i + 2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, dl = mx - mn;
-      if (dl < 0.08) continue; // greys / whites / blacks untouched
-      let h = mx === r ? ((g - b) / dl) % 6 : mx === g ? (b - r) / dl + 2 : (r - g) / dl + 4; h *= 60; if (h < 0) h += 360;
-      if (h < 55 || h > 170) continue; // only greens (yellow-green to teal)
-      const s = dl / (1 - Math.abs(2 * l - 1)), nh = h + 95; // shift green -> blue
+      const r = d[i] / 255, g = d[i + 1] / 255, b = d[i + 2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), dl = mx - mn;
+      let l = (mx + mn) / 2, s = dl ? dl / (1 - Math.abs(2 * l - 1)) : 0;
+      let h = !dl ? 0 : mx === r ? ((g - b) / dl) % 6 : mx === g ? (b - r) / dl + 2 : (r - g) / dl + 4; h *= 60; if (h < 0) h += 360;
+      let nh;
+      if (emoji === '🐸') {
+        if (dl < 0.08 || h < 55 || h > 170) continue;
+        nh = h + 95; // only the frog's greens become blue
+      } else {
+        if (l < 0.12 || l > 0.96 || shinyHues[emoji] === undefined) continue;
+        nh = shinyHues[emoji];
+        s = Math.max(0.45, s * 0.85); // tint pale fur as well as colored feathers
+        l = Math.min(l, 0.82);
+      }
       const C = (1 - Math.abs(2 * l - 1)) * s, X = C * (1 - Math.abs((nh / 60) % 2 - 1)), m = l - C / 2, k = Math.floor(nh / 60) % 6;
       const [rr, gg, bb] = [[C, X, 0], [X, C, 0], [0, C, X], [0, X, C], [X, 0, C], [C, 0, X]][k];
       d[i] = (rr + m) * 255; d[i + 1] = (gg + m) * 255; d[i + 2] = (bb + m) * 255;
@@ -210,7 +219,7 @@ function arrive() {
   else if (t === TG && spotAt(P.x, P.y)) {
     removeSpot(P.x, P.y);
     toast('✨ A shiny creature appeared in the sparkling grass!');
-    startEncounter(byId(Math.random() < 0.65 ? 'frog' : 'bunny'), true, false, false);
+    startEncounter(pickAnimal(), true, false, false);
   }
   else if (t === TG && Math.random() < 0.22) {
     startEncounter(pickAnimal(), Math.random() < 1 / 8, false, false);
@@ -304,7 +313,7 @@ function updateFishing(dt) {
 const ec = $('enc-canvas'), ectx = ec.getContext('2d');
 let enc = null;
 function startEncounter(sp, shiny, inWater = false, inMountain = false) {
-  enc = { sp, shiny: !!((sp.water || sp.canShiny) && shiny), busy: false, lv: 2 + Math.floor(Math.random() * 8) };
+  enc = { sp, shiny: !!shiny, busy: false, lv: 2 + Math.floor(Math.random() * 8) };
   modal = 'enc'; keys.clear();
   $('encounter').classList.remove('hidden');
   $('enc-scene').className = 'enc-scene ' + (inWater ? 'water' : (inMountain ? 'mountain' : 'land'));
@@ -369,7 +378,7 @@ function openDex() {
     const icon = document.createElement('div'); icon.className = 'icon';
     if (s.water) { const c = document.createElement('canvas'); c.width = 90; c.height = 60; drawCarp(c.getContext('2d'), 48, 26, 17, d?.shiny > 0); icon.appendChild(c); }
     else if (d && s.draw) { const c = document.createElement('canvas'); c.width = 90; c.height = 60; s.draw(c.getContext('2d'), 45, 30, 22, d.shiny > 0); icon.appendChild(c); }
-    else if (d) icon.appendChild(emojiEl(s.emoji, 40, s.canShiny && d.shiny > 0)); else icon.textContent = '❔';
+    else if (d) icon.appendChild(emojiEl(s.emoji, 40, d.shiny > 0)); else icon.textContent = '❔';
     el.appendChild(icon);
     el.insertAdjacentHTML('beforeend', `<b>${d ? s.name : '???'}</b><br><small>${d ? `×${d.count}${d.shiny ? ` · ✨${d.shiny}` : ''}` : (s.id === 'bouldersaur' ? '🏔️ East Mountains' : s.water ? 'Fish in rivers' : s.id === 'frog' ? 'Grass or rivers' : 'Tall grass')}</small>`);
     list.appendChild(el);
