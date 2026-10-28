@@ -4,6 +4,22 @@ A browser adventure made for exploring, fishing, and collecting creatures. Wande
 through tall grass, hop into boats at the docks, and explore the eastern mountains
 in search of Bouldersaur. Watch for sparkles—you might find a shiny!
 
+## ❄ Winter Area
+
+Head south from the starting meadow, following the path and **↓ Winter Area**
+sign. No boat is needed. Explore snowy ground and falling snow to find **Snowy**,
+the area's main creature (85% of winter encounters). Its yellow triangular hood,
+orange trim, dark face, blue eyes, and toothy grin are based on the supplied picture.
+Shiny Snowy wears an ice-blue hood with purple trim and pink eyes.
+
+Walking through snow can trigger encounters. Step on sparkling snow for a
+guaranteed shiny Snowy encounter! Snowy can be caught, saved, and added to your
+Party or Box. Its shiny form is also visible in Collection's preview.
+
+![Snowy in the Winter Area, wearing a yellow hood with orange trim](docs/screenshots/winter.png)
+
+![Shiny Snowy with an ice-blue hood, purple trim, and pink eyes](docs/screenshots/shiny-snowy.png)
+
 ## Play
 
 Once GitHub Pages is enabled, open **[Magikarp River Quest](https://samehmohamed88.github.io/magikarp-fishing/)**
@@ -42,12 +58,12 @@ Touch devices also have an on-screen direction pad and fishing button.
 Step from a dock into the water to board a boat; return to a dock to get out.
 When fishing, wait for the bite message, then press Space again quickly!
 
-Discover eight species, including Magikarp, Frog, Fox, and Bouldersaur.
+Discover nine species, including Magikarp, Frog, Fox, Bouldersaur, and Snowy.
 Every species has a rare shiny form, including pink Bunny, blue Duck, purple
 Squirrel, blue Fox, and mint Hedgehog. Magikarp, Frog, and Bouldersaur keep their
 existing shiny colors. Check Collection to track your catches,
 and use Party to move creatures between your party and Box.
-In Collection, choose **✨ Preview shiny forms** to see all eight shiny designs
+In Collection, choose **✨ Preview shiny forms** to see all nine shiny designs
 without changing your catches or saved progress. Bunny, Duck, Squirrel, Fox,
 and Hedgehog use drawn sprites so their colors are consistent across devices.
 

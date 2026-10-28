@@ -7,7 +7,7 @@
   <meta name="description" content="Explore rivers by boat, fish for Magikarp and catch wild animals in the tall grass." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=winter-1" />
 </head>
 <body>
   <main>
@@ -18,13 +18,14 @@
       <span class="logo">🎣 River Quest</span>
       <span id="hud-caught">Caught: 0</span>
       <span id="hud-mode">🚶 On foot</span>
+      <span id="hud-biome">🌿 Meadows</span>
       <button id="btn-party" class="btn">🎒 Party (P)</button>
       <button id="btn-dex" class="btn">📖 Collection (C)</button>
     </header>
     <div id="party-bar" class="party-bar glass" title="Open party"></div>
 
     <div id="toast" class="toast glass"></div>
-    <div class="hint glass">Arrows/WASD: move · Space: fish · 🟫 Docks: boats · 🏔️ East: Mountains (Bouldersaur) · ✨ Sparkles = Shiny!</div>
+    <div class="hint glass">Arrows/WASD: move · Space: fish · ❄ South: Winter Area (Snowy) · 🏔️ East: Mountains · ✨ Sparkles = Shiny!</div>
 
     <section id="encounter" class="modal hidden" aria-live="polite">
       <div class="enc-card glass">
@@ -67,6 +68,6 @@
       <button id="btn-a" class="abtn">🎣</button>
     </div>
   </main>
-  <script src="game.js?v=shiny-sprites-2"></script>
+  <script src="game.js?v=winter-1"></script>
 </body>
 </html>

@@ -33,6 +33,7 @@ canvas#world { display: block; width: 100vw; height: 100vh; image-rendering: pix
 .enc-scene.land { background: linear-gradient(#9be7ff, #c9f2ff 45%, #6cc46a 45%, #3f9a45); }
 .enc-scene.water { background: linear-gradient(#9be7ff, #c9f2ff 35%, #3a8fd9 35%, #1d5fa3); }
 .enc-scene.mountain { background: linear-gradient(#ffd194, #70e1f5 35%, #636b75 35%, #3d434a); }
+.enc-scene.winter { background: linear-gradient(#93c9ee, #dcefff 42%, #fff 42%, #bcd9ec); }
 #enc-canvas { width: 100%; height: 100%; transition: opacity .2s, transform .2s; }
 #enc-canvas.gone { opacity: 0; transform: scale(.2); }
 .enc-text { margin: 14px 0; font-weight: 600; text-align: center; min-height: 1.4em; }
@@ -81,4 +82,8 @@ canvas#world { display: block; width: 100vw; height: 100vh; image-rendering: pix
 .mon small { opacity: .75; }
 .mon.empty { cursor: default; opacity: .35; justify-content: center; min-height: 100px; background: hsla(0,0%,100%,.04); border-style: dashed; }
 .box-title { margin: 16px 0 8px; font-size: 16px; } .box-title small, .muted { opacity: .6; font-weight: 400; }
-@media (pointer: coarse) { .party-bar { top: 70px; transform: none; flex-direction: row; left: 50%; translate: -50% 0; } }
+@media (pointer: coarse) {
+  .hud { width: calc(100vw - 20px); flex-wrap: wrap; justify-content: center; gap: 6px; white-space: normal; font-size: 12px; }
+  .hud .btn { padding: 6px 8px; }
+  .party-bar { top: 112px; transform: none; flex-direction: row; left: 50%; translate: -50% 0; }
+}

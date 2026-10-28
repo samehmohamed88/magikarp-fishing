@@ -1,6 +1,6 @@
 // ===== Magikarp River Quest =====
 const T = 40, W = 60, H = 45;
-const G = 0, TG = 1, WA = 2, DK = 3, TR = 4, SA = 5, MT = 6, MP = 7;
+const G = 0, TG = 1, WA = 2, DK = 3, TR = 4, SA = 5, MT = 6, MP = 7, SN = 8;
 const $ = id => document.getElementById(id);
 const cv = $('world'), ctx = cv.getContext('2d');
 
@@ -14,6 +14,7 @@ const SPECIES = [
   { id: 'fox', name: 'Fox', weight: 6, rate: 0.35, draw: (...a) => drawAnimal('fox', ...a) },
   { id: 'hedgehog', name: 'Hedgehog', weight: 2, rate: 0.25, draw: (...a) => drawAnimal('hedgehog', ...a) },
   { id: 'bouldersaur', name: 'Bouldersaur', weight: 4, rate: 0.2, draw: (...a) => drawBoulder(...a) },
+  { id: 'snowy', name: 'Snowy', habitat: 'winter', rate: 0.55, draw: (...a) => drawSnowy(...a) },
 ];
 const byId = id => SPECIES.find(s => s.id === id);
 
@@ -102,6 +103,46 @@ function drawAnimal(id, c, x, y, scale, shiny = false, t = 0) {
   if (shiny) {
     c.strokeStyle = '#fff3a1'; c.lineWidth = .055;
     for (const [sx, sy] of [[.88,-.9],[-.9,.1]]) {
+      c.beginPath(); c.moveTo(sx-.1,sy); c.lineTo(sx+.1,sy); c.moveTo(sx,sy-.13); c.lineTo(sx,sy+.13); c.stroke();
+    }
+  }
+  c.restore();
+}
+
+// Snowy's triangular winter hood, bright eyes, toothy grin, mittens, and boots.
+function drawSnowy(c, x, y, s, shiny = false, t = 0) {
+  const hood = shiny ? '#a4e8ff' : '#ffe8a2', trim = shiny ? '#a27ae5' : '#f5a06a';
+  const eye = shiny ? '#ff9ee2' : '#8be3f4', line = '#32343d';
+  c.save(); c.translate(x, y + Math.sin(t * 3) * s * .04); c.scale(s, s);
+  c.lineWidth = .055; c.strokeStyle = line; c.lineJoin = 'round';
+  const oval = (px, py, rx, ry, color, angle = 0) => {
+    c.fillStyle = color; c.beginPath(); c.ellipse(px, py, rx, ry, angle, 0, Math.PI * 2); c.fill(); c.stroke();
+  };
+  const hoodShape = (top, width, bottom, color) => {
+    c.fillStyle = color; c.beginPath(); c.moveTo(0, top);
+    c.quadraticCurveTo(.06, top-.08, .14, top+.08);
+    c.lineTo(width, bottom-.2); c.quadraticCurveTo(width+.08, bottom, width-.18, bottom+.08);
+    c.quadraticCurveTo(0, bottom+.35, -width+.18, bottom+.08);
+    c.quadraticCurveTo(-width-.08, bottom, -width, bottom-.2);
+    c.lineTo(-.14, top+.08); c.quadraticCurveTo(-.06, top-.08, 0, top); c.closePath(); c.fill(); c.stroke();
+  };
+  oval(-.4, .85, .27, .33, '#30343d', .15); oval(.4, .85, .27, .33, '#30343d', -.15);
+  hoodShape(-1.35, 1, .65, hood);
+  hoodShape(-1.08, .82, .43, trim);
+  hoodShape(-.86, .66, .29, '#34383f');
+  // Keep the grin clipped to the dark face, with individually outlined teeth.
+  c.save(); c.beginPath(); c.ellipse(0, .12, .55, .27, 0, 0, Math.PI * 2); c.clip();
+  c.fillStyle = '#fffdf5'; c.fillRect(-.6, -.18, 1.2, .6);
+  c.strokeStyle = '#454951'; c.lineWidth = .025;
+  for (const tx of [-.32, -.1, .12, .34]) { c.beginPath(); c.moveTo(tx, -.16); c.lineTo(tx, .4); c.stroke(); }
+  c.restore(); c.beginPath(); c.ellipse(0, .12, .55, .27, 0, 0, Math.PI * 2); c.stroke();
+  oval(-.32, -.35, .075, .105, eye); oval(.32, -.35, .075, .105, eye);
+  c.strokeStyle = trim; c.lineWidth = .12; c.beginPath(); c.moveTo(0, .4); c.lineTo(.04, .86); c.stroke();
+  c.strokeStyle = line; c.lineWidth = .055;
+  oval(.05, .43, .21, .2, '#30343d'); oval(-.14, .69, .22, .19, '#393e47');
+  if (shiny) {
+    c.strokeStyle = '#fff3a1'; c.lineWidth = .04;
+    for (const [sx, sy] of [[-.95,-.75],[.9,-.45]]) {
       c.beginPath(); c.moveTo(sx-.1,sy); c.lineTo(sx+.1,sy); c.moveTo(sx,sy-.13); c.lineTo(sx,sy+.13); c.stroke();
     }
   }
@@ -227,6 +268,11 @@ for (let i = 0; i < 18; i++) {
   if (map[my][mx] === MT) map[my][mx] = TR;
 }
 
+// Winter Area: south of the starting meadow, reachable without a boat.
+for (let y = 28; y <= 42; y++) for (let x = 2; x <= 15; x++) map[y][x] = SN;
+// A clear path from the starting clearing to the winter entrance.
+for (let y = 8; y < 28; y++) if (tile(5, y) === TR) map[y][5] = G;
+
 // ---------- State ----------
 const save = JSON.parse(localStorage.getItem('mkrq') || '{}');
 const dex = save.dex || {};
@@ -242,6 +288,7 @@ function toast(msg) { const el = $('toast'); el.textContent = msg; el.classList.
 function hud() {
   $('hud-caught').textContent = 'Caught: ' + Object.values(dex).reduce((a, d) => a + d.count, 0);
   $('hud-mode').textContent = P.boat ? '⛵ Boating' : '🚶 On foot';
+  $('hud-biome').textContent = tile(P.x, P.y) === SN ? '❄ Winter Area' : P.x >= 44 ? '🏔️ Mountains' : '🌿 Meadows';
   renderPartyBar();
 }
 
@@ -251,7 +298,7 @@ function tryMove(dx, dy) {
   const nx = P.x + dx, ny = P.y + dy, t = tile(nx, ny), cur = tile(P.x, P.y);
   let ok;
   if (P.boat) ok = t === WA || t === DK;
-  else ok = t === G || t === TG || t === SA || t === DK || t === MT || (t === WA && cur === DK);
+  else ok = t === G || t === TG || t === SA || t === DK || t === MT || t === SN || (t === WA && cur === DK);
   if (!ok) return;
   P.fx = P.x; P.fy = P.y; P.x = nx; P.y = ny; P.prog = 0;
 }
@@ -259,6 +306,15 @@ function arrive() {
   const t = tile(P.x, P.y);
   if (t === WA && !P.boat) { P.boat = true; toast('⛵ You hopped into a boat!'); }
   else if (t === DK && P.boat) { P.boat = false; toast('🟫 You docked the boat.'); }
+  else if (t === SN && spotAt(P.x, P.y)) {
+    removeSpot(P.x, P.y);
+    toast('✨ A shiny Snowy appeared in the sparkling snow!');
+    startEncounter(byId('snowy'), true, false, false, true);
+  }
+  else if (t === SN && Math.random() < 0.3) {
+    const sp = byId(Math.random() < 0.85 ? 'snowy' : 'bunny');
+    startEncounter(sp, Math.random() < 1 / 8, false, false, true);
+  }
   else if (t === MT && spotAt(P.x, P.y)) {
     removeSpot(P.x, P.y);
     toast('✨ A shiny Bouldersaur emerged from the mountain crags!');
@@ -280,7 +336,7 @@ function arrive() {
   hud();
 }
 function pickAnimal() {
-  const land = SPECIES.filter(s => !s.water && s.id !== 'bouldersaur'), tot = land.reduce((a, s) => a + s.weight, 0);
+  const land = SPECIES.filter(s => !s.water && s.id !== 'bouldersaur' && !s.habitat), tot = land.reduce((a, s) => a + s.weight, 0);
   let r = Math.random() * tot; for (const s of land) if ((r -= s.weight) < 0) return s; return land[0];
 }
 
@@ -314,7 +370,7 @@ function updateSpots(dt) {
     const x = P.x + Math.round((Math.random() - 0.5) * 26);
     const y = P.y + Math.round((Math.random() - 0.5) * 20);
     const t = tile(x, y);
-    if ((t === TG || t === WA || t === MT) && !spotAt(x, y) && Math.hypot(x - P.x, y - P.y) > 1.5) {
+    if ((t === TG || t === WA || t === MT || t === SN) && !spotAt(x, y) && Math.hypot(x - P.x, y - P.y) > 1.5) {
       spots.push({ x, y, life: 45 + Math.random() * 45 });
     }
   }
@@ -365,13 +421,13 @@ function updateFishing(dt) {
 // ---------- Encounter ----------
 const ec = $('enc-canvas'), ectx = ec.getContext('2d');
 let enc = null;
-function startEncounter(sp, shiny, inWater = false, inMountain = false) {
+function startEncounter(sp, shiny, inWater = false, inMountain = false, inWinter = false) {
   enc = { sp, shiny: !!shiny, busy: false, lv: 2 + Math.floor(Math.random() * 8) };
   modal = 'enc'; keys.clear();
   $('encounter').classList.remove('hidden');
-  $('enc-scene').className = 'enc-scene ' + (inWater ? 'water' : (inMountain ? 'mountain' : 'land'));
+  $('enc-scene').className = 'enc-scene ' + (inWater ? 'water' : inWinter ? 'winter' : (inMountain ? 'mountain' : 'land'));
   ec.classList.remove('gone'); $('ball').className = 'ball hidden';
-  setText(`${inWater ? 'You fished up' : (inMountain ? 'From the crags appeared' : 'A wild')} ${enc.shiny ? '✨SHINY✨ ' : ''}${sp.name} (Lv ${enc.lv})${inWater ? '!' : ' appeared!'}`);
+  setText(`${inWater ? 'You fished up' : inWinter ? 'In the snow, a wild' : (inMountain ? 'From the crags appeared' : 'A wild')} ${enc.shiny ? '✨SHINY✨ ' : ''}${sp.name} (Lv ${enc.lv})${inWater ? '!' : ' appeared!'}`);
   setBtns(true);
 }
 const setText = s => $('enc-text').textContent = s;
@@ -435,7 +491,7 @@ function openDex() {
     else if (visible && s.draw) { const c = document.createElement('canvas'); c.width = 90; c.height = 60; s.draw(c.getContext('2d'), 45, 30, 22, shiny); icon.appendChild(c); }
     else if (visible) icon.appendChild(emojiEl(s.emoji, 40, shiny)); else icon.textContent = '❔';
     el.appendChild(icon);
-    el.insertAdjacentHTML('beforeend', `<b>${visible ? s.name : '???'}</b><br><small>${previewShinies ? `✨ Shiny preview · ${d?.shiny ? 'caught' : 'not caught'}` : d ? `×${d.count}${d.shiny ? ` · ✨${d.shiny}` : ''}` : (s.id === 'bouldersaur' ? '🏔️ East Mountains' : s.water ? 'Fish in rivers' : s.id === 'frog' ? 'Grass or rivers' : 'Tall grass')}</small>`);
+    el.insertAdjacentHTML('beforeend', `<b>${visible ? s.name : '???'}</b><br><small>${previewShinies ? `✨ Shiny preview · ${d?.shiny ? 'caught' : 'not caught'}` : d ? `×${d.count}${d.shiny ? ` · ✨${d.shiny}` : ''}` : (s.habitat === 'winter' ? '❄ Winter Area · South' : s.id === 'bouldersaur' ? '🏔️ East Mountains' : s.water ? 'Fish in rivers' : s.id === 'frog' ? 'Grass or rivers' : 'Tall grass')}</small>`);
     list.appendChild(el);
   }
   $('dex').classList.remove('hidden');
@@ -516,6 +572,15 @@ function drawTile(t, x, y, px, py) {
     const o = Math.sin(time * 2 + x * 0.7 + y) * 4;
     ctx.moveTo(px + 6, py + 14 + o); ctx.quadraticCurveTo(px + 14, py + 10 + o, px + 22, py + 14 + o);
     ctx.moveTo(px + 18, py + 30 - o); ctx.quadraticCurveTo(px + 26, py + 26 - o, px + 34, py + 30 - o); ctx.stroke();
+  } else if (t === SN) {
+    ctx.fillStyle = h & 1 ? '#edf8ff' : '#ddecf7'; ctx.fillRect(px, py, T, T);
+    ctx.strokeStyle = '#b9d6e9'; ctx.lineWidth = 2; ctx.beginPath();
+    ctx.moveTo(px+5,py+28); ctx.quadraticCurveTo(px+18,py+21,px+34,py+29); ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.fillRect(px+((h>>2)%28)+4,py+((h>>6)%24)+4,3,3);
+    if ((h & 15) === 0) {
+      ctx.fillStyle = '#a9ccdf'; ctx.beginPath(); ctx.moveTo(px+12,py+16); ctx.lineTo(px+20,py+4); ctx.lineTo(px+28,py+16); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(px+15,py+11); ctx.lineTo(px+20,py+4); ctx.lineTo(px+25,py+11); ctx.fill();
+    }
   } else if (t === SA) { ctx.fillStyle = h & 1 ? '#ecd9a0' : '#e6d194'; ctx.fillRect(px, py, T, T); }
   else if (t === DK) {
     ctx.fillStyle = '#9c6a3a'; ctx.fillRect(px, py, T, T); ctx.strokeStyle = '#6e4622'; ctx.lineWidth = 2;
@@ -599,6 +664,21 @@ function render() {
   }
   drawSparkles(camX, camY);
   drawPlayer(ppx - camX, ppy - camY);
+  // A sign at the entrance helps players find the new biome.
+  const signX = 5*T + T/2 - camX, signY = 27*T - camY;
+  if (signX > -100 && signX < cv.width+100 && signY > -50 && signY < cv.height+50) {
+    ctx.fillStyle = '#765338'; ctx.fillRect(signX-3,signY+10,6,25);
+    ctx.fillStyle = '#244b6d'; ctx.fillRect(signX-77,signY-12,154,28);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('↓ Winter Area',signX,signY+7);
+  }
+  if (tile(P.x, P.y) === SN) {
+    ctx.fillStyle = '#ffffffc9';
+    for (let i=0;i<45;i++) {
+      const sx = (i*137 + Math.sin(time+i)*15) % cv.width;
+      const sy = (i*83 + time*(18+i%5*4)) % cv.height;
+      ctx.beginPath(); ctx.arc(sx,sy,1+i%3*.4,0,Math.PI*2); ctx.fill();
+    }
+  }
   if (fishing?.bite) { ctx.fillStyle = '#ffd166'; ctx.font = 'bold 28px Outfit'; ctx.textAlign = 'center'; ctx.fillText('!', ppx - camX + T / 2, ppy - camY - 18); }
 }
 
