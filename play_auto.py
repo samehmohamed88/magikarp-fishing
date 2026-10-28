@@ -14,6 +14,19 @@ import threading
 ROOT = Path(__file__).resolve().parent
 
 
+class GameHandler(http.server.SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-store")
+        super().end_headers()
+
+    def send_head(self):
+        # Refreshed games must read current files even after using an older server.
+        for header in ("If-Modified-Since", "If-None-Match"):
+            if header in self.headers:
+                del self.headers[header]
+        return super().send_head()
+
+
 def log(message):
     print(f"[updates] {message}", flush=True)
 
@@ -38,7 +51,8 @@ def update_once():
         git("-c", "merge.autoStash=false", "-c", "rebase.autoStash=false",
             "pull", "--ff-only", "--no-rebase", "origin", "main")
         after = git("rev-parse", "HEAD")
-        log("Up to date." if before == after else "Updated! Refresh the game in your browser.")
+        log(f"Up to date ({after[:7]})." if before == after else
+            f"Updated to {after[:7]}! Refresh the game in your browser.")
     except subprocess.TimeoutExpired:
         log("Git timed out; the game stays available. Will retry next interval.")
     except subprocess.CalledProcessError as error:
@@ -62,7 +76,7 @@ def main():
         if not (ROOT / name).is_file():
             parser.error(f"missing game file: {name}")
 
-    handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(ROOT))
+    handler = functools.partial(GameHandler, directory=str(ROOT))
     try:
         server = http.server.ThreadingHTTPServer(("127.0.0.1", args.port), handler)
     except OSError as error:

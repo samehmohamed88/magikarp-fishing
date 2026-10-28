@@ -47,6 +47,9 @@ Every species has a rare shiny form, including pink Bunny, blue Duck, purple
 Squirrel, blue Fox, and mint Hedgehog. Magikarp, Frog, and Bouldersaur keep their
 existing shiny colors. Check Collection to track your catches,
 and use Party to move creatures between your party and Box.
+In Collection, choose **✨ Preview shiny forms** to see all eight shiny designs
+without changing your catches or saved progress. Bunny, Duck, Squirrel, Fox,
+and Hedgehog use drawn sprites so their colors are consistent across devices.
 
 ## Saved progress
 

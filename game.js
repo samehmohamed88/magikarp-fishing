@@ -7,18 +7,17 @@ const cv = $('world'), ctx = cv.getContext('2d');
 // ---------- Creatures ----------
 const SPECIES = [
   { id: 'magikarp', name: 'Magikarp', water: true, rate: 0.8 },
-  { id: 'bunny', name: 'Bunny', emoji: '🐇', weight: 40, rate: 0.7 },
-  { id: 'duck', name: 'Duck', emoji: '🦆', weight: 25, rate: 0.6 },
+  { id: 'bunny', name: 'Bunny', weight: 40, rate: 0.7, draw: (...a) => drawAnimal('bunny', ...a) },
+  { id: 'duck', name: 'Duck', weight: 25, rate: 0.6, draw: (...a) => drawAnimal('duck', ...a) },
   { id: 'frog', name: 'Frog', emoji: '🐸', weight: 45, rate: 0.55 },
-  { id: 'squirrel', name: 'Squirrel', emoji: '🐿️', weight: 12, rate: 0.5 },
-  { id: 'fox', name: 'Fox', emoji: '🦊', weight: 6, rate: 0.35 },
-  { id: 'hedgehog', name: 'Hedgehog', emoji: '🦔', weight: 2, rate: 0.25 },
+  { id: 'squirrel', name: 'Squirrel', weight: 12, rate: 0.5, draw: (...a) => drawAnimal('squirrel', ...a) },
+  { id: 'fox', name: 'Fox', weight: 6, rate: 0.35, draw: (...a) => drawAnimal('fox', ...a) },
+  { id: 'hedgehog', name: 'Hedgehog', weight: 2, rate: 0.25, draw: (...a) => drawAnimal('hedgehog', ...a) },
   { id: 'bouldersaur', name: 'Bouldersaur', weight: 4, rate: 0.2, draw: (...a) => drawBoulder(...a) },
 ];
 const byId = id => SPECIES.find(s => s.id === id);
 
-// Each emoji species has its own shiny palette. Preserve the frog's blue form.
-const shinyHues = { '🐇': 300, '🦆': 205, '🐿️': 280, '🦊': 205, '🦔': 160 };
+// Preserve the frog's blue form by recoloring its green pixels.
 const emojiCache = {};
 function emojiCanvas(emoji, size, shiny) {
   const key = emoji + size + shiny; if (emojiCache[key]) return emojiCache[key];
@@ -32,16 +31,8 @@ function emojiCanvas(emoji, size, shiny) {
       const r = d[i] / 255, g = d[i + 1] / 255, b = d[i + 2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), dl = mx - mn;
       let l = (mx + mn) / 2, s = dl ? dl / (1 - Math.abs(2 * l - 1)) : 0;
       let h = !dl ? 0 : mx === r ? ((g - b) / dl) % 6 : mx === g ? (b - r) / dl + 2 : (r - g) / dl + 4; h *= 60; if (h < 0) h += 360;
-      let nh;
-      if (emoji === '🐸') {
-        if (dl < 0.08 || h < 55 || h > 170) continue;
-        nh = h + 95; // only the frog's greens become blue
-      } else {
-        if (l < 0.12 || l > 0.96 || shinyHues[emoji] === undefined) continue;
-        nh = shinyHues[emoji];
-        s = Math.max(0.45, s * 0.85); // tint pale fur as well as colored feathers
-        l = Math.min(l, 0.82);
-      }
+      if (dl < 0.08 || h < 55 || h > 170) continue;
+      const nh = h + 95;
       const C = (1 - Math.abs(2 * l - 1)) * s, X = C * (1 - Math.abs((nh / 60) % 2 - 1)), m = l - C / 2, k = Math.floor(nh / 60) % 6;
       const [rr, gg, bb] = [[C, X, 0], [X, C, 0], [0, C, X], [0, X, C], [X, 0, C], [C, 0, X]][k];
       d[i] = (rr + m) * 255; d[i + 1] = (gg + m) * 255; d[i + 2] = (bb + m) * 255;
@@ -53,6 +44,68 @@ function emojiCanvas(emoji, size, shiny) {
 function emojiEl(emoji, size, shiny) {
   const src = emojiCanvas(emoji, size, shiny), c = document.createElement('canvas');
   c.width = src.width; c.height = src.height; c.getContext('2d').drawImage(src, 0, 0); return c;
+}
+
+// Draw woodland creatures with fixed palettes so their forms match on every device.
+function drawAnimal(id, c, x, y, scale, shiny = false, t = 0) {
+  const palettes = {
+    bunny: shiny ? ['#f08acb', '#af3d8f', '#ffe6f7'] : ['#eee8de', '#aba29a', '#fff8ed'],
+    duck: shiny ? ['#62c4ff', '#235bbd', '#daf7ff'] : ['#d6ae6c', '#21875b', '#fff1d3'],
+    squirrel: shiny ? ['#b783ed', '#6237a4', '#eee0ff'] : ['#bd7746', '#78432c', '#f9dfb5'],
+    fox: shiny ? ['#5eabff', '#284bb2', '#e3f6ff'] : ['#ef8c38', '#994124', '#fff0d4'],
+    hedgehog: shiny ? ['#8cf0d4', '#258e85', '#ddfff1'] : ['#cda777', '#72513c', '#f6dfb7'],
+  };
+  const [body, dark, light] = palettes[id];
+  c.save(); c.translate(x, y + Math.sin(t * 3) * scale * 0.035); c.scale(scale, scale);
+  c.lineWidth = 0.045; c.strokeStyle = '#253044'; c.lineJoin = 'round';
+  const oval = (px, py, rx, ry, color, angle = 0) => {
+    c.fillStyle = color; c.beginPath(); c.ellipse(px, py, rx, ry, angle, 0, Math.PI * 2); c.fill(); c.stroke();
+  };
+  const shape = (points, color) => {
+    c.fillStyle = color; c.beginPath(); points.forEach(([px, py], i) => i ? c.lineTo(px, py) : c.moveTo(px, py)); c.closePath(); c.fill(); c.stroke();
+  };
+  if (id === 'squirrel') {
+    oval(.65, -.1, .42, .85, dark, .35); oval(.72, -.65, .3, .34, body);
+  } else if (id === 'fox') {
+    shape([[.25,.55],[1,.3],[.9,-.5],[.58,-.1],[-.1,.25]], body);
+    shape([[.82,-.17],[.9,-.5],[1,.3],[.76,.36]], light);
+  } else if (id === 'hedgehog') {
+    const points = [];
+    for (let i = 0; i <= 24; i++) {
+      const a = Math.PI + i / 24 * Math.PI * 2, r = i % 2 ? .76 : 1;
+      points.push([Math.cos(a) * r, Math.sin(a) * r * .85]);
+    }
+    shape(points, dark);
+  }
+  oval(-.25, .72, .26, .12, dark); oval(.32, .72, .26, .12, dark);
+  oval(0, .15, .62, .63, body); oval(-.08, .32, .37, .4, light);
+  if (id === 'bunny') {
+    oval(-.38, -.85, .18, .55, body, -.18); oval(.12, -.89, .18, .58, body, .12);
+    oval(-.38, -.85, .075, .37, dark, -.18); oval(.12, -.89, .075, .4, dark, .12);
+    oval(.57, .4, .23, .23, light);
+  } else if (id === 'squirrel' || id === 'fox') {
+    shape([[-.6,-.48],[-.58,-1.05],[-.12,-.61]], body);
+    shape([[.02,-.61],[.45,-1.05],[.43,-.4]], body);
+    shape([[-.51,-.55],[-.52,-.86],[-.28,-.61]], dark);
+    shape([[.14,-.6],[.38,-.86],[.35,-.5]], dark);
+  }
+  oval(-.15, -.34, .55, .48, id === 'duck' ? dark : body);
+  if (id === 'duck') {
+    oval(-.36, -.02, .4, .15, shiny ? '#ffe26b' : '#f4a333');
+    oval(.26, .15, .28, .2, dark, -.25);
+  } else {
+    oval(-.34, -.12, .3, .2, light);
+    oval(-.39, -.21, .075, .055, '#413048');
+  }
+  oval(-.37, -.45, .085, .1, '#182235'); oval(.07, -.45, .085, .1, '#182235');
+  oval(-.39, -.48, .025, .03, '#fff'); oval(.05, -.48, .025, .03, '#fff');
+  if (shiny) {
+    c.strokeStyle = '#fff3a1'; c.lineWidth = .055;
+    for (const [sx, sy] of [[.88,-.9],[-.9,.1]]) {
+      c.beginPath(); c.moveTo(sx-.1,sy); c.lineTo(sx+.1,sy); c.moveTo(sx,sy-.13); c.lineTo(sx,sy+.13); c.stroke();
+    }
+  }
+  c.restore();
 }
 
 // Procedural Bouldersaur: boulder shell of stone plates, pale head, claws
@@ -368,25 +421,33 @@ $('btn-throw').onclick = throwBall;
 $('btn-run').onclick = () => { if (enc && !enc.busy) { closeEnc(); toast('Got away safely!'); } };
 
 // ---------- Collection ----------
+let previewShinies = false;
 function openDex() {
   if (modal === 'enc') return;
   modal = 'dex'; keys.clear();
   const list = $('dex-list'); list.innerHTML = '';
   for (const s of SPECIES) {
-    const d = dex[s.id], el = document.createElement('div');
-    el.className = 'dex-item' + (d ? '' : ' unseen');
+    const d = dex[s.id], el = document.createElement('div'), visible = d || previewShinies;
+    const shiny = previewShinies || d?.shiny > 0;
+    el.className = 'dex-item' + (visible ? '' : ' unseen');
     const icon = document.createElement('div'); icon.className = 'icon';
-    if (s.water) { const c = document.createElement('canvas'); c.width = 90; c.height = 60; drawCarp(c.getContext('2d'), 48, 26, 17, d?.shiny > 0); icon.appendChild(c); }
-    else if (d && s.draw) { const c = document.createElement('canvas'); c.width = 90; c.height = 60; s.draw(c.getContext('2d'), 45, 30, 22, d.shiny > 0); icon.appendChild(c); }
-    else if (d) icon.appendChild(emojiEl(s.emoji, 40, d.shiny > 0)); else icon.textContent = '❔';
+    if (s.water) { const c = document.createElement('canvas'); c.width = 90; c.height = 60; drawCarp(c.getContext('2d'), 48, 26, 17, shiny); icon.appendChild(c); }
+    else if (visible && s.draw) { const c = document.createElement('canvas'); c.width = 90; c.height = 60; s.draw(c.getContext('2d'), 45, 30, 22, shiny); icon.appendChild(c); }
+    else if (visible) icon.appendChild(emojiEl(s.emoji, 40, shiny)); else icon.textContent = '❔';
     el.appendChild(icon);
-    el.insertAdjacentHTML('beforeend', `<b>${d ? s.name : '???'}</b><br><small>${d ? `×${d.count}${d.shiny ? ` · ✨${d.shiny}` : ''}` : (s.id === 'bouldersaur' ? '🏔️ East Mountains' : s.water ? 'Fish in rivers' : s.id === 'frog' ? 'Grass or rivers' : 'Tall grass')}</small>`);
+    el.insertAdjacentHTML('beforeend', `<b>${visible ? s.name : '???'}</b><br><small>${previewShinies ? `✨ Shiny preview · ${d?.shiny ? 'caught' : 'not caught'}` : d ? `×${d.count}${d.shiny ? ` · ✨${d.shiny}` : ''}` : (s.id === 'bouldersaur' ? '🏔️ East Mountains' : s.water ? 'Fish in rivers' : s.id === 'frog' ? 'Grass or rivers' : 'Tall grass')}</small>`);
     list.appendChild(el);
   }
   $('dex').classList.remove('hidden');
 }
 const closeDex = () => { $('dex').classList.add('hidden'); modal = null; };
 $('btn-dex').onclick = openDex; $('btn-dex-close').onclick = closeDex;
+$('btn-shiny-preview').onclick = () => {
+  previewShinies = !previewShinies;
+  $('btn-shiny-preview').textContent = previewShinies ? 'Show collection' : '✨ Preview shiny forms';
+  $('btn-shiny-preview').setAttribute('aria-pressed', String(previewShinies));
+  openDex();
+};
 
 // ---------- Party ----------
 function monIcon(m, w = 70, h = 46) {

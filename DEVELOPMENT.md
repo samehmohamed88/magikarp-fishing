@@ -13,6 +13,10 @@ otherwise updates are skipped. Git uses fast-forward-only pulls with auto-stash
 disabled. Conflicting untracked files are protected by Git. Network failures do
 not stop the server. Refresh the browser after updates. Ctrl+C stops the server
 and its update worker; restart to load changes to the launcher itself.
+The launcher disables browser caching and prints the current Git commit after
+each successful update check. Already-open tabs still need a refresh to run new
+game code. The **Preview shiny forms** button in Collection identifies the version
+with drawn shiny sprites and the preview gallery.
 
 From this checkout, run `./play.sh`. The default port is 8000; use
 `PORT=8001 ./play.sh` to choose another. Stop it with Ctrl+C.
