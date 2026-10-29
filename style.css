@@ -1,4 +1,29 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
+#btn-league { position: fixed; right: 16px; top: 132px; z-index: 2; background: #68523b; }
+#journey-status { position: fixed; top: 82px; left: 16px; padding: 9px 12px; border-radius: 12px; max-width: 44vw; font-size: 13px; pointer-events: none; }
+#btn-site { position: fixed; right: 16px; bottom: 145px; z-index: 2; max-width: calc(100vw - 32px); background: #70532d; }
+.league-card.glass { width: min(720px, 94vw); max-height: 90vh; overflow-y: auto; padding: 22px; border-radius: 24px; background: #1b3146f5; }
+.league-card h2 { font-size: 22px; }
+#league-intro { line-height: 1.6; color: #e2dfca; margin-bottom: 18px; }
+#league-content { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.league-option { padding: 16px; border: 1px solid #eac27c55; border-radius: 16px; background: #ffffff08; }
+.league-option h3 { font-size: 17px; }
+.league-option p { margin: 10px 0; line-height: 1.5; font-size: 14px; color: #e2e6eb; }
+.league-option .btn { width: 100%; }
+.gym-team, .champion-prize { grid-column: 1 / -1; text-align: center; }
+.gym-team { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; }
+.gym-team .icon, .champion-prize .icon { display: grid; place-items: center; }
+.champion-prize { background: radial-gradient(ellipse at 50% 20%, #8d704b66, #ffffff08 70%); }
+@media (max-width: 600px) {
+  #league-content { grid-template-columns: 1fr; }
+  .league-card.glass { padding: 16px; }
+  .league-card h2 { font-size: 18px; }
+}
+@media (pointer: coarse) {
+  #btn-league { top: auto; bottom: 195px; left: 16px; right: auto; font-size: 12px; }
+  #journey-status { top: 172px; left: 12px; max-width: calc(100vw - 24px); font-size: 12px; }
+  #btn-site { bottom: 245px; font-size: 12px; }
+}
 #btn-explore { position: fixed; right: 16px; top: 82px; z-index: 2; background: #315d68; }
 .explore-card { width: min(780px, 94vw); max-height: 90vh; overflow-y: auto; padding: 22px; border-radius: 24px; background-color: #19313e; }
 .explore-card.glass { background: #19313ef5; }

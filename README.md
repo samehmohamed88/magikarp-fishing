@@ -4,6 +4,48 @@ A browser adventure made for exploring, fishing, and collecting creatures. Wande
 through tall grass, hop into boats at the docks, and explore the eastern mountains
 in search of Bouldersaur. Watch for sparkles—you might find a shiny!
 
+## 🏅 Markets, six gyms, and the Champion Door
+
+Press **G** or tap **Gyms & Markets** to find every market and gym. Travel there
+from surface land, then press **Space** or tap the nearby building button to enter.
+You can also walk to the buildings. Shops and their entrances are safe from random encounters.
+
+Six markets sell lures: in the meadow, snow, jungle, desert, Ember Highlands,
+and Moonlit Grove. New and existing players start this update with **60 coins**.
+Catches earn **10 coins**, rare catches **15**, and shiny catches **25**.
+A first trainer victory earns **30 coins**; a gym victory earns **120**.
+
+| Lure | Price | Duration | Effect |
+| --- | --- | --- | --- |
+| Rare Lure | 40 coins | 10 wild encounters | Rare selection weight ×3; catch chance +5 percentage points |
+| Deluxe Rare Lure | 90 coins | 20 wild encounters | Rare selection weight ×5; catch chance +10 percentage points |
+
+Buying activates the lure immediately. Only one can be active at a time, and
+each wild encounter uses a charge—even if you run away. The last charge still
+boosts that encounter. Battles and time spent exploring do not use charges.
+Rare selection boosts apply to random meadow, biome, and fishing choices, plus
+Ghost encounters on October 31. Visible swimmers keep their species, and shiny
+odds and seasonal availability stay the same. Catch boosts work in every habitat.
+The coin, badge, and remaining-lure display keeps track of your progress.
+
+| Gym | Leader | Badge | Team levels |
+| --- | --- | --- | --- |
+| Meadow | Wren | Leaf | 5–6 |
+| Frost | Flurry | Snowflake | 8–9 |
+| Jungle | Fern | Vine | 10–12 |
+| Dunes | Solis | Sun | 12–14 |
+| Ember | Blaze | Flame | 15–17 |
+| Moon | Selene | Moon | 18–20 |
+
+Beat each leader's entire team to earn its badge. You can challenge the gyms in
+any order and retry after a loss. Defeated gyms keep their badges and do not give
+repeat rewards. Winning all six makes a glowing **Champion Door** appear just
+north of the starting tunnel. Enter it to claim a **shiny Phoenix (Lv 20)** and
+**200 coins**, once per save. A full party sends the Phoenix to your Box.
+
+Coins, badges, lures, and the Champion prize save with your existing collection.
+After updating, refresh the game and look for **Gyms & Markets (G)**.
+
 ## 🧭 Five new biomes, 30 new creatures
 
 Press **M** or tap **Explore** to find the new areas and travel to them from land.

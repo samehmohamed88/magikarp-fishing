@@ -1,5 +1,39 @@
 # Running and updating River Quest
 
+## Markets and gyms
+
+`league.js` loads after `biomes.js` and before `game.js`. It defines six markets,
+six gym leaders, the Champion Door, lure effects, and their UI. The existing battle
+engine handles gym teams; only a full victory awards a badge. Gym wins are stored
+separately from regular trainer wins in the new `journey` save field. Old saves
+receive 60 coins and zero badges without changing their catches or past wins.
+
+Lures affect weighted rare selections in eligible random land/fishing pools and
+the seasonally valid Ghost roll. Existing visible swimmers and sparkle guarantees
+are preserved. Encounter entry snapshots the catch bonus and consumes exactly one
+charge; trainers and generator rewards do not consume charges. No timers run down
+lures. Coin awards happen with successful catches and first trainer/gym wins.
+
+The door exists only after all six recognized gym wins. The Champion Hall checks
+proximity and all six badges again before granting its one-time reward. Markets,
+gym challenges, and purchases require proximity. Guide travel requires surface
+land and is blocked during encounters, battles, and other action dialogs.
+
+With the server running, `tests/league-smoke.cjs` exercises old-save migration,
+walk/boat reachability, actual UI purchases, insufficient funds, lure probabilities,
+catching/coins, expiry, gym losses and all six wins, persistence, door/reward gates,
+ordinary trainers, diving, and mobile interaction. Install Playwright in a separate
+developer tooling directory and set `PLAYWRIGHT_MODULE` to that installation's
+module path if it is not available to Node normally. Set `CHROMIUM_PATH` to a system
+Chromium executable when needed, then run:
+
+```bash
+GAME_URL=http://127.0.0.1:8000 node tests/league-smoke.cjs
+```
+
+The test uses disposable browser contexts and writes screenshots under `/tmp`.
+It does not touch player saves or require production dependencies.
+
 This is a static HTML/CSS/JavaScript game. It needs Python 3 to serve it.
 There are no npm dependencies, build steps, backend services, or required secrets.
 

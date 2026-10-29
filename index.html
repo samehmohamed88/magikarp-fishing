@@ -7,7 +7,7 @@
   <meta name="description" content="Explore rivers by boat, fish for Magikarp and catch wild animals in the tall grass." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=wild-world-1" />
+  <link rel="stylesheet" href="style.css?v=league-1" />
 </head>
 <body>
   <main>
@@ -23,6 +23,9 @@
       <button id="btn-dex" class="btn">📖 Collection (C)</button>
     </header>
     <button id="btn-explore" class="btn">🧭 Explore (M)</button>
+    <button id="btn-league" class="btn">🏅 Gyms & Markets (G)</button>
+    <div id="journey-status" class="glass" role="status"></div>
+    <button id="btn-site" class="btn" hidden></button>
     <button id="btn-dive" class="btn" hidden>🤿 Dive (V)</button>
     <button id="btn-depth" class="btn" hidden>🌊 Dive deeper (B)</button>
     <button id="btn-deep-action" class="btn" hidden>⚡ Use deep sea generator (Space)</button>
@@ -34,6 +37,14 @@
 
     <div id="toast" class="toast glass"></div>
     <div class="hint glass">Arrows/WASD: move · Space: fish · V at DIVE buoys: scuba · Swim into creatures underwater · ✨ Sparkles = Shiny!</div>
+
+    <section id="league" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="league-title">
+      <div class="league-card glass">
+        <div class="dex-head"><h2 id="league-title">Gyms & Markets</h2><button id="btn-league-close" class="btn" aria-label="Close gyms and markets">✕</button></div>
+        <p id="league-intro" role="status"></p>
+        <div id="league-content"></div>
+      </div>
+    </section>
 
     <section id="generator" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="generator-title">
       <div class="generator-card glass">
@@ -126,7 +137,8 @@
       <button id="btn-a" class="abtn">🎣</button>
     </div>
   </main>
-  <script src="biomes.js?v=wild-world-1"></script>
-  <script src="game.js?v=wild-world-1"></script>
+  <script src="biomes.js?v=league-1"></script>
+  <script src="league.js?v=league-1"></script>
+  <script src="game.js?v=league-1"></script>
 </body>
 </html>

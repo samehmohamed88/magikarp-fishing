@@ -71,7 +71,7 @@ function halloweenCalendar(date = new Date()) {
 function pickHalloweenAnimal(date = new Date()) {
   const season=halloweenCalendar(date);
   if(!season.open)return null;
-  if(season.ghosts&&Math.random()<.05)return byId('ghost');
+  if(season.ghosts&&Math.random()<.05*(activeLure()?.multiplier||1))return byId('ghost');
   return byId(['skeleton','crow','zombie'][Math.floor(Math.random()*3)]);
 }
 function drawHalloweenCreature(id,c,x,y,s,shiny=false,t=0) {
@@ -926,6 +926,8 @@ for(const [x1,y1,x2,y2] of [[21,8,24,8],[21,36,24,36],[43,12,48,12],[48,8,48,12]
   for(let y=y1;y<=y2;y++)for(let x=x1;x<=x2;x++)if([TR,MP].includes(map[y][x]))map[y][x]=G;
 }
 
+prepareLeagueMap();
+
 // Separate cave layer: connected chambers under the starting clearing.
 const tunnelEntrance = { x: 5, y: 5 }, caveExit = { x: 8, y: 8 };
 const caveGenerator = { x: 11, y: 10 };
@@ -1086,9 +1088,9 @@ for (const sp of SPECIES.filter(sp => sp.diveOnly)) for (let i = 0; i < 3; i++) 
     shiny: R() < 1 / 8, moveIn: 2 + R() * 2, life: 45 + R() * 30 });
 }
 function pickWaterAnimal(excludeId = null) {
-  const pool = SPECIES.filter(sp => sp.fishingWeight && sp.id !== excludeId), total = pool.reduce((sum, sp) => sum + sp.fishingWeight, 0);
+  const pool = SPECIES.filter(sp => sp.fishingWeight && sp.id !== excludeId), total = pool.reduce((sum, sp) => sum + lureWeight(sp,sp.fishingWeight), 0);
   let roll = Math.random() * total;
-  return pool.find(sp => (roll -= sp.fishingWeight) < 0) || pool[0];
+  return pool.find(sp => (roll -= lureWeight(sp,sp.fishingWeight)) < 0) || pool[0];
 }
 function pickFishingAnimal(x, y) {
   // Sparkles override visible swimmers; the remaining 5% excludes Alligator.
@@ -1146,6 +1148,7 @@ function drawWaterWildlife(camX, camY) {
 
 // ---------- State ----------
 const save = JSON.parse(localStorage.getItem('mkrq') || '{}');
+const journey = loadJourney(save.journey);
 const dex = save.dex || {};
 const P = { x: save.x ?? 5, y: save.y ?? 5, fx: 0, fy: 0, prog: 1, dir: [0, 1], boat: !!save.boat };
 underground = !!save.underground;
@@ -1184,7 +1187,7 @@ for(const pile of deepStonePiles) {
   deepTreasures.generated[pile.id]=save.deepTreasures?.generated?.[pile.id]===true;
   deepTreasures.collected[pile.id]=deepTreasures.generated[pile.id]||save.deepTreasures?.collected?.[pile.id]===true;
 }
-const persist = () => localStorage.setItem('mkrq', JSON.stringify({ dex, party, box, trainerWins, caveTreasures, deepTreasures, x: P.x, y: P.y, boat: P.boat, diving: P.diving, underground, halloweenCavern, deepDiving, shallowReturn, abyssDiving, deepReturn }));
+const persist = () => localStorage.setItem('mkrq', JSON.stringify({ dex, party, box, trainerWins, journey, caveTreasures, deepTreasures, x: P.x, y: P.y, boat: P.boat, diving: P.diving, underground, halloweenCavern, deepDiving, shallowReturn, abyssDiving, deepReturn }));
 
 const nearCaveObject = object => underground && !halloweenCavern && Math.abs(P.x-object.x)+Math.abs(P.y-object.y)<=1;
 const nearDeepObject=object=>deepDiving&&!abyssDiving&&Math.abs(P.x-object.x)+Math.abs(P.y-object.y)<=1;
@@ -1352,6 +1355,7 @@ function checkDiveEncounter() {
 let toastT;
 function toast(msg) { const el = $('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2200); }
 function hud() {
+  leagueHud();
   $('hud-caught').textContent = 'Caught: ' + Object.values(dex).reduce((a, d) => a + d.count, 0);
   $('hud-mode').textContent = underground ? '🕯️ Underground' : P.diving ? '🤿 Diving' : P.boat ? '⛵ Boating' : '🚶 On foot';
   $('btn-tunnel').hidden = !nearTunnel();
@@ -1433,6 +1437,7 @@ function tryMove(dx, dy) {
   if(underground&&!halloweenCavern&&nx===caveGenerator.x&&ny===caveGenerator.y)return;
   if(deepDiving&&!abyssDiving&&nx===deepGenerator.x&&ny===deepGenerator.y)return;
   if (activeTrainers().some(trainer => trainer.x === nx && trainer.y === ny)) return;
+  if(!underground&&!P.diving&&surfaceSites().some(site=>site.x===nx&&site.y===ny))return;
   let ok;
   if (underground) ok = t === CF || t === CP;
   else if (P.diving) ok = isDiveWater(nx, ny);
@@ -1453,6 +1458,7 @@ function arrive() {
     if(challengeTrainer()){hud();return;}
     checkDiveEncounter(); hud(); return;
   }
+  if(leagueSafeTile(P.x,P.y)){hud();return;}
   if (challengeTrainer()) { hud(); return; }
   const biome=newBiomeByTile(t), forestSparkle = t === HF && spotAt(P.x, P.y);
   const biomeSparkle=biome&&spotAt(P.x,P.y);
@@ -1509,14 +1515,14 @@ function arrive() {
   hud();
 }
 function pickAnimal() {
-  const land = SPECIES.filter(s => !s.water && s.id !== 'bouldersaur' && !s.habitat), tot = land.reduce((a, s) => a + s.weight, 0);
-  let r = Math.random() * tot; for (const s of land) if ((r -= s.weight) < 0) return s; return land[0];
+  const land = SPECIES.filter(s => !s.water && s.id !== 'bouldersaur' && !s.habitat), tot = land.reduce((a, s) => a + lureWeight(s,s.weight), 0);
+  let r = Math.random() * tot; for (const s of land) if ((r -= lureWeight(s,s.weight)) < 0) return s; return land[0];
 }
 
 function pickBiomeAnimal(habitat) {
   const pool=SPECIES.filter(s=>s.habitat===habitat&&newBiomeById(habitat));
-  let roll=Math.random()*pool.reduce((sum,s)=>sum+s.weight,0);
-  for(const s of pool)if((roll-=s.weight)<0)return s;
+  let roll=Math.random()*pool.reduce((sum,s)=>sum+lureWeight(s,s.weight),0);
+  for(const s of pool)if((roll-=lureWeight(s,s.weight))<0)return s;
   return pool[0];
 }
 
@@ -1536,6 +1542,11 @@ function challengeTrainer() {
     toast(box.length ? `${trainer.name}: Add a creature from your Box to your party to battle!` : `${trainer.name}: Catch a creature first, then come back to battle!`);
     return true;
   }
+  return startTrainerBattle(trainer);
+}
+function startTrainerBattle(trainer) {
+  if(modal||!party.length)return false;
+  fishing=null;keys.clear();
   battle = {
     trainer, allies: party.map(mon => ({ ...mon, hp: maxHP(mon) })),
     foes: trainer.team.map(mon => ({ ...mon, hp: maxHP(mon) })),
@@ -1545,7 +1556,7 @@ function challengeTrainer() {
   clearTimeout(toastT); $('toast').classList.remove('show');
   $('battle').classList.remove('hidden');
   $('battle').classList.toggle('underwater',!!trainer.diver);
-  $('battle-title').textContent = `${trainer.name} challenges you!`;
+  $('battle-title').textContent = trainer.gym?`${trainer.name} · Leader ${trainer.leader}`:`${trainer.name} challenges you!`;
   $('battle-run').textContent = 'Run';
   updateBattle(`Go, ${byId(battle.allies[0].id).name}!`);
   $('battle-attack').focus();
@@ -1628,10 +1639,11 @@ function battleTurn(heal = false) {
     if (!foe.hp) {
       message += `${byId(foe.id).name} fainted. `;
       if (battle.foe + 1 === battle.foes.length) {
-        battle.over = true; trainerWins[battle.trainer.id] = true;
+        battle.over = true;
+        const reward=awardBattleVictory(battle.trainer);
         party.forEach(mon => { mon.lv = Math.min(100, mon.lv + 1); });
         persist(); hud(); $('battle-run').textContent = 'Back to exploring';
-        updateBattle(`You beat ${battle.trainer.name}! Each party creature gained a level. Everyone is healed!`);
+        updateBattle(`You beat ${battle.trainer.name}! Each party creature gained a level. Everyone is healed!${reward}`);
         return;
       }
       battle.foe++;
@@ -1675,6 +1687,7 @@ $('battle-run').onclick = closeBattle;
 // ---------- Fishing ----------
 function action() {
   if (modal) return;
+  if(nearLeagueSite()){openLeagueSite();return;}
   if(deepDiving&&(nearbyDeepStone()||nearDeepObject(deepGenerator))){deepAction();return;}
   if (nearTunnel()) { useTunnel(); return; }
   if(underground&&(nearbyTreasure()||nearCaveObject(caveGenerator))){caveAction();return;}
@@ -1709,7 +1722,7 @@ function updateSpots(dt) {
     const x = P.x + Math.round((Math.random() - 0.5) * 26);
     const y = P.y + Math.round((Math.random() - 0.5) * 20);
     const t = tile(x, y);
-    if ((t === TG || t === WA || t === MT || t === SN || t === HF || newBiomeByTile(t)) && !spotAt(x, y) && Math.hypot(x - P.x, y - P.y) > 1.5) {
+    if ((t === TG || t === WA || t === MT || t === SN || t === HF || newBiomeByTile(t)) && !leagueSafeTile(x,y) && !spotAt(x, y) && Math.hypot(x - P.x, y - P.y) > 1.5) {
       spots.push({ x, y, life: 45 + Math.random() * 45 });
     }
   }
@@ -1719,7 +1732,7 @@ function updateSpots(dt) {
     let local=spots.filter(s=>map[s.y]?.[s.x]===biome.tile&&Math.hypot(s.x-P.x,s.y-P.y)<9).length;
     const candidates=[];
     for(let y=P.y-6;y<=P.y+6;y++)for(let x=P.x-6;x<=P.x+6;x++)
-      if(map[y]?.[x]===biome.tile&&Math.hypot(x-P.x,y-P.y)>1.5&&!spotAt(x,y))candidates.push({x,y});
+      if(map[y]?.[x]===biome.tile&&!leagueSafeTile(x,y)&&Math.hypot(x-P.x,y-P.y)>1.5&&!spotAt(x,y))candidates.push({x,y});
     while(local<2&&candidates.length) {
       const [s]=candidates.splice(Math.floor(Math.random()*candidates.length),1);
       if(spots.length>=10) {
@@ -1789,7 +1802,7 @@ function startEncounter(sp, shiny, inWater = false, inMountain = false, inWinter
   }
   encounterGrace = 4;
   const lv=2+Math.floor(Math.random()*8),health=24+lv*5;
-  enc = { sp, shiny: !!shiny, busy: false, attempts: 0, lv, hp:health, maxHp:health,
+  enc = { sp, shiny: !!shiny, busy: false, attempts: 0, lv, hp:health, maxHp:health, lureBonus:useEncounterLure(),
     allies:party.map(mon=>({...mon,hp:maxHP(mon)})),ally:0,lost:false };
   modal = 'enc'; keys.clear();
   $('encounter').classList.remove('hidden');
@@ -1802,6 +1815,7 @@ function startEncounter(sp, shiny, inWater = false, inMountain = false, inWinter
     setText(`In ${biome.name}, ${sp.special?'a rare':'a wild'} ${enc.shiny?'✨SHINY✨ ':''}${sp.name} (Lv ${enc.lv}) appeared!`);
   }
   setBtns(true);
+  persist();hud();
 }
 const setText = s => $('enc-text').textContent = s;
 const setBtns = on => {
@@ -1811,12 +1825,12 @@ const setBtns = on => {
 function encounterCatchChance() {
   if(!enc)return 0;
   if(enc.attempts>=1||enc.hp===1)return 1;
-  return Math.min(1,enc.sp.rate+(1-enc.hp/enc.maxHp)*.1);
+  return Math.min(1,enc.sp.rate+(1-enc.hp/enc.maxHp)*.1+enc.lureBonus);
 }
 function updateEncounterHealth() {
   if(!enc)return;
   $('enc-hp').max=enc.maxHp;$('enc-hp').value=enc.hp;
-  $('enc-health').textContent=`HP ${enc.hp} / ${enc.maxHp} · Catch chance: ${Math.floor(encounterCatchChance()*100)}%`;
+  $('enc-health').textContent=`HP ${enc.hp} / ${enc.maxHp} · Catch chance: ${Math.floor(encounterCatchChance()*100)}%${enc.lureBonus?' · 🪶 Lure boost':''}`;
   const ally=enc.allies[enc.ally];
   $('enc-ally').hidden=!ally;
   if(ally){$('enc-ally-hp').max=maxHP(ally);$('enc-ally-hp').value=ally.hp;$('enc-ally-text').textContent=`Your ${byId(ally.id).name}: HP ${ally.hp} / ${maxHP(ally)}`;}
@@ -1883,7 +1897,8 @@ async function throwBall() {
     const d = dex[enc.sp.id] ||= { count: 0, shiny: 0 }; d.count++; if (enc.shiny) d.shiny++;
     const mon = { id: enc.sp.id, shiny: enc.shiny, lv: enc.lv };
     const toParty = party.length < 6; (toParty ? party : box).push(mon);
-    setText(`Gotcha! ${enc.sp.name} was caught! 🎉 ${toParty ? 'Added to your party.' : 'Party full: sent to the Box.'}`); persist(); hud();
+    const coins=awardCatchCoins(enc.sp,enc.shiny);
+    setText(`Gotcha! ${enc.sp.name} was caught! 🎉 +${coins} coins! ${toParty ? 'Added to your party.' : 'Party full: sent to the Box.'}`); persist(); hud();
     await wait(1400);if(enc===currentEncounter)closeEnc();
   } else {
     ball.className = 'ball hidden'; ec.classList.remove('gone');
@@ -1901,7 +1916,7 @@ $('btn-run').onclick = () => { if (enc && !enc.busy) { closeEnc(); toast('Got aw
 // ---------- Collection ----------
 let previewShinies = false;
 function openDex() {
-  if (modal === 'enc' || modal === 'battle' || modal === 'generator') return;
+  if (modal && !['dex','party','explore'].includes(modal)) return;
   if(modal==='explore')closeExplore();
   modal = 'dex'; keys.clear();
   const list = $('dex-list'); list.innerHTML = '';
@@ -1975,7 +1990,7 @@ function renderPartyBar() {
     if (party[i]) slot.appendChild(monIcon(party[i], 44, 30)); bar.appendChild(slot);
   }
 }
-function openParty() { if (modal === 'enc' || modal === 'battle' || modal === 'generator') return; if (modal === 'dex') closeDex(); if(modal==='explore')closeExplore(); modal = 'party'; keys.clear(); renderParty(); $('party').classList.remove('hidden'); }
+function openParty() { if (modal && !['dex','party','explore'].includes(modal)) return; if (modal === 'dex') closeDex(); if(modal==='explore')closeExplore(); modal = 'party'; keys.clear(); renderParty(); $('party').classList.remove('hidden'); }
 const closeParty = () => { $('party').classList.add('hidden'); modal = null; };
 $('btn-party').onclick = openParty; $('btn-party-close').onclick = closeParty; $('party-bar').onclick = openParty;
 $('btn-party-store-all').onclick = () => {
@@ -1987,6 +2002,8 @@ $('btn-party-store-all').onclick = () => {
 const DIRS = { ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1], ArrowLeft: [-1, 0], KeyA: [-1, 0], ArrowRight: [1, 0], KeyD: [1, 0] };
 addEventListener('keydown', e => {
   if(e.target.matches('select,input,textarea'))return;
+  if(['league','market','gym','champion'].includes(modal)) {if(e.code==='Escape'||e.code==='KeyG'){e.preventDefault();closeLeague();}return;}
+  if(e.code==='KeyG'&&!e.repeat){e.preventDefault();openLeagueGuide();return;}
   if(modal==='explore') {if(e.code==='Escape'||e.code==='KeyM'){e.preventDefault();closeExplore();}return;}
   if(e.code==='KeyM'&&!e.repeat){e.preventDefault();openExplore();return;}
   if(modal==='generator'){if(e.code==='Escape')closeGenerator();return;}
@@ -2016,6 +2033,9 @@ $('btn-deep-action').onclick=deepAction;
 $('btn-tunnel').onclick = useTunnel;
 $('btn-cave-action').onclick = caveAction;
 $('btn-generator-close').onclick = closeGenerator;
+$('btn-league').onclick=openLeagueGuide;
+$('btn-league-close').onclick=closeLeague;
+$('btn-site').onclick=openLeagueSite;
 
 // ---------- Render ----------
 function resize() { cv.width = innerWidth; cv.height = innerHeight; }
@@ -2230,6 +2250,7 @@ function render() {
     ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(biome.name,sx,sy-4);
     ctx.font='11px sans-serif';ctx.fillText('6 creatures · Sparkles = Shiny',sx,sy+10);
   }
+  drawLeagueSites(camX,camY);
   drawPlayer(ppx - camX, ppy - camY);
   // A sign at the entrance helps players find the new biome.
   const signX = 5*T + T/2 - camX, signY = 27*T - camY;
