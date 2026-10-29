@@ -738,7 +738,7 @@ for(const sp of SPECIES.filter(sp=>sp.habitat==='cave'))for(let i=0;i<3;i++) {
 }
 
 // October's cavern has its own map and wildlife, separate from the crystal caves.
-const halloweenCavernEntrance = { x:12, y:14 }, halloweenCavernExit = { x:8, y:8 };
+const halloweenCavernEntrance = { x:12, y:10 }, halloweenCavernExit = { x:8, y:8 };
 const halloweenCavernMap = Array.from({length:H},()=>Array(W).fill(CW));
 for(const [x1,y1,x2,y2] of [[3,3,22,18],[28,4,49,21],[12,26,37,40],
   [21,10,29,12],[16,17,18,29],[31,19,33,28]]) {

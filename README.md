@@ -228,8 +228,8 @@ the starting clearing. An encounter already underway can still be completed.
 
 ## Halloween Cavern — every creature is shiny!
 
-During **October**, find the glowing **HALLOWEEN CAVERN** ladder in the southern
-part of Halloween Forest. Stand on or beside it and press **Space**, or tap
+During **October**, find the glowing **HALLOWEEN CAVERN** ladder in the middle
+of Halloween Forest. Stand on or beside it and press **Space**, or tap
 **Enter Halloween Cavern**. Explore pumpkin-lit chambers and purple pools, then
 walk into the roaming creatures to encounter them. **Every creature is shiny**,
 both on the map and when caught:

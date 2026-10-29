@@ -196,7 +196,7 @@ An in-progress encounter may finish after midnight; only new spawns are gated.
 
 ## Halloween Cavern validation
 
-During October, the surface entrance is (12,14) in Halloween Forest. Its separate
+During October, the surface entrance is (12,10), in the middle of Halloween Forest. Its separate
 map has an exit at (8,8), connected rooms, and walkable crawfish pools. `underground`
 stays true while `halloweenCavern` selects this map, wildlife, rendering, and save
 location. Legacy saves without the new flag still load in the normal Crystal Caves.
