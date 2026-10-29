@@ -95,6 +95,29 @@ you can rematch the Elite Four after completing the challenge.
 
 ![An Elite Four battle showing both active creatures and all six creatures on each team](docs/screenshots/elite-four.png)
 
+## 🐉 Fire Dragon Cave
+
+Beat all four Elite Four members to open a cave **northwest of the starting
+tunnel**, near the Champion Door. Press **G → Fire Dragon Cave → Travel here**,
+then **Space** or the nearby cave button to enter. Existing Elite Four champions
+also get access, and the cave stays open during rematches.
+
+Your **first entry awards 20 balls with a 100% catch chance**, once per save.
+Follow the signs through the winding cave to meet a **level-70 Fire Dragon** at
+the far end. Approach it, or use the nearby **Meet Fire Dragon** button. It has
+its own sprite and is exclusive to this cave.
+
+During any wild encounter, choose **💎 100% Ball (Z)** to spend one guaranteed-catch
+ball. Regular balls remain available separately. You can keep the remaining balls
+for other creatures; your inventory saves automatically. The dragon joins your
+Party, or your Box if the party is full. Once caught, it disappears from its lair.
+If you run away or choose the coin reward after defeating it, you can meet it again.
+Return to the entrance ladder and press **Space** to leave the cave.
+
+![A level-70 Fire Dragon waiting at the end of its ember-lit cave](docs/screenshots/fire-dragon-cave.png)
+
+![The Fire Dragon encounter with a separate guaranteed-catch ball button](docs/screenshots/fire-dragon.png)
+
 ## 🧭 Five new biomes, 30 new creatures
 
 Press **M** or tap **Explore** to find the new areas and travel to them from land.
@@ -124,7 +147,7 @@ caught with the same balls as other creatures.
 
 ![A shiny Moon Unicorn encounter in the Moonlit Grove](docs/screenshots/moon-unicorn.png)
 
-Collection now has **95 species**, a discovery counter, and filters for the new
+Collection now has **96 species**, a discovery counter, and filters for the new
 areas. Your existing catches, shiny forms, trainer wins, and generator rewards
 stay saved. The limited-edition Ghost still appears **only on October 31**.
 Return to land before using fast travel; it is unavailable during encounters.
@@ -242,7 +265,8 @@ Build a party of up to six creatures, with extra catches stored in your Box.
 | Descend one diving level | B or **Dive deeper / Dive to Abyss** |
 | Collect stones / use a nearby generator | Space or the on-screen action button |
 | Throw a ball during an encounter | Space or **Throw Ball** |
-| Weaken a wild creature | X or **Attack** |
+| Attack a wild creature | X or **Attack** |
+| Use a guaranteed-catch ball | Z or **100% Ball** (requires a ball) |
 | Attack during a trainer battle | Space or **Attack** |
 | Open or close Party | P |
 | Open or close Collection | C |
@@ -258,7 +282,7 @@ that chance, and a second ball always succeeds if your party is still in the fig
 Creatures won't run away after breaking free, but they may knock out your party.
 You have four seconds to reel in after a bite.
 
-Discover 95 species across the five new biomes, meadows, rivers, caves, seasonal forest, and three
+Discover 96 species across the five new biomes, meadows, rivers, caves, seasonal forest, and three
 diving levels, including Magikarp, Bouldersaur, Orca, and Anglerfish.
 Every species has a shiny form, including pink Bunny, blue Duck, purple
 Squirrel, blue Fox, and mint Hedgehog. Magikarp, Frog, and Bouldersaur keep their
@@ -367,10 +391,16 @@ level 2. There is no oxygen timer.
 
 Wild encounters show both creatures' HP. With a creature in your party, choose
 **Attack (X)** to lower the wild creature's HP and improve the catch chance.
-Your attacks leave it at **at least 1 HP**, so you can still catch it. At 1 HP,
-the next ball is guaranteed to succeed if your party has survived.
+You can now defeat it completely at **0 HP**. It stops fighting and gives you
+two choices: **catch it with a regular ball (100% chance)**, or **Take 100 coins
+& leave**. The coin choice awards exactly 100 coins instead of a creature;
+catching gives the creature and its usual catch coins. You cannot collect both
+rewards from the same encounter. Coins save immediately.
 
-The wild creature **fights back after each attack and after a failed catch**.
+At 1 HP, regular balls also catch for sure if your party has survived. Attack
+once more if you want to defeat the creature and unlock the coin choice.
+
+The wild creature **fights back after non-final attacks and failed catches**.
 It can knock out your active creature; the next surviving party member takes over
 automatically. If your entire party is knocked out, you must leave the encounter
 before you can try again. Your party recovers when you leave, and you keep all
@@ -381,6 +411,8 @@ your first creature to unlock Attack. **Run** leaves the encounter at any time
 when a throw animation is not in progress.
 
 ![A wild encounter showing creature HP, Attack, and catch chance](docs/screenshots/wild-encounter.png)
+
+![A defeated creature offering a guaranteed regular catch or 100 coins](docs/screenshots/defeat-choice.png)
 
 ## Underground caves
 

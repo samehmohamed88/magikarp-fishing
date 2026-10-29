@@ -151,6 +151,13 @@ canvas#world { display: block; width: 100vw; height: 100vh; image-rendering: pix
 .ball.wobble { animation: wobble .5s ease-in-out; }
 @keyframes wobble { 25% { transform: rotate(-25deg) } 75% { transform: rotate(25deg) } }
 .ball.caught { filter: brightness(.7); }
+.ball.perfect { background: linear-gradient(#985fe0 0 46%, #222 46% 54%, #fafafa 54%); box-shadow: 0 0 15px #d8bbff, inset -4px -4px 8px #0004; }
+#btn-perfect-ball { background: #7046a1; }
+#btn-defeat-coins { background: #816126; border-color: #f5d179; }
+.enc-scene.fire-cave { background: radial-gradient(ellipse at 50% 85%, #ec934c55, transparent 70%), linear-gradient(#39243e, #684453 65%, #3c293b 65%); }
+#btn-dragon { position: fixed; right: 16px; bottom: 145px; z-index: 2; background: #9c4b40; }
+#dragon-quest { position: fixed; top: 122px; left: 50%; transform: translateX(-50%); width: min(520px, calc(100vw - 24px)); padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; text-align: center; pointer-events: none; }
+@media (pointer: coarse) { #dragon-quest { top: 215px; font-size: 11px; } #btn-dragon { bottom: 145px; font-size: 12px; } }
 
 .dex-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .dex-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-height: 60vh; overflow: auto; }

@@ -1,5 +1,41 @@
 # Running and updating River Quest
 
+## Fire Dragon Cave and defeated-creature rewards
+
+`dragon-cave.js` loads after `league.js` and before `game.js`. It contains the
+dragon sprite, cave map, entry/exit controls, and rendering. The cave entrance at
+(3,3) appears only when `journey.eliteCleared` is true, including old champion
+saves and rematches. It is accessible by walking or the G guide. The cave has its
+own connected map, entrance ladder at (6,8), and dragon nest at (52,16).
+`underground` plus `dragonCave` selects this layer; surface, seasonal cavern,
+crystal cave, and diving navigation remain separate. Invalid cave locations
+recover to the entrance. Locked cave saves return safely to the surface.
+
+First entry sets `journey.fireCaveGift` and awards 20 `journey.perfectBalls`
+together with the saved cave location. Further entries/reloads award nothing.
+The separate 100% Ball button or Z spends exactly one ball, saves the inventory
+when thrown, and guarantees success without a random roll. Busy/lost encounters
+and empty inventories cannot spend balls. Regular throws do not use this supply.
+
+The Fire Dragon is level 70 with 374 HP. It is excluded from ordinary wildlife
+and Elite Four starter parties. Capture marks `journey.fireDragonCaught`, adds
+the level-70 creature to Party/Box and Collection, and removes its map sprite.
+Running away or choosing coins leaves the dragon available for another encounter.
+All new fields default safely for old saves; ball inventory and cave progress
+persist independently from candies, lures, badges, and generator rewards.
+
+Wild attacks now reach 0 HP; a final hit never triggers retaliation. At 0 HP,
+the player chooses an ordinary guaranteed catch or exactly 100 coins. Coin claims
+are guarded by the active encounter, zero HP, and busy/lost state, then close the
+encounter immediately before saving. Catch animations lock the coin choice, so
+repeated input cannot collect both rewards. Coins do not add Collection entries.
+Focused encounter buttons accept Space to activate their own action.
+
+Run `tests/fire-cave-smoke.cjs` with the Playwright environment below. It covers
+an actual final Elite Four victory, migration, entry/re-entry/reload rewards,
+cave reachability, level-70 stats and art, capture and Box overflow, coin choice,
+keyboard/touch input, empty bags, regular-ball independence, and saved progress.
+
 ## Level Candies
 
 Every market sells a Level Candy for 20 coins. Purchases require the active
@@ -148,14 +184,14 @@ There should be 24 surface swimmers, three per fishing species, plus 21 diving-o
 creatures (three per exclusive species). All 45 occupy distinct water tiles.
 Open-water weights total 100: Catfish 20, each other new water creature 14,
 Magikarp 5, and Frog 5. Visible-swimmer targeting overrides these weights.
-Catch difficulty: every species has a first-ball rate of at least 92%, second
+Catch difficulty: ordinary wildlife has a first-ball rate of at least 92%, second
 throws always succeed, and failed catches cannot make creatures flee. The fishing
 bite window is four seconds. Verify a forced first failure followed by a second
 catch, preserving shiny state and saved Party/Box entries.
 The ten new woodland species share weight 20 each in the meadow encounter pool
 (16 total meadow species), including sparkling grass. They have no fishing weight
 and do not enter the separate winter or mountain pools. Verify distinct normal
-and shiny sprites for encounters, Party/Box, Collection (95 species), and battles,
+and shiny sprites for encounters, Party/Box, Collection (96 species), and battles,
 as well as catch/save/reload compatibility with existing saves.
 Fishing shiny probabilities: Alligator 75%; Shark, Catfish, Grunt, Spiny Dogfish,
 and Crocodile 50%; Magikarp and Frog retain 1/8. Sparkling casts guarantee a shiny
@@ -210,7 +246,7 @@ There are 18 cave creatures, three each of Mole, Ant, Spider, Cricket, Praying
 Mantis, and Cave Crawfish. They only encounter by contact underground. Crawfish
 stay in shallow pools; the others stay on dirt. All have distinct normal/shiny
 sprites. They never join surface, fishing, winter, mountain, or diving pools.
-Check movement and respawn boundaries, capture, Party/Box, Collection (95 species),
+Check movement and respawn boundaries, capture, Party/Box, Collection (96 species),
 preview sprites, and persistence. Cave encounters use a separate cave background.
 Old saves without underground default to the surface; cave saves reload on the
 cave layer, with invalid cave positions recovered at the ladder. Surface wildlife
@@ -273,7 +309,7 @@ the four species enters meadow, fishing, normal cave, or swimmer pools. Encounte
 also checks the calendar to prevent stale seasonal availability.
 
 Test all four normal/shiny sprite pairs, catching, and save/reload into November.
-Party, Box, and Collection (95 species) must keep seasonal catches after the event.
+Party, Box, and Collection (96 species) must keep seasonal catches after the event.
 An in-progress encounter may finish after midnight; only new spawns are gated.
 
 ## Deep Sea validation
@@ -323,7 +359,7 @@ collision capture; saved shiny catches; and exclusion from other wildlife pools.
 Load a pre-expansion Abyss save to verify old catches, generator rewards, trainer
 wins, and both return points survive while all new species become available.
 Catch new species into both Party and a full-party Box, reload, and use one in a
-diver battle. Collection must list 95 species and preview every shiny form.
+diver battle. Collection must list 96 species and preview every shiny form.
 No stone piles, generator interactions, or level-2 trainers appear in the Abyss.
 
 Level-2 diver trainers have separate IDs in trainerWins. Their tiles block movement
@@ -333,8 +369,9 @@ reapproach, victory/level rewards, saved wins, and underwater battle presentatio
 Depth changes and wild encounters must remain paused during trainer battles.
 
 Wild encounters keep HP and temporary party HP in enc. X / Attack lowers wild HP
-to a minimum of 1 and improves catch odds. The wild creature retaliates after each
-attack and failed ball, knocks out allies at 0 HP, and auto-switches to the next
+to a minimum of 0 and improves catch odds. At 0 HP the player chooses a guaranteed
+regular-ball catch or 100 coins. The wild creature retaliates after non-final
+attacks and failed balls, knocks out allies at 0 HP, and auto-switches to the next
 survivor. A full-party knockout disables attacks and catches until leaving. Party
 HP resets on the next encounter; saved catches and party membership remain intact.
 Verify no-party starter catches, catch odds at full/partial/1 HP, successful and

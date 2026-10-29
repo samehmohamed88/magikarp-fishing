@@ -42,6 +42,9 @@ function loadJourney(saved) {
     eliteRound:Number.isInteger(data.eliteRound)&&data.eliteRound>=0&&data.eliteRound<=4?data.eliteRound:0,
     eliteCleared:data.eliteCleared===true||data.eliteRound===4,
     eliteReward:data.eliteReward===true,
+    perfectBalls:Number.isSafeInteger(data.perfectBalls)&&data.perfectBalls>=0&&data.perfectBalls<=Number.MAX_SAFE_INTEGER-20?data.perfectBalls:0,
+    fireCaveGift:data.fireCaveGift===true,
+    fireDragonCaught:data.fireDragonCaught===true,
   };
 }
 const badgeCount = () => GYMS.filter(g=>journey.gymWins[g.id]).length;
@@ -56,7 +59,7 @@ function useEncounterLure() {
   return lure.bonus;
 }
 function prepareLeagueMap() {
-  for(const site of [...MARKETS,...GYMS,CHAMPION_DOOR]) {
+  for(const site of [...MARKETS,...GYMS,CHAMPION_DOOR,FIRE_CAVE_SITE]) {
     const ground=map[site.y][site.x];
     for(let y=site.y-1;y<=site.y+1;y++)for(let x=site.x-1;x<=site.x+1;x++)
       if([TR,MP,TG].includes(map[y][x]))map[y][x]=[TR,MP,TG].includes(ground)?G:ground;
@@ -64,7 +67,7 @@ function prepareLeagueMap() {
   // Keep the first gym connected to the established north/south footpath.
   for(let x=3;x<=5;x++)map[12][x]=G;
 }
-function surfaceSites() {return [...MARKETS,...GYMS,...(championDoorOpen()?[CHAMPION_DOOR]:[])];}
+function surfaceSites() {return [...MARKETS,...GYMS,...(championDoorOpen()?[CHAMPION_DOOR]:[]),...(fireCaveUnlocked()?[FIRE_CAVE_SITE]:[])];}
 function nearLeagueSite() {
   if(underground||P.diving||P.boat)return null;
   return surfaceSites().find(site=>Math.abs(site.x-P.x)+Math.abs(site.y-P.y)<=1)||null;
@@ -74,10 +77,10 @@ function leagueSafeTile(x,y) {
 }
 function leagueHud() {
   const lure=activeLure();
-  $('journey-status').textContent=`🪙 ${journey.coins} · 🍬 ${journey.candies} · 🏅 ${badgeCount()}/6${lure?` · 🪶 ${lure.name}: ${journey.lure.remaining} left`:''}`;
+  $('journey-status').textContent=`🪙 ${journey.coins} · 🍬 ${journey.candies} · 🏅 ${badgeCount()}/6${journey.fireCaveGift?` · 💎 100% balls: ${journey.perfectBalls}`:''}${lure?` · 🪶 ${lure.name}: ${journey.lure.remaining} left`:''}`;
   const site=nearLeagueSite();
   $('btn-site').hidden=!site;
-  if(site)$('btn-site').textContent=site===CHAMPION_DOOR&&eliteFourUnlocked()?'🚪 Elite Four / Champion Hall (Space)':`${site.gym?'🏅':site===CHAMPION_DOOR?'🚪':'🛒'} ${site.name} (Space)`;
+  if(site)$('btn-site').textContent=site===FIRE_CAVE_SITE?'🐉 Enter Fire Dragon Cave (Space)':site===CHAMPION_DOOR&&eliteFourUnlocked()?'🚪 Elite Four / Champion Hall (Space)':`${site.gym?'🏅':site===CHAMPION_DOOR?'🚪':'🛒'} ${site.name} (Space)`;
 }
 let leagueSite=null;
 function openLeaguePanel(mode) {
@@ -103,13 +106,14 @@ function openLeagueGuide() {
   if(!openLeaguePanel('league'))return;
   leagueSite=null;
   $('league-title').textContent='🏅 Six badges, one secret door';
-  $('league-intro').textContent=`${badgeCount()}/6 badges · ${journey.coins} coins. Win all six gyms to reveal a door north of the starting tunnel. Catches earn 10–25 coins, trainer wins 30, gym wins 120.`;
+  $('league-intro').textContent=`${badgeCount()}/6 badges · ${journey.coins} coins. Win all six gyms to reveal a door north of the starting tunnel. Catches earn 10–25 coins; defeating a wild creature lets you choose 100 coins instead. Trainer wins earn 30, gym wins 120.${fireCaveUnlocked()?' Your Fire Dragon Cave is open!':''}`;
   const list=$('league-content');list.replaceChildren();
-  for(const site of [...GYMS,...MARKETS,...(championDoorOpen()?[CHAMPION_DOOR]:[])]) {
+  for(const site of [...GYMS,...MARKETS,...(championDoorOpen()?[CHAMPION_DOOR]:[]),...(fireCaveUnlocked()?[FIRE_CAVE_SITE]:[])]) {
     const card=document.createElement('article');card.className='league-option';
     const won=site.gym&&journey.gymWins[site.id];
     const heading=document.createElement('h3');heading.textContent=`${site.icon||(site===CHAMPION_DOOR?'🚪':'🛒')} ${site.name}${won?' ✓':''}`;
     const detail=document.createElement('p');detail.textContent=site.gym?`${site.badge} Badge · ${site.leader} · Lv ${site.team[0].lv}–${site.team.at(-1).lv}`:site===CHAMPION_DOOR?(eliteFourUnlocked()?`Elite Four: ${journey.eliteRound}/4 defeated. Walk into the door to battle!`:'Your Champion Hall is open!'):'Buy lures for rare creatures and candies to level up your team.';
+    if(site===FIRE_CAVE_SITE)detail.textContent=`${journey.fireDragonCaught?'Fire Dragon caught!':'A level-70 Fire Dragon awaits at the end.'} First visit: 20 balls with a 100% catch chance.`;
     card.append(heading,detail,leagueButton('Travel here',()=>travelToLeagueSite(site.id),!canTravel()));list.append(card);
   }
   if(!canTravel()){$('league-intro').textContent+=' Return to surface land to travel.';}
@@ -125,6 +129,7 @@ function travelToLeagueSite(id) {
 function openLeagueSite() {
   if(modal||P.prog<1)return;
   const site=nearLeagueSite();if(!site)return;
+  if(site===FIRE_CAVE_SITE){enterFireCave();return;}
   const mode=site.gym?'gym':site===CHAMPION_DOOR?'champion':'market';
   if(!openLeaguePanel(mode))return;
   leagueSite=site;renderLeagueSite();$('btn-league-close').focus();
@@ -163,6 +168,7 @@ function renderLeagueSite() {
     $('league-intro').textContent=journey.championReward
       ?`Four masters. Six level-30 creatures each. ${journey.eliteRound}/4 defeated. Your party heals between battles and your progress saves. Enter with an empty party to receive six random level-20 creatures to keep—even ones you have never caught!`
       :'All six badges opened this door. Welcome, Champion! Claim your shiny Phoenix (Lv 20) and 200 coins to unlock the Elite Four beyond the door.';
+    if(fireCaveUnlocked())$('league-intro').textContent+=' Fire Dragon Cave is now open northwest of the starting tunnel! Find it in Gyms & Markets (G).';
     const card=document.createElement('article');card.className='league-option champion-prize';
     card.append(monIcon({id:'phoenix',shiny:true},160,110));
     const label=document.createElement('p');label.textContent=GYMS.map(g=>`${g.icon} ${g.badge}`).join(' · ');card.append(label);
@@ -213,7 +219,7 @@ function awardBattleVictory(trainer) {
     if(journey.eliteRound===4){
       journey.eliteCleared=true;
       const awarded=awardElitePrizes();
-      return ` You defeated all four masters and all 24 creatures! You are the Elite Four Champion!${awarded?' Prizes: shiny Megalodon, Mosasaurus, and Elasmosaurus (Lv 30)! Check your Party and Box.':' Your Elite Four prizes were already collected.'}`;
+      return ` You defeated all four masters and all 24 creatures! You are the Elite Four Champion!${awarded?' Prizes: shiny Megalodon, Mosasaurus, and Elasmosaurus (Lv 30)! Check your Party and Box.':' Your Elite Four prizes were already collected.'} Fire Dragon Cave is open northwest of the starting tunnel! Enter to receive 20 guaranteed-catch balls and meet a level-70 dragon. Find the cave with G.`;
     }
     return ` Elite Four: ${journey.eliteRound}/4 defeated. ${ELITE_FOUR[journey.eliteRound].name} is next!`;
   }
@@ -236,7 +242,7 @@ function giveEliteStarterParty() {
   if(party.length)return false;
   const season=halloweenCalendar();
   // Seasonal creatures keep their calendar rules; collection ownership is never a filter.
-  const pool=SPECIES.filter(sp=>sp.habitat!=='halloween'||(season.open&&(sp.id!=='ghost'||season.ghosts)));
+  const pool=SPECIES.filter(sp=>!sp.postgameOnly&&(sp.habitat!=='halloween'||(season.open&&(sp.id!=='ghost'||season.ghosts))));
   for(let i=0;i<6;i++) {
     const [sp]=pool.splice(Math.floor(Math.random()*pool.length),1);
     party.push({id:sp.id,lv:20,shiny:false});
@@ -275,7 +281,11 @@ function drawLeagueSites(camX,camY) {
     const x=(site.x+.5)*T-camX,y=(site.y+.5)*T-camY;
     if(x< -100||x>cv.width+100||y< -70||y>cv.height+70)continue;
     ctx.save();ctx.textAlign='center';ctx.lineWidth=2;
-    if(site===CHAMPION_DOOR) {
+    if(site===FIRE_CAVE_SITE) {
+      ctx.fillStyle='#864950';ctx.beginPath();ctx.ellipse(x,y,27,30,0,Math.PI,0);ctx.lineTo(x+27,y+20);ctx.lineTo(x-27,y+20);ctx.closePath();ctx.fill();
+      ctx.fillStyle='#261b2d';ctx.beginPath();ctx.ellipse(x,y+5,18,24,0,Math.PI,0);ctx.lineTo(x+18,y+20);ctx.lineTo(x-18,y+20);ctx.closePath();ctx.fill();
+      ctx.fillStyle='#ffc16d';ctx.font='bold 18px sans-serif';ctx.fillText('🔥',x,y+6);
+    } else if(site===CHAMPION_DOOR) {
       ctx.shadowColor='#f8d878';ctx.shadowBlur=18+Math.sin(time*3)*6;
       ctx.fillStyle='#f8d878';ctx.fillRect(x-18,y-28,36,50);ctx.shadowBlur=0;
       ctx.fillStyle='#493d7c';ctx.fillRect(x-13,y-23,26,45);ctx.fillStyle='#fff2bc';ctx.fillRect(x+6,y,4,4);
