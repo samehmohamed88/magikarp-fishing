@@ -27,6 +27,7 @@ const LURES = [
   {id:'rare',name:'Rare Lure',price:40,uses:10,multiplier:3,bonus:.05},
   {id:'deluxe',name:'Deluxe Rare Lure',price:90,uses:20,multiplier:5,bonus:.1},
 ];
+const LEVEL_CANDY = {name:'Level Candy',price:20,maxLevel:100};
 const RARE_CREATURES = new Set(['fox','hedgehog','bouldersaur','ghost','shark','spiny-dogfish','alligator','narwhal','giant-squid','colossal-squid','great-white-shark','orca','anglerfish','goblin-shark','dragonfish']);
 const isRareCreature = sp => !!sp.special || RARE_CREATURES.has(sp.id);
 function loadJourney(saved) {
@@ -34,6 +35,7 @@ function loadJourney(saved) {
   const lure=LURES.find(l=>l.id===data.lure?.id);
   return {
     coins:Number.isSafeInteger(data.coins)&&data.coins>=0?data.coins:60,
+    candies:Number.isSafeInteger(data.candies)&&data.candies>=0?data.candies:0,
     gymWins:Object.fromEntries(GYMS.map(g=>[g.id,data.gymWins?.[g.id]===true])),
     lure:lure&&Number.isSafeInteger(data.lure.remaining)&&data.lure.remaining>0?{id:lure.id,remaining:data.lure.remaining}:null,
     championReward:data.championReward===true,
@@ -72,7 +74,7 @@ function leagueSafeTile(x,y) {
 }
 function leagueHud() {
   const lure=activeLure();
-  $('journey-status').textContent=`🪙 ${journey.coins} · 🏅 ${badgeCount()}/6${lure?` · 🪶 ${lure.name}: ${journey.lure.remaining} left`:''}`;
+  $('journey-status').textContent=`🪙 ${journey.coins} · 🍬 ${journey.candies} · 🏅 ${badgeCount()}/6${lure?` · 🪶 ${lure.name}: ${journey.lure.remaining} left`:''}`;
   const site=nearLeagueSite();
   $('btn-site').hidden=!site;
   if(site)$('btn-site').textContent=site===CHAMPION_DOOR&&eliteFourUnlocked()?'🚪 Elite Four / Champion Hall (Space)':`${site.gym?'🏅':site===CHAMPION_DOOR?'🚪':'🛒'} ${site.name} (Space)`;
@@ -107,7 +109,7 @@ function openLeagueGuide() {
     const card=document.createElement('article');card.className='league-option';
     const won=site.gym&&journey.gymWins[site.id];
     const heading=document.createElement('h3');heading.textContent=`${site.icon||(site===CHAMPION_DOOR?'🚪':'🛒')} ${site.name}${won?' ✓':''}`;
-    const detail=document.createElement('p');detail.textContent=site.gym?`${site.badge} Badge · ${site.leader} · Lv ${site.team[0].lv}–${site.team.at(-1).lv}`:site===CHAMPION_DOOR?(eliteFourUnlocked()?`Elite Four: ${journey.eliteRound}/4 defeated. Walk into the door to battle!`:'Your Champion Hall is open!'):'Buy lures to find and catch rare creatures.';
+    const detail=document.createElement('p');detail.textContent=site.gym?`${site.badge} Badge · ${site.leader} · Lv ${site.team[0].lv}–${site.team.at(-1).lv}`:site===CHAMPION_DOOR?(eliteFourUnlocked()?`Elite Four: ${journey.eliteRound}/4 defeated. Walk into the door to battle!`:'Your Champion Hall is open!'):'Buy lures for rare creatures and candies to level up your team.';
     card.append(heading,detail,leagueButton('Travel here',()=>travelToLeagueSite(site.id),!canTravel()));list.append(card);
   }
   if(!canTravel()){$('league-intro').textContent+=' Return to surface land to travel.';}
@@ -132,7 +134,16 @@ function renderLeagueSite() {
   $('league-title').textContent=leagueSite.name;
   if(modal==='market') {
     const lure=activeLure();
-    $('league-intro').textContent=`You have ${journey.coins} coins. ${lure?`${lure.name} active: ${journey.lure.remaining} encounters left. Finish it before buying another.`:'Lures activate immediately and last for a number of wild encounters. Running away also uses one charge.'} Catch creatures to earn more coins!`;
+    $('league-intro').textContent=`You have ${journey.coins} coins and ${journey.candies} ${journey.candies===1?'candy':'candies'}. ${lure?`${lure.name} active: ${journey.lure.remaining} encounters left. Finish it before buying another.`:'Lures activate immediately and last for a number of wild encounters. Running away also uses one charge.'} Catch creatures to earn more coins!`;
+    const candy=document.createElement('article');candy.className='league-option candy-shop';
+    candy.innerHTML=`<h3>🍬 ${LEVEL_CANDY.name}</h3><p>1 candy · ${LEVEL_CANDY.price} coins</p><p>Give a creature +1 level, up to Lv ${LEVEL_CANDY.maxLevel}. Choose any creature in your Party or Box. Unused candies stay in your bag.</p>`;
+    const buyCandyButton=leagueButton(`Buy candy · ${LEVEL_CANDY.price} coins`,buyCandy,journey.coins<LEVEL_CANDY.price||journey.candies>=Number.MAX_SAFE_INTEGER);
+    buyCandyButton.id='btn-buy-candy';
+    const give=leagueButton('Give candies →',()=>{
+      if(modal!=='market')return;
+      closeLeague();openParty();toggleCandyMode();
+    },!journey.candies||!party.length&&!box.length);
+    give.id='btn-market-give-candy';candy.append(buyCandyButton,give);list.append(candy);
     for(const item of LURES) {
       const card=document.createElement('article');card.className='league-option';
       card.innerHTML=`<h3>🪶 ${item.name}</h3><p>${item.uses} encounters · ${item.price} coins</p><p>Rare creatures appear more often in random land and fishing encounters (${item.multiplier}× weight). Catch chance increases by ${Math.round(item.bonus*100)} percentage points everywhere.</p><p>Visible swimmers, shiny odds, and seasonal dates stay the same.</p>`;
@@ -180,6 +191,15 @@ function buyLure(id) {
   if(modal!=='market'||nearLeagueSite()!==leagueSite||activeLure())return;
   const lure=LURES.find(l=>l.id===id);if(!lure||journey.coins<lure.price)return;
   journey.coins-=lure.price;journey.lure={id,remaining:lure.uses};persist();hud();renderLeagueSite();
+}
+function buyCandy() {
+  if(modal!=='market'||nearLeagueSite()!==leagueSite||journey.coins<LEVEL_CANDY.price||journey.candies>=Number.MAX_SAFE_INTEGER)return;
+  journey.coins-=LEVEL_CANDY.price;journey.candies++;
+  persist();hud();renderLeagueSite();
+  $('league-intro').textContent=`🍬 Bought a Level Candy! ${journey.coins} coins left · ${journey.candies} ${journey.candies===1?'candy':'candies'} in your bag. Choose “Give candies” now, or use Party (P) later.`;
+  // Keep keyboard shopping usable when the purchase rebuilds the market cards.
+  const next=['btn-buy-candy','btn-market-give-candy','btn-league-close'].map($).find(button=>!button.disabled);
+  next.focus();
 }
 function challengeGym(id) {
   const gym=GYMS.find(g=>g.id===id);

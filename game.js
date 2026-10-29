@@ -1980,6 +1980,23 @@ $('btn-shiny-preview').onclick = () => {
 };
 
 // ---------- Party ----------
+let partyCandyMode = false;
+const canGiveCandy = mon => Number.isInteger(mon.lv) && mon.lv >= 1 && mon.lv < LEVEL_CANDY.maxLevel;
+function toggleCandyMode() {
+  if(modal!=='party')return;
+  partyCandyMode=!partyCandyMode;
+  $('candy-message').textContent='';renderParty();
+}
+function giveCandy(source,index) {
+  if(modal!=='party'||!partyCandyMode||journey.candies<1||!Number.isInteger(index))return;
+  const creatures=source==='party'?party:source==='box'?box:null;
+  const mon=creatures?.[index];
+  if(!mon||!canGiveCandy(mon))return;
+  mon.lv++;journey.candies--;persist();hud();renderParty();
+  $('candy-message').textContent=`🍬 ${byId(mon.id).name} grew to Lv ${mon.lv}! ${journey.candies} ${journey.candies===1?'candy':'candies'} left.${mon.lv===LEVEL_CANDY.maxLevel?' Maximum level reached!':''}`;
+  const card=$(source==='party'?'party-list':'box-list').children[index];
+  (card&&!card.disabled?card:$('btn-party-candy')).focus();
+}
 function monIcon(m, w = 70, h = 46) {
   const s = byId(m.id), el = document.createElement('div'); el.className = 'icon';
   if (s.id === 'magikarp') { const c = document.createElement('canvas'); c.width = w; c.height = h; drawCarp(c.getContext('2d'), w * .53, h * .42, h * .27, m.shiny); el.appendChild(c); }
@@ -1995,15 +2012,33 @@ function monCard(m, onClick, label) {
 }
 function renderParty() {
   const pl = $('party-list'), bl = $('box-list'); pl.innerHTML = ''; bl.innerHTML = '';
+  $('party').classList.toggle('candy-mode',partyCandyMode);
+  $('candy-count').textContent=journey.candies;
+  $('btn-party-candy').textContent=partyCandyMode?'Done giving candies':'🍬 Give candy';
+  $('btn-party-candy').setAttribute('aria-pressed',String(partyCandyMode));
+  $('candy-help').textContent=partyCandyMode
+    ?journey.candies?`Choose a creature below to give +1 level (maximum ${LEVEL_CANDY.maxLevel}). Each click uses one candy.`:`Your bag is empty. Buy more Level Candies at any market for ${LEVEL_CANDY.price} coins each.`
+    :'Buy candies at any market, then choose “Give candy” to level up a creature in your Party or Box.';
+  const cardFor=(mon,source,index,move,label)=>{
+    const card=monCard(mon,()=>partyCandyMode?giveCandy(source,index):move(),partyCandyMode?`Give a candy to ${byId(mon.id).name}`:label);
+    if(partyCandyMode) {
+      const eligible=canGiveCandy(mon);
+      card.disabled=!eligible||journey.candies<1;
+      const hint=document.createElement('small');hint.className='candy-card-hint';hint.textContent=!eligible?'Max level':journey.candies?'🍬 +1 level':'No candies';
+      card.append(hint);
+    }
+    return card;
+  };
   for (let i = 0; i < 6; i++) {
     const m = party[i];
-    if (m) pl.appendChild(monCard(m, () => { box.push(party.splice(i, 1)[0]); refresh(); }, 'Click to send to Box'));
+    if (m) pl.appendChild(cardFor(m,'party',i,() => { box.push(party.splice(i, 1)[0]); refresh(); },'Click to send to Box'));
     else { const e = document.createElement('div'); e.className = 'mon empty'; e.textContent = 'Empty'; pl.appendChild(e); }
   }
-  box.forEach((m, i) => bl.appendChild(monCard(m, () => { if (party.length < 6) { party.push(box.splice(i, 1)[0]); refresh(); } else toast('Party is full (6)!'); }, 'Click to add to party')));
+  box.forEach((m, i) => bl.appendChild(cardFor(m,'box',i,() => { if (party.length < 6) { party.push(box.splice(i, 1)[0]); refresh(); } else toast('Party is full (6)!'); },'Click to add to party')));
   if (!box.length) bl.innerHTML = '<p class="muted">Box is empty.</p>';
   $('box-count').textContent = box.length;
-  $('btn-party-store-all').disabled = party.length === 0;
+  $('btn-party-store-all').disabled = partyCandyMode || party.length === 0;
+  $('box-action-hint').textContent=partyCandyMode?'choose to give candy':'click to swap';
 }
 function refresh() { renderParty(); renderPartyBar(); persist(); }
 function renderPartyBar() {
@@ -2013,11 +2048,12 @@ function renderPartyBar() {
     if (party[i]) slot.appendChild(monIcon(party[i], 44, 30)); bar.appendChild(slot);
   }
 }
-function openParty() { if (modal && !['dex','party','explore'].includes(modal)) return; if (modal === 'dex') closeDex(); if(modal==='explore')closeExplore(); modal = 'party'; keys.clear(); renderParty(); $('party').classList.remove('hidden'); }
-const closeParty = () => { $('party').classList.add('hidden'); modal = null; };
+function openParty() { if (modal && !['dex','party','explore'].includes(modal)) return; if (modal === 'dex') closeDex(); if(modal==='explore')closeExplore(); if(modal!=='party'){partyCandyMode=false;$('candy-message').textContent='';} modal = 'party'; keys.clear(); renderParty(); $('party').classList.remove('hidden'); }
+const closeParty = () => { $('party').classList.add('hidden'); partyCandyMode=false; modal = null; };
 $('btn-party').onclick = openParty; $('btn-party-close').onclick = closeParty; $('party-bar').onclick = openParty;
+$('btn-party-candy').onclick = toggleCandyMode;
 $('btn-party-store-all').onclick = () => {
-  if (modal !== 'party' || !party.length) return;
+  if (modal !== 'party' || partyCandyMode || !party.length) return;
   box.push(...party.splice(0)); refresh();
 };
 
@@ -2029,6 +2065,7 @@ addEventListener('keydown', e => {
   if(e.code==='KeyG'&&!e.repeat){e.preventDefault();openLeagueGuide();return;}
   if(modal==='explore') {if(e.code==='Escape'||e.code==='KeyM'){e.preventDefault();closeExplore();}return;}
   if(e.code==='KeyM'&&!e.repeat){e.preventDefault();openExplore();return;}
+  if(modal==='party') {if(e.code==='Escape'||e.code==='KeyP'){e.preventDefault();closeParty();}return;}
   if(modal==='generator'){if(e.code==='Escape')closeGenerator();return;}
   if(modal==='enc'&&e.code==='KeyX'){e.preventDefault();if(!e.repeat)weakenEncounter();return;}
   if(e.code==='KeyB'&&!e.repeat&&P.diving){e.preventDefault();toggleDepth();return;}

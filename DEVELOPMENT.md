@@ -1,5 +1,26 @@
 # Running and updating River Quest
 
+## Level Candies
+
+Every market sells a Level Candy for 20 coins. Purchases require the active
+market and proximity, sufficient coins, and a safely incrementable inventory.
+`journey.candies` defaults to zero for old saves and rejects invalid counts.
+Buying a candy preserves any active lure. The existing `persist()` saves the
+inventory together with coins, creatures, badges, and other progress.
+
+Party's **Give candy** mode selects a creature in either Party or Box without
+moving it. Each selection consumes one candy for +1 level, with the existing
+level-100 cap. Empty bags and maximum-level creatures cannot consume candies;
+giving is blocked outside that mode and during battles/encounters. The mode stays
+active when the bag empties so repeated taps never move a creature unexpectedly.
+Closing Party restores the usual transfer controls on the next opening.
+
+Run `tests/candy-smoke.cjs` with the same Playwright environment described below.
+It covers old-save migration, all six markets, insufficient funds, active-lure
+compatibility, Party and Box selection, the cap, save/reload, combat stats,
+keyboard controls, and touch purchases/feeding. Asset query versions are bumped
+in `index.html` so refreshing loads the new UI and game code.
+
 ## Markets and gyms
 
 `league.js` loads after `biomes.js` and before `game.js`. It defines six markets,

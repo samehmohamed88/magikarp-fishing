@@ -191,6 +191,18 @@ canvas#world { display: block; width: 100vw; height: 100vh; image-rendering: pix
 .pslot:hover { transform: scale(1.1); }
 .pslot.shiny, .mon.shiny { box-shadow: 0 0 0 2px #ffd166, 0 0 14px #ffd16688; }
 .party-card { width: min(520px, 94vw); }
+.party-card { max-height: 92vh; overflow-y: auto; }
+.candy-bag { margin-bottom: 14px; padding: 12px; border-radius: 14px; background: #e89ba61c; border: 1px solid #efb2ca55; }
+.candy-bag-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.candy-bag p { font-size: 13px; line-height: 1.5; margin-top: 8px; }
+#candy-message:empty { display: none; }
+#candy-message { color: #b9f4c9; font-weight: 600; }
+.candy-mode #btn-party-candy { background: #934d77; }
+.candy-mode .mon:not(.empty) { border-color: #f3a8d6; }
+.candy-mode .mon:disabled { opacity: .5; cursor: default; }
+.candy-mode .mon:disabled:hover { transform: none; }
+.candy-card-hint { color: #ffcadf; }
+.candy-shop .btn + .btn { margin-top: 10px; }
 .party-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .box-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; max-height: 30vh; overflow: auto; }
 .mon { font: inherit; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 6px;

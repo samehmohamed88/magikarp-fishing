@@ -7,7 +7,7 @@
   <meta name="description" content="Explore rivers by boat, fish for Magikarp and catch wild animals in the tall grass." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=elite-four-1" />
+  <link rel="stylesheet" href="style.css?v=level-candy-1" />
 </head>
 <body>
   <main>
@@ -126,9 +126,14 @@
     <section id="party" class="modal hidden">
       <div class="dex-card party-card glass">
         <div class="dex-head"><h2>🎒 Your Party</h2><button id="btn-party-close" class="btn">✕</button></div>
+        <section class="candy-bag" aria-label="Level candies">
+          <div class="candy-bag-head"><strong>🍬 Candies: <span id="candy-count">0</span></strong><button id="btn-party-candy" class="btn" aria-pressed="false">🍬 Give candy</button></div>
+          <p id="candy-help"></p>
+          <p id="candy-message" role="status" aria-live="polite"></p>
+        </section>
         <p><button id="btn-party-store-all" class="btn">📦 Move all to Box</button></p>
         <div id="party-list" class="party-list"></div>
-        <h3 class="box-title">📦 Box (<span id="box-count">0</span>) <small>click to swap</small></h3>
+        <h3 class="box-title">📦 Box (<span id="box-count">0</span>) <small id="box-action-hint">click to swap</small></h3>
         <div id="box-list" class="box-list"></div>
       </div>
     </section>
@@ -143,8 +148,8 @@
       <button id="btn-a" class="abtn">🎣</button>
     </div>
   </main>
-  <script src="biomes.js?v=elite-four-1"></script>
-  <script src="league.js?v=elite-four-1"></script>
-  <script src="game.js?v=elite-four-1"></script>
+  <script src="biomes.js?v=level-candy-1"></script>
+  <script src="league.js?v=level-candy-1"></script>
+  <script src="game.js?v=level-candy-1"></script>
 </body>
 </html>

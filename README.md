@@ -10,7 +10,7 @@ Press **G** or tap **Gyms & Markets** to find every market and gym. Travel there
 from surface land, then press **Space** or tap the nearby building button to enter.
 You can also walk to the buildings. Shops and their entrances are safe from random encounters.
 
-Six markets sell lures: in the meadow, snow, jungle, desert, Ember Highlands,
+Six markets sell lures and Level Candies: in the meadow, snow, jungle, desert, Ember Highlands,
 and Moonlit Grove. New and existing players start this update with **60 coins**.
 Catches earn **10 coins**, rare catches **15**, and shiny catches **25**.
 A first trainer victory earns **30 coins**; a gym victory earns **120**.
@@ -27,6 +27,21 @@ Rare selection boosts apply to random meadow, biome, and fishing choices, plus
 Ghost encounters on October 31. Visible swimmers keep their species, and shiny
 odds and seasonal availability stay the same. Catch boosts work in every habitat.
 The coin, badge, and remaining-lure display keeps track of your progress.
+
+### 🍬 Level Candies
+
+Buy **Level Candies for 20 coins each** at any market. Each candy raises one
+creature by **one level**, up to **level 100**. Buy them while you have a lure
+active, or save them for later—unused candies stay in your bag.
+
+Choose **Give candies →** at the market, or open **Party (P) → Give candy**.
+Click or tap a creature in your **Party or Box** to give it a candy. Each click
+uses one candy; the creature stays in its current slot. Choose **Done giving
+candies** to return to moving creatures between Party and Box. Level-100
+creatures cannot consume candies. Your coins, candies, and new levels save
+automatically, and the higher level strengthens the creature in battle.
+
+![Giving Level Candies to creatures in Party and Box](docs/screenshots/level-candies.png)
 
 | Gym | Leader | Badge | Team levels |
 | --- | --- | --- | --- |
