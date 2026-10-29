@@ -2,6 +2,14 @@
 [hidden] { display: none !important; }
 #btn-dive { position: fixed; right: 16px; bottom: 145px; z-index: 2; background: #17627d; }
 #btn-depth, #btn-deep-action { position: fixed; right: 16px; bottom: 195px; z-index: 2; background: #244781; }
+#btn-depth { bottom: 245px; }
+.enc-scene.abyss { background: radial-gradient(circle at 25% 25%, #4679a3, #172d52 30%, #11162f 65%, #283650 66%); }
+#battle.underwater #battle-canvas { background: linear-gradient(#174f72, #12324e 65%, #294e66 65%); }
+.enc-health progress { display: block; width: 100%; height: 14px; accent-color: #8bd99e; }
+.enc-health p, .enc-help { font-size: 13px; line-height: 1.4; text-align: center; margin-top: 5px; }
+.enc-help { color: #d1e7f2; margin-bottom: 12px; }
+.enc-actions { flex-wrap: wrap; }
+.enc-card { max-height: 94vh; overflow-y: auto; }
 #deep-quest { position: fixed; top: 122px; left: 50%; transform: translateX(-50%); max-width: calc(100vw - 24px); width: max-content; padding: 8px 14px; border-radius: 12px; font-size: 13px; pointer-events: none; }
 .enc-scene.deep-sea { background: radial-gradient(ellipse at 50% 0%, #3772ad, #152b51 65%, #31435f 66%); box-shadow: inset 0 0 24px #3db8d544; }
 #btn-tunnel { position: fixed; right: 16px; bottom: 195px; z-index: 2; background: #5b435e; }

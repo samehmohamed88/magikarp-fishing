@@ -73,7 +73,7 @@ catch, preserving shiny state and saved Party/Box entries.
 The ten new woodland species share weight 20 each in the meadow encounter pool
 (16 total meadow species), including sparkling grass. They have no fishing weight
 and do not enter the separate winter or mountain pools. Verify distinct normal
-and shiny sprites for encounters, Party/Box, Collection (53 species), and battles,
+and shiny sprites for encounters, Party/Box, Collection (56 species), and battles,
 as well as catch/save/reload compatibility with existing saves.
 Fishing shiny probabilities: Alligator 75%; Shark, Catfish, Grunt, Spiny Dogfish,
 and Crocodile 50%; Magikarp and Frog retain 1/8. Sparkling casts guarantee a shiny
@@ -128,7 +128,7 @@ There are 18 cave creatures, three each of Mole, Ant, Spider, Cricket, Praying
 Mantis, and Cave Crawfish. They only encounter by contact underground. Crawfish
 stay in shallow pools; the others stay on dirt. All have distinct normal/shiny
 sprites. They never join surface, fishing, winter, mountain, or diving pools.
-Check movement and respawn boundaries, capture, Party/Box, Collection (53 species),
+Check movement and respawn boundaries, capture, Party/Box, Collection (56 species),
 preview sprites, and persistence. Cave encounters use a separate cave background.
 Old saves without underground default to the surface; cave saves reload on the
 cave layer, with invalid cave positions recovered at the ladder. Surface wildlife
@@ -191,13 +191,13 @@ the four species enters meadow, fishing, normal cave, or swimmer pools. Encounte
 also checks the calendar to prevent stale seasonal availability.
 
 Test all four normal/shiny sprite pairs, catching, and save/reload into November.
-Party, Box, and Collection (53 species) must keep seasonal catches after the event.
+Party, Box, and Collection (56 species) must keep seasonal catches after the event.
 An in-progress encounter may finish after midnight; only new spawns are gated.
 
 ## Deep Sea validation
 
 From any valid shallow scuba position, B / Dive deeper enters a separate basin
-at (8,8). V / Shallows (or B) returns to the saved shallow position; V again
+at (8,8). V / Shallows returns to the saved shallow position; V again
 surfaces. The deep generator at (9,8) is adjacent to the entrance and blocks
 movement onto its tile. Moonstones (3,10), Sunstones (56,12), and Abyss Crystals
 (3,34) are reachable along the basin sides. Space, the action button, and walking
@@ -223,6 +223,35 @@ Verify keyboard and button depth transitions, all 20 species, collision/capture,
 respawns within bounds, all eight new sprite pairs, both generator workflows,
 save/reload between collection and reward, duplicate guards, Party/Box/Collection,
 and date rollover while deep diving. Update asset query versions when shipping.
+
+## Abyss, diver trainers, and wild combat validation
+
+B descends from shallows to Deep Sea to Abyss; V ascends one level. Abyss uses
+abyssDiving=true together with deepDiving=true, its own map and wildlife, and an
+entrance at (8,8). deepReturn stores the previous level-2 position; shallowReturn
+retains the level-1 position. Validate both return points and repair invalid saved
+positions to the appropriate entrance. Old deep saves without abyssDiving remain
+on level 2. Neither cave nor surface seasonal updates should change the dive map.
+
+The Abyss has five of each exclusive species: Anglerfish, Gulper Eel, and Dumbo
+Octopus. Test unique normal/shiny art, reachable spawn tiles, respawn bounds,
+collision capture, saved shiny catches, and exclusion from other wildlife pools.
+No stone piles, generator interactions, or level-2 trainers appear in the Abyss.
+
+Level-2 diver trainers have separate IDs in trainerWins. Their tiles block movement
+and wildlife spawns; only adjacent players on the same level can challenge them.
+Test empty-party prompts, all trainer teams, attacks/healing/switching, retreat and
+reapproach, victory/level rewards, saved wins, and underwater battle presentation.
+Depth changes and wild encounters must remain paused during trainer battles.
+
+Wild encounters keep HP and temporary party HP in enc. X / Attack lowers wild HP
+to a minimum of 1 and improves catch odds. The wild creature retaliates after each
+attack and failed ball, knocks out allies at 0 HP, and auto-switches to the next
+survivor. A full-party knockout disables attacks and catches until leaving. Party
+HP resets on the next encounter; saved catches and party membership remain intact.
+Verify no-party starter catches, catch odds at full/partial/1 HP, successful and
+failed balls, second-ball guarantee, knockout/auto-switch/retreat, action guards
+during animations, mobile controls, and cancellation at seasonal cavern closing.
 
 ## Halloween Cavern validation
 

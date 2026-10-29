@@ -110,9 +110,10 @@ Build a party of up to six creatures, with extra catches stored in your Box.
 | Move | Arrow keys or WASD |
 | Cast or reel in | Space while facing water |
 | Dive at a buoy / ascend one depth | V or the Dive / Shallows / Surface button |
-| Dive deeper from the shallows | B or **Dive deeper** |
+| Descend one diving level | B or **Dive deeper / Dive to Abyss** |
 | Collect stones / use a nearby generator | Space or the on-screen action button |
 | Throw a ball during an encounter | Space or **Throw Ball** |
+| Weaken a wild creature | X or **Attack** |
 | Attack during a trainer battle | Space or **Attack** |
 | Open or close Party | P |
 | Open or close Collection | C |
@@ -122,12 +123,13 @@ Touch devices also have an on-screen direction pad and fishing button.
 Step from a dock into the water to board a boat; return to a dock to get out.
 When fishing, wait for the bite message, then press Space again to reel it in.
 
-Catching is forgiving: every species has at least a 92% chance on the first ball,
-and the second ball always succeeds. Creatures won't run away after breaking free.
+Catching starts with at least a 92% chance on the first ball. Weakening increases
+that chance, and a second ball always succeeds if your party is still in the fight.
+Creatures won't run away after breaking free, but they may knock out your party.
 You have four seconds to reel in after a bite.
 
-Discover forty-five species, including Magikarp, Frog, Fox, Bouldersaur, Snowy,
-and the six new water creatures.
+Discover 56 species across the meadows, rivers, caves, seasonal forest, and three
+diving levels, including Magikarp, Bouldersaur, Orca, and Anglerfish.
 Every species has a shiny form, including pink Bunny, blue Duck, purple
 Squirrel, blue Fox, and mint Hedgehog. Magikarp, Frog, and Bouldersaur keep their
 existing shiny colors. Check Collection to track your catches,
@@ -136,7 +138,7 @@ You can move even the last creature into the Box, or choose **Move all to Box**
 to empty your party at once. Your creatures and Collection progress stay saved.
 Click any creature in the Box to add it back. Put at least one in your party
 before approaching a trainer to battle.
-In Collection, choose **✨ Preview shiny forms** to see all forty-five shiny designs
+In Collection, choose **✨ Preview shiny forms** to see all 56 shiny designs
 without changing your catches or saved progress. Bunny, Duck, Squirrel, Fox,
 and Hedgehog use drawn sprites so their colors are consistent across devices.
 
@@ -193,6 +195,51 @@ generator; they do not spawn as wild swimmers. Stone and reward progress saves
 immediately and is separate from the cave's dinosaur generator.
 
 ![The five new deep-sea species and three prehistoric rewards, with their normal and shiny appearances](docs/screenshots/deep-sea-creatures.png)
+
+## Scuba-diver trainers
+
+Look for divers with **!** markers in the **Deep Sea (level 2)**. Swim beside
+**Diver Coral**, **Diver Finn**, or **Captain Marina** with a creature in your party
+to battle their water-creature teams. Attack, heal, switch, or run using the same
+controls as land trainers. Wins save and give each party creature a level; defeated
+divers show a check mark. Your party recovers after the battle.
+
+![A scuba-diver trainer battle in the Deep Sea](docs/screenshots/diver-battle.png)
+
+## The Abyss — diving level 3
+
+From the Deep Sea, press **B / Dive to Abyss** to reach the third and deepest level.
+Explore glowing coral and underwater vents, and swim into **Anglerfish, Gulper
+Eels, and Dumbo Octopuses**. These three species appear only here, each with a
+distinct shiny form. Your catches and position save automatically.
+
+![The Abyss with glowing deep-sea creatures and a return marker](docs/screenshots/abyss.png)
+
+Press **V / Deep Sea** to return to the exact level-2 location where you descended.
+Press V again for the shallows and once more for your boat. B always goes down
+one level; V goes up one level. The stone generator and diver trainers are on
+level 2. There is no oxygen timer.
+
+![Normal and shiny Anglerfish, Gulper Eel, and Dumbo Octopus](docs/screenshots/abyss-creatures.png)
+
+## Weakening and wild-creature battles
+
+Wild encounters show both creatures' HP. With a creature in your party, choose
+**Attack (X)** to lower the wild creature's HP and improve the catch chance.
+Your attacks leave it at **at least 1 HP**, so you can still catch it. At 1 HP,
+the next ball is guaranteed to succeed if your party has survived.
+
+The wild creature **fights back after each attack and after a failed catch**.
+It can knock out your active creature; the next surviving party member takes over
+automatically. If your entire party is knocked out, you must leave the encounter
+before you can try again. Your party recovers when you leave, and you keep all
+previous catches. Successful catches do not trigger a counterattack.
+
+You can still throw balls without attacking. If you have no party yet, catch
+your first creature to unlock Attack. **Run** leaves the encounter at any time
+when a throw animation is not in progress.
+
+![A wild encounter showing creature HP, Attack, and catch chance](docs/screenshots/wild-encounter.png)
 
 ## Underground caves
 

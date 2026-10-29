@@ -7,7 +7,7 @@
   <meta name="description" content="Explore rivers by boat, fish for Magikarp and catch wild animals in the tall grass." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=deep-sea-1" />
+  <link rel="stylesheet" href="style.css?v=abyss-1" />
 </head>
 <body>
   <main>
@@ -50,7 +50,11 @@
           <div id="ball" class="ball hidden"></div>
         </div>
         <p id="enc-text" class="enc-text">A wild creature appeared!</p>
+        <div class="enc-health"><progress id="enc-hp" max="1" value="1" aria-label="Wild creature health"></progress><p id="enc-health" aria-live="polite"></p></div>
+        <div id="enc-ally" class="enc-health" hidden><progress id="enc-ally-hp" max="1" value="1" aria-label="Your creature health"></progress><p id="enc-ally-text" aria-live="polite"></p></div>
+        <p id="enc-help" class="enc-help"></p>
         <div class="enc-actions">
+          <button id="btn-weaken" class="btn">⚔️ Attack (X)</button>
           <button id="btn-throw" class="btn primary">⚪ Throw Ball</button>
           <button id="btn-run" class="btn">🏃 Run</button>
         </div>
@@ -109,6 +113,6 @@
       <button id="btn-a" class="abtn">🎣</button>
     </div>
   </main>
-  <script src="game.js?v=deep-sea-1"></script>
+  <script src="game.js?v=abyss-1"></script>
 </body>
 </html>
