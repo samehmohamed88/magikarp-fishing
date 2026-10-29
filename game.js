@@ -6,21 +6,21 @@ const cv = $('world'), ctx = cv.getContext('2d');
 
 // ---------- Creatures ----------
 const SPECIES = [
-  { id: 'magikarp', name: 'Magikarp', water: true, fishingWeight: 30, rate: 0.8 },
-  { id: 'bunny', name: 'Bunny', weight: 40, rate: 0.7, draw: (...a) => drawAnimal('bunny', ...a) },
-  { id: 'duck', name: 'Duck', weight: 25, rate: 0.6, draw: (...a) => drawAnimal('duck', ...a) },
-  { id: 'frog', name: 'Frog', emoji: '🐸', weight: 45, fishingWeight: 20, rate: 0.55 },
-  { id: 'squirrel', name: 'Squirrel', weight: 12, rate: 0.5, draw: (...a) => drawAnimal('squirrel', ...a) },
-  { id: 'fox', name: 'Fox', weight: 6, rate: 0.35, draw: (...a) => drawAnimal('fox', ...a) },
-  { id: 'hedgehog', name: 'Hedgehog', weight: 2, rate: 0.25, draw: (...a) => drawAnimal('hedgehog', ...a) },
-  { id: 'bouldersaur', name: 'Bouldersaur', weight: 4, rate: 0.2, draw: (...a) => drawBoulder(...a) },
-  { id: 'snowy', name: 'Snowy', habitat: 'winter', rate: 0.55, draw: (...a) => drawSnowy(...a) },
-  { id: 'shark', name: 'Shark', water: true, fishingWeight: 8, rate: 0.35, draw: (...a) => drawWaterAnimal('shark', ...a) },
-  { id: 'catfish', name: 'Catfish', water: true, fishingWeight: 12, rate: 0.65, draw: (...a) => drawWaterAnimal('catfish', ...a) },
-  { id: 'grunt', name: 'Grunt', water: true, fishingWeight: 12, rate: 0.7, draw: (...a) => drawWaterAnimal('grunt', ...a) },
-  { id: 'spiny-dogfish', name: 'Spiny Dogfish', water: true, fishingWeight: 8, rate: 0.45, draw: (...a) => drawWaterAnimal('spiny-dogfish', ...a) },
-  { id: 'crocodile', name: 'Crocodile', water: true, fishingWeight: 5, rate: 0.3, draw: (...a) => drawWaterAnimal('crocodile', ...a) },
-  { id: 'alligator', name: 'Alligator', water: true, fishingWeight: 5, rate: 0.3, draw: (...a) => drawWaterAnimal('alligator', ...a) },
+  { id: 'magikarp', name: 'Magikarp', water: true, fishingWeight: 30, rate: 0.98 },
+  { id: 'bunny', name: 'Bunny', weight: 40, rate: 0.97, draw: (...a) => drawAnimal('bunny', ...a) },
+  { id: 'duck', name: 'Duck', weight: 25, rate: 0.96, draw: (...a) => drawAnimal('duck', ...a) },
+  { id: 'frog', name: 'Frog', emoji: '🐸', weight: 45, fishingWeight: 20, rate: 0.955 },
+  { id: 'squirrel', name: 'Squirrel', weight: 12, rate: 0.95, draw: (...a) => drawAnimal('squirrel', ...a) },
+  { id: 'fox', name: 'Fox', weight: 6, rate: 0.935, draw: (...a) => drawAnimal('fox', ...a) },
+  { id: 'hedgehog', name: 'Hedgehog', weight: 2, rate: 0.925, draw: (...a) => drawAnimal('hedgehog', ...a) },
+  { id: 'bouldersaur', name: 'Bouldersaur', weight: 4, rate: 0.92, draw: (...a) => drawBoulder(...a) },
+  { id: 'snowy', name: 'Snowy', habitat: 'winter', rate: 0.955, draw: (...a) => drawSnowy(...a) },
+  { id: 'shark', name: 'Shark', water: true, fishingWeight: 8, rate: 0.935, draw: (...a) => drawWaterAnimal('shark', ...a) },
+  { id: 'catfish', name: 'Catfish', water: true, fishingWeight: 12, rate: 0.965, draw: (...a) => drawWaterAnimal('catfish', ...a) },
+  { id: 'grunt', name: 'Grunt', water: true, fishingWeight: 12, rate: 0.97, draw: (...a) => drawWaterAnimal('grunt', ...a) },
+  { id: 'spiny-dogfish', name: 'Spiny Dogfish', water: true, fishingWeight: 8, rate: 0.945, draw: (...a) => drawWaterAnimal('spiny-dogfish', ...a) },
+  { id: 'crocodile', name: 'Crocodile', water: true, fishingWeight: 5, rate: 0.93, draw: (...a) => drawWaterAnimal('crocodile', ...a) },
+  { id: 'alligator', name: 'Alligator', water: true, fishingWeight: 5, rate: 0.93, draw: (...a) => drawWaterAnimal('alligator', ...a) },
 ];
 const byId = id => SPECIES.find(s => s.id === id);
 
@@ -678,7 +678,7 @@ function drawSparkles(camX, camY) {
 function updateFishing(dt) {
   if (!fishing) return;
   fishing.wait -= dt;
-  if (!fishing.bite && fishing.wait <= 0) { fishing.bite = true; fishing.wait = 0.9; toast('❗ Something bit! Press Space!'); }
+  if (!fishing.bite && fishing.wait <= 0) { fishing.bite = true; fishing.wait = 4; toast('❗ Something bit! Press Space!'); }
   else if (fishing.bite && fishing.wait <= 0) { fishing = null; toast('It got away…'); }
 }
 
@@ -686,7 +686,7 @@ function updateFishing(dt) {
 const ec = $('enc-canvas'), ectx = ec.getContext('2d');
 let enc = null;
 function startEncounter(sp, shiny, inWater = false, inMountain = false, inWinter = false) {
-  enc = { sp, shiny: !!shiny, busy: false, lv: 2 + Math.floor(Math.random() * 8) };
+  enc = { sp, shiny: !!shiny, busy: false, attempts: 0, lv: 2 + Math.floor(Math.random() * 8) };
   modal = 'enc'; keys.clear();
   $('encounter').classList.remove('hidden');
   $('enc-scene').className = 'enc-scene ' + (inWater ? 'water' : inWinter ? 'winter' : (inMountain ? 'mountain' : 'land'));
@@ -715,7 +715,8 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 async function throwBall() {
   if (!enc || enc.busy) return;
   enc.busy = true; setBtns(false);
-  const ball = $('ball'), success = Math.random() < enc.sp.rate;
+  enc.attempts++;
+  const ball = $('ball'), success = enc.attempts >= 2 || Math.random() < enc.sp.rate;
   const shakes = success ? 3 : Math.floor(Math.random() * 3);
   setText('You threw a ball!');
   ball.className = 'ball throw'; await wait(600);
@@ -733,8 +734,7 @@ async function throwBall() {
     ball.className = 'ball hidden'; ec.classList.remove('gone');
     setText('Oh no! It broke free!');
     await wait(900);
-    if (Math.random() < 0.25) { setText(`${enc.sp.name} ran away!`); await wait(1100); closeEnc(); return; }
-    setText(`What will you do?`); enc.busy = false; setBtns(true);
+    setText('Try again! Your next ball is guaranteed to catch it.'); enc.busy = false; setBtns(true);
   }
 }
 $('btn-throw').onclick = throwBall;

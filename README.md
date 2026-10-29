@@ -92,7 +92,11 @@ Build a party of up to six creatures, with extra catches stored in your Box.
 
 Touch devices also have an on-screen direction pad and fishing button.
 Step from a dock into the water to board a boat; return to a dock to get out.
-When fishing, wait for the bite message, then press Space again quickly!
+When fishing, wait for the bite message, then press Space again to reel it in.
+
+Catching is forgiving: every species has at least a 92% chance on the first ball,
+and the second ball always succeeds. Creatures won't run away after breaking free.
+You have four seconds to reel in after a bite.
 
 Discover fifteen species, including Magikarp, Frog, Fox, Bouldersaur, Snowy,
 and the six new water creatures.

@@ -62,6 +62,10 @@ tile to target it; open-water fishing should include all eight fishing species.
 Verify each new aquatic creature has a distinct normal/shiny sprite in encounters,
 Collection, Party/Box, and battles, and survives save/reload. They must not appear
 in grass or winter encounter pools.
+Catch difficulty: every species has a first-ball rate of at least 92%, second
+throws always succeed, and failed catches cannot make creatures flee. The fishing
+bite window is four seconds. Verify a forced first failure followed by a second
+catch, preserving shiny state and saved Party/Box entries.
 
 Cloud tasks already have isolated checkouts. Use this checkout directly;
 do not create a Git worktree unless explicitly requested.
