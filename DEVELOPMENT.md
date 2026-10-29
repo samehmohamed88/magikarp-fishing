@@ -82,6 +82,10 @@ Sparkling fishing spots override visible swimmer targeting: 95% shiny Alligator,
 5% another shiny fishing species (the fallback pool excludes Alligator). Test
 the .95 boundary and the full cast/bite/reel flow; non-sparkling casts retain
 their existing species and shiny odds. Land sparkles are unaffected.
+Party can be completely empty: single-card moves include the last creature,
+and Move all to Box stores the whole party. Verify save/reload and restoring a
+creature from Box, preserving levels, shiny flags, and Collection counts. Empty
+parties cannot start battles and receive guidance to add a boxed creature.
 
 Cloud tasks already have isolated checkouts. Use this checkout directly;
 do not create a Git worktree unless explicitly requested.

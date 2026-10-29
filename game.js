@@ -566,7 +566,7 @@ function challengeTrainer() {
   fishing = null; keys.clear();
   if (!party.length) {
     ignoredTrainer = trainer.id;
-    toast(`${trainer.name}: Catch a creature first, then come back to battle!`);
+    toast(box.length ? `${trainer.name}: Add a creature from your Box to your party to battle!` : `${trainer.name}: Catch a creature first, then come back to battle!`);
     return true;
   }
   battle = {
@@ -886,12 +886,13 @@ function renderParty() {
   const pl = $('party-list'), bl = $('box-list'); pl.innerHTML = ''; bl.innerHTML = '';
   for (let i = 0; i < 6; i++) {
     const m = party[i];
-    if (m) pl.appendChild(monCard(m, () => { if (party.length > 1) { box.push(party.splice(i, 1)[0]); refresh(); } else toast('Keep at least one in your party!'); }, 'Click to send to Box'));
+    if (m) pl.appendChild(monCard(m, () => { box.push(party.splice(i, 1)[0]); refresh(); }, 'Click to send to Box'));
     else { const e = document.createElement('div'); e.className = 'mon empty'; e.textContent = 'Empty'; pl.appendChild(e); }
   }
   box.forEach((m, i) => bl.appendChild(monCard(m, () => { if (party.length < 6) { party.push(box.splice(i, 1)[0]); refresh(); } else toast('Party is full (6)!'); }, 'Click to add to party')));
   if (!box.length) bl.innerHTML = '<p class="muted">Box is empty.</p>';
   $('box-count').textContent = box.length;
+  $('btn-party-store-all').disabled = party.length === 0;
 }
 function refresh() { renderParty(); renderPartyBar(); persist(); }
 function renderPartyBar() {
@@ -904,6 +905,10 @@ function renderPartyBar() {
 function openParty() { if (modal === 'enc' || modal === 'battle') return; if (modal === 'dex') closeDex(); modal = 'party'; keys.clear(); renderParty(); $('party').classList.remove('hidden'); }
 const closeParty = () => { $('party').classList.add('hidden'); modal = null; };
 $('btn-party').onclick = openParty; $('btn-party-close').onclick = closeParty; $('party-bar').onclick = openParty;
+$('btn-party-store-all').onclick = () => {
+  if (modal !== 'party' || !party.length) return;
+  box.push(...party.splice(0)); refresh();
+};
 
 // ---------- Input ----------
 const DIRS = { ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1], ArrowLeft: [-1, 0], KeyA: [-1, 0], ArrowRight: [1, 0], KeyD: [1, 0] };

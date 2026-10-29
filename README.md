@@ -129,6 +129,10 @@ Every species has a shiny form, including pink Bunny, blue Duck, purple
 Squirrel, blue Fox, and mint Hedgehog. Magikarp, Frog, and Bouldersaur keep their
 existing shiny colors. Check Collection to track your catches,
 and use Party to move creatures between your party and Box.
+You can move even the last creature into the Box, or choose **Move all to Box**
+to empty your party at once. Your creatures and Collection progress stay saved.
+Click any creature in the Box to add it back. Put at least one in your party
+before approaching a trainer to battle.
 In Collection, choose **✨ Preview shiny forms** to see all twenty-five shiny designs
 without changing your catches or saved progress. Bunny, Duck, Squirrel, Fox,
 and Hedgehog use drawn sprites so their colors are consistent across devices.
