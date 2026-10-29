@@ -75,6 +75,13 @@ canvas#world { display: block; width: 100vw; height: 100vh; image-rendering: pix
 #battle-canvas { width: 100%; height: auto; border-radius: 16px; background: linear-gradient(#a6ddf1, #d1f0eb 55%, #609f78 55%, #355f51); margin-top: 12px; }
 #battle-text { min-height: 4em; padding: 12px 0; line-height: 1.5; }
 .battle-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
+#battle-switch-panel { margin-top: 16px; border-top: 1px solid #ffffff30; padding-top: 12px; }
+#battle-switch-panel h3 { font-size: 17px; }
+#battle-switch-panel p { font-size: 13px; margin: 8px 0; opacity: .85; }
+#battle-switch-list { display: grid; gap: 8px; margin-bottom: 12px; }
+.battle-choice { width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; }
+.battle-choice .icon { flex-shrink: 0; }
+.battle-choice:disabled { opacity: .5; }
 .party-bar { position: fixed; left: 16px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 6px; padding: 8px; border-radius: 16px; cursor: pointer; }
 .pslot { width: 52px; height: 40px; border-radius: 10px; background: hsla(0,0%,100%,.08); display: grid; place-items: center; font-size: 26px; transition: transform .15s; }
 .pslot:hover { transform: scale(1.1); }

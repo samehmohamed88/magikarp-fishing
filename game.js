@@ -378,7 +378,7 @@ function challengeTrainer() {
   battle = {
     trainer, allies: party.map(mon => ({ ...mon, hp: maxHP(mon) })),
     foes: trainer.team.map(mon => ({ ...mon, hp: maxHP(mon) })),
-    ally: 0, foe: 0, healed: false, over: false,
+    ally: 0, foe: 0, healed: false, over: false, switching: false,
   };
   modal = 'battle';
   clearTimeout(toastT); $('toast').classList.remove('show');
@@ -400,7 +400,43 @@ function updateBattle(message) {
   $('battle-attack').disabled = battle.over;
   $('battle-heal').disabled = battle.over || battle.healed || ally.hp === maxHP(ally);
   $('battle-heal').textContent = battle.healed ? 'Heal used' : 'Heal (1)';
+  $('battle-switch').disabled = battle.over || !battle.allies.some((mon, i) => i !== battle.ally && mon.hp > 0);
+  renderBattleSwitch();
   drawBattle();
+}
+function renderBattleSwitch() {
+  const open = battle.switching && !battle.over;
+  $('battle-attack').disabled = battle.over || open;
+  const ally = battle.allies[battle.ally];
+  $('battle-heal').disabled = battle.over || open || battle.healed || ally.hp === maxHP(ally);
+  $('battle-switch-panel').classList.toggle('hidden', !open);
+  $('battle-switch').setAttribute('aria-expanded', String(open));
+  const list = $('battle-switch-list'); list.replaceChildren();
+  if (!open) return;
+  battle.allies.forEach((mon, i) => {
+    const button = document.createElement('button');
+    button.className = 'btn battle-choice';
+    button.disabled = i === battle.ally || mon.hp <= 0;
+    button.appendChild(monIcon(mon));
+    const label = document.createElement('span');
+    label.textContent = `${mon.shiny ? '✨ ' : ''}${byId(mon.id).name} · Lv ${mon.lv} · HP ${mon.hp}/${maxHP(mon)}${i === battle.ally ? ' · Active' : mon.hp <= 0 ? ' · Fainted' : ''}`;
+    button.appendChild(label);
+    button.onclick = () => switchBattleAlly(i);
+    list.appendChild(button);
+  });
+}
+function toggleBattleSwitch() {
+  if (!battle || battle.over || $('battle-switch').disabled) return;
+  battle.switching = !battle.switching;
+  renderBattleSwitch();
+  if (battle.switching) $('battle-switch-list').querySelector('button:not(:disabled)').focus();
+  else $('battle-switch').focus();
+}
+function switchBattleAlly(index) {
+  if (!battle || battle.over || !battle.switching || !Number.isInteger(index) || index === battle.ally || !battle.allies[index] || battle.allies[index].hp <= 0) return;
+  battle.switching = false; battle.ally = index;
+  enemyBattleTurn(`Go, ${byId(battle.allies[index].id).name}! `);
+  $('battle-attack').focus();
 }
 function drawBattle() {
   const c = $('battle-canvas').getContext('2d');
@@ -416,7 +452,7 @@ function drawBattle() {
   draw(battle.foes[battle.foe], 390, 90);
 }
 function battleTurn(heal = false) {
-  if (!battle || battle.over) return;
+  if (!battle || battle.over || battle.switching) return;
   const ally = battle.allies[battle.ally], foe = battle.foes[battle.foe];
   let message;
   if (heal) {
@@ -441,17 +477,22 @@ function battleTurn(heal = false) {
       return;
     }
   }
+  enemyBattleTurn(message);
+}
+function enemyBattleTurn(message) {
+  const ally = battle.allies[battle.ally], foe = battle.foes[battle.foe];
   const damage = 4 + foe.lv + Math.floor(Math.random() * 3);
   ally.hp = Math.max(0, ally.hp - damage);
   message += `${byId(foe.id).name} dealt ${damage} damage.`;
   if (!ally.hp) {
     message += ` ${byId(ally.id).name} fainted.`;
-    if (battle.ally + 1 === battle.allies.length) {
+    const next = battle.allies.findIndex(mon => mon.hp > 0);
+    if (next === -1) {
       battle.over = true; $('battle-run').textContent = 'Back to exploring';
       updateBattle('Your party is out of HP. Everyone has been healed—catch more creatures or try again!');
       return;
     }
-    battle.ally++;
+    battle.ally = next;
     message += ` Go, ${byId(battle.allies[battle.ally].id).name}!`;
   }
   updateBattle(message);
@@ -464,6 +505,8 @@ function closeBattle() {
 }
 $('battle-attack').onclick = () => battleTurn();
 $('battle-heal').onclick = () => battleTurn(true);
+$('battle-switch').onclick = toggleBattleSwitch;
+$('battle-switch-cancel').onclick = toggleBattleSwitch;
 $('battle-run').onclick = closeBattle;
 
 // ---------- Fishing ----------
@@ -672,8 +715,8 @@ $('btn-party').onclick = openParty; $('btn-party-close').onclick = closeParty; $
 const DIRS = { ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1], ArrowLeft: [-1, 0], KeyA: [-1, 0], ArrowRight: [1, 0], KeyD: [1, 0] };
 addEventListener('keydown', e => {
   if (modal === 'battle') {
-    if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) battleTurn(); }
-    if (e.code === 'Escape') closeBattle();
+    if (e.code === 'Space' && !e.target.closest('button')) { e.preventDefault(); if (!e.repeat) battleTurn(); }
+    if (e.code === 'Escape') battle.switching ? toggleBattleSwitch() : closeBattle();
     return;
   }
   if (DIRS[e.code]) { keys.add(e.code); e.preventDefault(); }

@@ -32,6 +32,11 @@ Choose **Attack** (or press Space), use **Heal** once per battle, or **Run**
 creature on the trainer's team to win and give each of your party creatures a level.
 Your party recovers after every battle, including a loss or retreat.
 
+Choose **Switch** to send in another party creature. The menu shows each creature's
+remaining HP; active and fainted creatures cannot be selected. Switching uses your
+turn, so the opponent attacks your new creature. Opening the menu or choosing
+**Cancel** (Escape) costs no turn. Each creature keeps its HP when switched out.
+
 Defeated trainers show a **✓** and will not challenge you again; wins save with
 your progress. After running or losing, walk away and approach again to retry.
 

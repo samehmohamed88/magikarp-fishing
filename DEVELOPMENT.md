@@ -53,6 +53,10 @@ With at least one caught creature, walk next to a trainer marked ! to test battl
 startup, Attack/Space, the one-use Heal, retreat, and party switching. A win gives
 every party member a level and saves a check mark on that trainer. Verify it stays
 after refreshing. Losing or retreating must leave caught creatures and saves intact.
+Test manual Switch with multiple party members: switching costs one turn and
+preserves each creature's HP; canceling costs none. Active/fainted choices are
+disabled. After a faint, any surviving party member can take over regardless of
+party order. Check mouse, keyboard, and touch selection.
 
 Cloud tasks already have isolated checkouts. Use this checkout directly;
 do not create a Git worktree unless explicitly requested.

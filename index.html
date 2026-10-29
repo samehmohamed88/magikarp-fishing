@@ -7,7 +7,7 @@
   <meta name="description" content="Explore rivers by boat, fish for Magikarp and catch wild animals in the tall grass." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=trainers-1" />
+  <link rel="stylesheet" href="style.css?v=trainers-switch-1" />
 </head>
 <body>
   <main>
@@ -53,8 +53,15 @@
         <div class="battle-actions">
           <button id="battle-attack" class="btn primary">Attack (Space)</button>
           <button id="battle-heal" class="btn">Heal (1)</button>
+          <button id="battle-switch" class="btn" aria-expanded="false" aria-controls="battle-switch-panel">Switch</button>
           <button id="battle-run" class="btn">Run</button>
         </div>
+        <section id="battle-switch-panel" class="hidden" aria-labelledby="battle-switch-title">
+          <h3 id="battle-switch-title">Choose your next creature</h3>
+          <p>Switching uses your turn. Your opponent will attack next.</p>
+          <div id="battle-switch-list"></div>
+          <button id="battle-switch-cancel" class="btn">Cancel</button>
+        </section>
       </div>
     </section>
 
@@ -85,6 +92,6 @@
       <button id="btn-a" class="abtn">🎣</button>
     </div>
   </main>
-  <script src="game.js?v=trainers-1"></script>
+  <script src="game.js?v=trainers-switch-1"></script>
 </body>
 </html>
