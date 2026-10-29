@@ -39,8 +39,44 @@ const SPECIES = [
     ['praying-mantis','Praying Mantis'],['cave-crawfish','Cave Crawfish']].map(([id,name]) => ({
     id, name, habitat: 'cave', rate: .96, draw: (...a) => drawCaveCreature(id, ...a),
   })),
+  ...[['tyrannosaurus-rex','Tyrannosaurus rex'],['spinosaurus','Spinosaurus'],['giganotosaurus','Giganotosaurus']].map(([id,name]) => ({
+    id, name, habitat: 'generator', rate: 1, draw: (...a) => drawDinosaur(id, ...a),
+  })),
 ];
 const byId = id => SPECIES.find(s => s.id === id);
+
+function drawDinosaur(id, c, x, y, s, shiny = false, t = 0) {
+  const palettes = {
+    'tyrannosaurus-rex': ['#79974f','#e1dfa1','#e9a24b','#fff0b9'],
+    spinosaurus: ['#c87955','#f5d7aa','#668fd5','#c5e7ff'],
+    giganotosaurus: ['#547f8b','#b9e1db','#ae6cbf','#f1cbff'],
+  };
+  const p=palettes[id],body=p[shiny?2:0],light=p[shiny?3:1],spino=id==='spinosaurus',giga=id==='giganotosaurus';
+  c.save();c.translate(x,y+Math.sin(t*2)*s*.025);c.scale(s,s);c.strokeStyle='#26323d';c.lineWidth=.045;c.lineJoin='round';
+  const oval=(x,y,rx,ry,color,angle=0)=>{c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,angle,0,Math.PI*2);c.fill();c.stroke();};
+  const shape=(points,color)=>{c.fillStyle=color;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();c.stroke();};
+  shape([[.35,-.12],[1.68,.1+Math.sin(t*3)*.1],[1.04,.48],[.38,.45]],body);
+  if(spino){
+    shape([[-.42,-.2],[-.38,-.82],[-.1,-1.23],[.26,-1.28],[.58,-1.03],[.8,-.63],[.85,-.03]],light);
+    for(let i=0;i<5;i++){c.beginPath();c.moveTo(-.26+i*.22,-.12);c.lineTo(-.3+i*.23,-.7-Math.sin(i/4*Math.PI)*.48);c.stroke();}
+  }
+  oval(.15,.08,.85,.56,body);oval(-.05,.29,.56,.26,light);
+  for(const side of [-1,1]){
+    const px=side*.33+.12;
+    oval(px,.55,.22,.42,body,-side*.2);shape([[px-.12,.77],[px-.46,.99],[px+.24,.99],[px+.14,.74]],body);
+    for(let i=0;i<3;i++)shape([[px-.37+i*.16,.97],[px-.4+i*.16,1.06],[px-.28+i*.16,.97]],'#fff3ce');
+  }
+  oval(-.59,-.28,.32,.53,body,-.25);
+  oval(-.88,-.64,spino?.35:.49,spino?.25:.34,body);
+  oval(spino?-1.3:-1.07,-.51,spino?.52:.4,spino?.14:.2,body);
+  shape([[-1.55,-.44],[-.69,-.4],[-.83,-.24],[-1.48,-.3]],'#9c505a');
+  for(let i=0;i<5;i++)shape([[-1.48+i*.15,-.42],[-1.43+i*.15,-.31],[-1.38+i*.15,-.42]],'#fff4d8');
+  oval(-.87,-.72,.1,.1,'#fff');oval(-.9,-.72,.045,.065,'#202835');
+  if(giga){for(let i=0;i<6;i++)shape([[-.45+i*.2,-.43],[-.37+i*.2,-.65],[-.29+i*.2,-.38]],light);shape([[-1.08,-.83],[-.8,-.92],[-.65,-.78]],light);}
+  c.lineWidth=.12;c.lineCap='round';c.strokeStyle=body;c.beginPath();c.moveTo(-.45,.06);c.lineTo(-.65,.35);c.lineTo(spino?-.99:-.77,.28);c.stroke();
+  c.strokeStyle='#fff3ce';c.lineWidth=.035;for(let i=0;i<2;i++){c.beginPath();c.moveTo((spino?-.99:-.77)+i*.05,.28);c.lineTo((spino?-1.06:-.84)+i*.05,.36);c.stroke();}
+  c.restore();
+}
 
 function drawCaveCreature(id, c, x, y, s, shiny = false, t = 0) {
   if (id === 'cave-crawfish') {
@@ -599,6 +635,12 @@ for (const trainer of TRAINERS) {
 
 // Separate cave layer: connected chambers under the starting clearing.
 const tunnelEntrance = { x: 5, y: 5 }, caveExit = { x: 8, y: 8 };
+const caveGenerator = { x: 11, y: 10 };
+const caveTreasurePiles = [
+  { id:'ruby', name:'Rubies', x:10, y:5, color:'#ed5374', light:'#ffb0c4', species:'tyrannosaurus-rex', hint:'Front of the entrance chamber' },
+  { id:'sapphire', name:'Sapphires', x:13, y:5, color:'#4e94ff', light:'#b8e1ff', species:'spinosaurus', hint:'Front of the entrance chamber' },
+  { id:'limestone', name:'Limestone', x:16, y:5, color:'#c8c1a3', light:'#fff2cd', species:'giganotosaurus', hint:'Front of the entrance chamber' },
+];
 const caveMap = Array.from({ length: H }, () => Array(W).fill(CW));
 const carve = (x1,y1,x2,y2) => {for(let y=y1;y<=y2;y++)for(let x=x1;x<=x2;x++)caveMap[y][x]=CF;};
 carve(3,3,20,17); carve(26,5,42,20); carve(8,25,28,39); carve(40,27,55,40);
@@ -716,7 +758,52 @@ let fishing = null, modal = null, time = 0;
 const keys = new Set();
 const party = save.party || [], box = save.box || [];
 const trainerWins = save.trainerWins || {};
-const persist = () => localStorage.setItem('mkrq', JSON.stringify({ dex, party, box, trainerWins, x: P.x, y: P.y, boat: P.boat, diving: P.diving, underground }));
+const caveTreasures = { collected: {}, generated: {} };
+for(const pile of caveTreasurePiles) {
+  caveTreasures.generated[pile.id]=save.caveTreasures?.generated?.[pile.id]===true;
+  caveTreasures.collected[pile.id]=caveTreasures.generated[pile.id]||save.caveTreasures?.collected?.[pile.id]===true;
+}
+const persist = () => localStorage.setItem('mkrq', JSON.stringify({ dex, party, box, trainerWins, caveTreasures, x: P.x, y: P.y, boat: P.boat, diving: P.diving, underground }));
+
+const nearCaveObject = object => underground && Math.abs(P.x-object.x)+Math.abs(P.y-object.y)<=1;
+function nearbyTreasure() { return caveTreasurePiles.find(pile=>!caveTreasures.collected[pile.id]&&nearCaveObject(pile)); }
+function collectCaveTreasure(pile) {
+  if(modal||P.prog<1||!nearCaveObject(pile)||caveTreasures.collected[pile.id])return;
+  caveTreasures.collected[pile.id]=true;encounterGrace=4;
+  hud();persist();toast(`💎 Collected ${pile.name}! Bring them to the generator beside the entrance ladder.`);
+}
+function openGenerator() {
+  if(modal||P.prog<1||!nearCaveObject(caveGenerator))return;
+  modal='generator';keys.clear();renderGenerator();$('generator').classList.remove('hidden');
+}
+function closeGenerator() { $('generator').classList.add('hidden');modal=null;encounterGrace=4; }
+function renderGenerator() {
+  const list=$('generator-list');list.innerHTML='';
+  for(const pile of caveTreasurePiles) {
+    const done=caveTreasures.generated[pile.id],ready=caveTreasures.collected[pile.id],sp=byId(pile.species);
+    const card=document.createElement('div');card.className='generator-option';
+    card.appendChild(monIcon({id:sp.id,shiny:false},104,70));
+    const label=document.createElement('p');label.textContent=`${pile.name} → ${sp.name}`;card.appendChild(label);
+    const button=document.createElement('button');button.className='btn';button.dataset.treasure=pile.id;
+    button.textContent=done?'✓ Added to your collection':ready?`Insert ${pile.name}`:`Find ${pile.name}: ${pile.hint}`;
+    button.disabled=done||!ready;button.onclick=()=>generateDinosaur(pile.id);card.appendChild(button);list.appendChild(card);
+  }
+}
+function generateDinosaur(id) {
+  const pile=caveTreasurePiles.find(p=>p.id===id);
+  if(!pile||modal!=='generator'||!nearCaveObject(caveGenerator)||!caveTreasures.collected[id]||caveTreasures.generated[id])return;
+  caveTreasures.generated[id]=true;
+  const mon={id:pile.species,shiny:false,lv:10},toParty=party.length<6;
+  (toParty?party:box).push(mon);
+  const entry=dex[mon.id]||={count:0,shiny:0};entry.count++;
+  persist();hud();renderGenerator();
+  $('generator-message').textContent=`${byId(mon.id).name} joined your ${toParty?'party':'Box'}! ${Object.values(caveTreasures.generated).filter(Boolean).length}/3 dinosaurs collected.`;
+}
+function caveAction() {
+  if(modal||P.prog<1||!underground)return;
+  const pile=nearbyTreasure();
+  if(pile)collectCaveTreasure(pile);else if(nearCaveObject(caveGenerator))openGenerator();
+}
 
 let caveGrace = underground ? 4 : 0, encounterGrace = 4;
 function nearTunnel() {
@@ -754,7 +841,7 @@ function updateCaveWildlife(dt) {
   caveGrace=Math.max(0,caveGrace-dt);checkCaveEncounter();
 }
 function checkCaveEncounter() {
-  if(!underground||modal||P.prog<1||caveGrace>0||encounterGrace>0||Math.hypot(P.x-caveExit.x,P.y-caveExit.y)<=1)return;
+  if(!underground||modal||P.prog<1||caveGrace>0||encounterGrace>0||Math.hypot(P.x-caveExit.x,P.y-caveExit.y)<=1||nearCaveObject(caveGenerator)||nearbyTreasure())return;
   const mon=caveWildlife.find(m=>Math.hypot(m.fx+(m.x-m.fx)*m.progress-P.x,m.fy+(m.y-m.fy)*m.progress-P.y)<.65);
   if(!mon)return;
   const sp=byId(mon.id),shiny=mon.shiny;
@@ -793,11 +880,16 @@ function hud() {
   $('hud-mode').textContent = underground ? '🕯️ Underground' : P.diving ? '🤿 Diving' : P.boat ? '⛵ Boating' : '🚶 On foot';
   $('btn-tunnel').hidden = !nearTunnel();
   $('btn-tunnel').textContent = underground ? '☀️ Exit cave (Space)' : '🕳️ Enter tunnel (Space)';
+  const treasure=nearbyTreasure();
+  $('btn-cave-action').hidden=!treasure&&!nearCaveObject(caveGenerator);
+  $('btn-cave-action').textContent=treasure?`💎 Collect ${treasure.name} (Space)`:'⚡ Use generator (Space)';
+  $('cave-quest').hidden=!underground;
+  $('cave-quest').textContent=caveTreasurePiles.map(p=>`${p.name}: ${caveTreasures.generated[p.id]?'✓ Dinosaur':caveTreasures.collected[p.id]?'✓ Collected':'Find pile'}`).join(' · ');
   $('btn-dive').textContent = P.diving ? '↑ Surface (V)' : '🤿 Dive (V)';
   $('btn-dive').hidden = !P.diving && !(P.boat && diveSites.some(site => site.x === P.x && site.y === P.y));
   $('hud-biome').textContent = underground ? '💎 Crystal Caves' : P.diving ? '🫧 Underwater' : tile(P.x, P.y) === SN ? '❄ Winter Area' : P.x >= 44 ? '🏔️ Mountains' : '🌿 Meadows';
   document.querySelector('.hint').textContent = underground
-    ? 'Arrows/WASD: explore · Touch creatures to encounter · Return to the ladder and press Space to exit'
+    ? 'Space: collect piles / use generator · Generator: beside the entrance ladder · Return to the ladder to exit'
     : 'Arrows/WASD: move · Space: fish / use tunnel · V at DIVE buoys: scuba · ✨ Sparkles = Shiny!';
   renderPartyBar();
 }
@@ -806,6 +898,7 @@ function hud() {
 function tryMove(dx, dy) {
   P.dir = [dx, dy];
   const nx = P.x + dx, ny = P.y + dy, t = tile(nx, ny), cur = tile(P.x, P.y);
+  if(underground&&nx===caveGenerator.x&&ny===caveGenerator.y)return;
   if (!underground && TRAINERS.some(trainer => trainer.x === nx && trainer.y === ny)) return;
   let ok;
   if (underground) ok = t === CF || t === CP;
@@ -817,7 +910,11 @@ function tryMove(dx, dy) {
 }
 function arrive() {
   const t = tile(P.x, P.y);
-  if (underground) { checkCaveEncounter(); hud(); return; }
+  if (underground) {
+    const pile=caveTreasurePiles.find(p=>p.x===P.x&&p.y===P.y);
+    if(pile)collectCaveTreasure(pile);
+    checkCaveEncounter();hud();return;
+  }
   if (P.diving) { checkDiveEncounter(); hud(); return; }
   if (challengeTrainer()) { hud(); return; }
   if (encounterGrace > 0 && t !== WA && t !== DK) { hud(); return; }
@@ -1009,6 +1106,7 @@ $('battle-run').onclick = closeBattle;
 function action() {
   if (modal) return;
   if (nearTunnel()) { useTunnel(); return; }
+  if(underground&&(nearbyTreasure()||nearCaveObject(caveGenerator))){caveAction();return;}
   if (underground) { toast('🕯️ Touch cave creatures to encounter them. Use the ladder to return outside.'); return; }
   if (P.diving) { toast('🤿 Swim into a creature to encounter it. Press V or Surface to go up.'); return; }
   if (fishing) {
@@ -1149,7 +1247,7 @@ $('btn-run').onclick = () => { if (enc && !enc.busy) { closeEnc(); toast('Got aw
 // ---------- Collection ----------
 let previewShinies = false;
 function openDex() {
-  if (modal === 'enc' || modal === 'battle') return;
+  if (modal === 'enc' || modal === 'battle' || modal === 'generator') return;
   modal = 'dex'; keys.clear();
   const list = $('dex-list'); list.innerHTML = '';
   for (const s of SPECIES) {
@@ -1161,7 +1259,7 @@ function openDex() {
     else if (visible && s.draw) { const c = document.createElement('canvas'); c.width = 90; c.height = 60; s.draw(c.getContext('2d'), 45, 30, 22, shiny); icon.appendChild(c); }
     else if (visible) icon.appendChild(emojiEl(s.emoji, 40, shiny)); else icon.textContent = '❔';
     el.appendChild(icon);
-    el.insertAdjacentHTML('beforeend', `<b>${visible ? s.name : '???'}</b><br><small>${previewShinies ? `✨ Shiny preview · ${d?.shiny ? 'caught' : 'not caught'}` : d ? `×${d.count}${d.shiny ? ` · ✨${d.shiny}` : ''}` : (s.habitat === 'cave' ? '🕳️ Tunnel in the starting meadow' : s.diveOnly ? '🤿 Diving only' : s.habitat === 'winter' ? '❄ Winter Area · South' : s.id === 'bouldersaur' ? '🏔️ East Mountains' : s.water ? 'Fish in rivers' : s.id === 'frog' ? 'Grass or rivers' : 'Tall grass')}</small>`);
+    el.insertAdjacentHTML('beforeend', `<b>${visible ? s.name : '???'}</b><br><small>${previewShinies ? `✨ Shiny preview · ${d?.shiny ? 'caught' : 'not caught'}` : d ? `×${d.count}${d.shiny ? ` · ✨${d.shiny}` : ''}` : (s.habitat === 'generator' ? '⚡ Stones → Cave generator' : s.habitat === 'cave' ? '🕳️ Tunnel in the starting meadow' : s.diveOnly ? '🤿 Diving only' : s.habitat === 'winter' ? '❄ Winter Area · South' : s.id === 'bouldersaur' ? '🏔️ East Mountains' : s.water ? 'Fish in rivers' : s.id === 'frog' ? 'Grass or rivers' : 'Tall grass')}</small>`);
     list.appendChild(el);
   }
   $('dex').classList.remove('hidden');
@@ -1209,7 +1307,7 @@ function renderPartyBar() {
     if (party[i]) slot.appendChild(monIcon(party[i], 44, 30)); bar.appendChild(slot);
   }
 }
-function openParty() { if (modal === 'enc' || modal === 'battle') return; if (modal === 'dex') closeDex(); modal = 'party'; keys.clear(); renderParty(); $('party').classList.remove('hidden'); }
+function openParty() { if (modal === 'enc' || modal === 'battle' || modal === 'generator') return; if (modal === 'dex') closeDex(); modal = 'party'; keys.clear(); renderParty(); $('party').classList.remove('hidden'); }
 const closeParty = () => { $('party').classList.add('hidden'); modal = null; };
 $('btn-party').onclick = openParty; $('btn-party-close').onclick = closeParty; $('party-bar').onclick = openParty;
 $('btn-party-store-all').onclick = () => {
@@ -1220,6 +1318,7 @@ $('btn-party-store-all').onclick = () => {
 // ---------- Input ----------
 const DIRS = { ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1], ArrowLeft: [-1, 0], KeyA: [-1, 0], ArrowRight: [1, 0], KeyD: [1, 0] };
 addEventListener('keydown', e => {
+  if(modal==='generator'){if(e.code==='Escape')closeGenerator();return;}
   if (e.code === 'KeyV' && !e.repeat && (P.diving || (P.boat && diveSites.some(site => site.x === P.x && site.y === P.y)))) { e.preventDefault(); toggleDive(); return; }
   if (modal === 'battle') {
     if (e.code === 'Space' && !e.target.closest('button')) { e.preventDefault(); if (!e.repeat) battleTurn(); }
@@ -1240,6 +1339,8 @@ document.querySelectorAll('.dpad button').forEach(b => {
 $('btn-a').onclick = () => modal === 'battle' ? battleTurn() : action();
 $('btn-dive').onclick = toggleDive;
 $('btn-tunnel').onclick = useTunnel;
+$('btn-cave-action').onclick = caveAction;
+$('btn-generator-close').onclick = closeGenerator;
 
 // ---------- Render ----------
 function resize() { cv.width = innerWidth; cv.height = innerHeight; }
@@ -1442,10 +1543,41 @@ function drawCaveScene(camX,camY,ppx,ppy) {
     byId(mon.id).draw(ctx,x,y,15,mon.shiny,time);
     if(mon.shiny){ctx.fillStyle='#fff09a';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.fillText('✦',x+15,y-15);}
   }
+  drawCaveTreasures(camX,camY);
   drawPlayer(ppx-camX,ppy-camY);
   const x=ppx-camX+T/2,y=ppy-camY+T/2;
   const light=ctx.createRadialGradient(x,y,100,x,y,Math.max(cv.width,cv.height));
   light.addColorStop(0,'#090d2000');light.addColorStop(1,'#090d2099');ctx.fillStyle=light;ctx.fillRect(0,0,cv.width,cv.height);
+}
+
+function drawCaveTreasures(camX,camY) {
+  for(const pile of caveTreasurePiles) {
+    const x=(pile.x+.5)*T-camX,y=(pile.y+.5)*T-camY,got=caveTreasures.collected[pile.id];
+    if(x < -100 || y < -80 || x > cv.width+100 || y > cv.height+80)continue;
+    ctx.fillStyle='#171e32';ctx.strokeStyle=got?'#658a78':pile.light;ctx.lineWidth=3;
+    ctx.beginPath();ctx.roundRect(x-23,y-22,46,48,8);ctx.fill();ctx.stroke();
+    if(!got) {
+      const glow=ctx.createRadialGradient(x,y,3,x,y,50);glow.addColorStop(0,pile.color+'aa');glow.addColorStop(1,pile.color+'00');ctx.fillStyle=glow;ctx.fillRect(x-50,y-50,100,100);
+      for(const [dx,dy,size] of [[-12,5,12],[9,4,14],[0,-4,17]]) {
+        ctx.fillStyle=pile.color;ctx.strokeStyle=pile.light;ctx.lineWidth=1.5;ctx.beginPath();
+        ctx.moveTo(x+dx-size*.55,y+dy+size*.6);ctx.lineTo(x+dx-size*.55,y+dy-size*.35);ctx.lineTo(x+dx,y+dy-size);ctx.lineTo(x+dx+size*.55,y+dy-size*.35);ctx.lineTo(x+dx+size*.55,y+dy+size*.6);ctx.closePath();ctx.fill();ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x+dx,y+dy-size);ctx.lineTo(x+dx,y+dy+size*.6);ctx.stroke();
+      }
+    }
+    ctx.fillStyle='#101827';ctx.fillRect(x-48,y-48,96,21);
+    ctx.fillStyle=got?'#b3d8bc':'#ffffff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText((got?pile.name+' ✓':pile.name).toUpperCase(),x,y-33);
+    if(!got){ctx.fillStyle=pile.light;ctx.font='bold 20px sans-serif';ctx.fillText('↓',x,y-56-Math.sin(time*3)*3);}
+  }
+  const x=(caveGenerator.x+.5)*T-camX,y=(caveGenerator.y+.5)*T-camY;
+  ctx.fillStyle='#202638';ctx.fillRect(x-26,y-28,52,54);ctx.strokeStyle='#99b4d2';ctx.lineWidth=3;ctx.strokeRect(x-26,y-28,52,54);
+  ctx.fillStyle='#64829c';ctx.fillRect(x-18,y-44,36,14);ctx.fillStyle='#a6f6db';ctx.fillRect(x-17,y-20,34,22);
+  ctx.fillStyle='#274658';ctx.font='bold 20px sans-serif';ctx.textAlign='center';ctx.fillText('⚡',x,y-2);
+  caveTreasurePiles.forEach((pile,i)=>{ctx.fillStyle=caveTreasures.generated[pile.id]?'#a4f5bd':caveTreasures.collected[pile.id]?pile.color:'#526172';ctx.beginPath();ctx.arc(x-14+i*14,y+13,4,0,Math.PI*2);ctx.fill();});
+  ctx.fillStyle='#e4f4ff';ctx.font='bold 12px sans-serif';ctx.fillText('DINOSAUR GENERATOR',x,y-54);
+  for(const sign of [{x:27,y:31},{x:41,y:30}]) {
+    const sx=(sign.x+.5)*T-camX,sy=(sign.y+.5)*T-camY;
+    ctx.fillStyle='#292f48';ctx.fillRect(sx-53,sy-12,106,24);ctx.fillStyle='#f9dc95';ctx.fillText('← Entrance',sx,sy+4);
+  }
 }
 
 // ---------- Loop ----------

@@ -123,7 +123,7 @@ Catching is forgiving: every species has at least a 92% chance on the first ball
 and the second ball always succeeds. Creatures won't run away after breaking free.
 You have four seconds to reel in after a bite.
 
-Discover thirty-eight species, including Magikarp, Frog, Fox, Bouldersaur, Snowy,
+Discover forty-one species, including Magikarp, Frog, Fox, Bouldersaur, Snowy,
 and the six new water creatures.
 Every species has a shiny form, including pink Bunny, blue Duck, purple
 Squirrel, blue Fox, and mint Hedgehog. Magikarp, Frog, and Bouldersaur keep their
@@ -133,7 +133,7 @@ You can move even the last creature into the Box, or choose **Move all to Box**
 to empty your party at once. Your creatures and Collection progress stay saved.
 Click any creature in the Box to add it back. Put at least one in your party
 before approaching a trainer to battle.
-In Collection, choose **✨ Preview shiny forms** to see all thirty-eight shiny designs
+In Collection, choose **✨ Preview shiny forms** to see all forty-one shiny designs
 without changing your catches or saved progress. Bunny, Duck, Squirrel, Fox,
 and Hedgehog use drawn sprites so their colors are consistent across devices.
 
@@ -176,6 +176,31 @@ Wild encounters are less frequent: grass and mountains have an 8% chance per
 step, and snow has a 10% chance. After a wild encounter ends, you get four seconds
 without another random or collision encounter. The same protection applies after
 loading your save. Fishing remains under your control.
+
+## Cave stones and dinosaur generator
+
+The **generator is beside the entrance ladder**. The three bright, labeled piles
+are grouped at the front of the entrance chamber. Walk onto a pile to collect it,
+or stand beside it and press **Space** / tap **Collect**.
+
+![Bright ruby, sapphire, and limestone piles at the cave entrance, with the generator beside the ladder](docs/screenshots/cave-generator.png)
+
+Bring each pile to the generator, press **Space** / tap **Use generator**, then
+choose **Insert** for that pile:
+
+| Stone pile | Generator reward |
+| --- | --- |
+| Rubies | Tyrannosaurus rex |
+| Sapphires | Spinosaurus |
+| Limestone | Giganotosaurus |
+
+**These dinosaurs can only be obtained by putting their stones into the generator.**
+Collecting a pile alone does not award a dinosaur. You can earn **all three**, in
+any order, once each per save. Each dinosaur starts at level 10 and joins your
+party, or your Box if your party is full. Collected piles and claimed rewards save
+immediately, so you can leave, reload, and finish later.
+
+![The three generator rewards: Tyrannosaurus rex, Spinosaurus, and Giganotosaurus](docs/screenshots/generator-dinosaurs.png)
 
 ## Saved progress
 

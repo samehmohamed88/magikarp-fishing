@@ -7,7 +7,7 @@
   <meta name="description" content="Explore rivers by boat, fish for Magikarp and catch wild animals in the tall grass." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=caves-1" />
+  <link rel="stylesheet" href="style.css?v=generator-1" />
 </head>
 <body>
   <main>
@@ -24,10 +24,21 @@
     </header>
     <button id="btn-dive" class="btn" hidden>🤿 Dive (V)</button>
     <button id="btn-tunnel" class="btn" hidden>🕳️ Enter tunnel (Space)</button>
+    <button id="btn-cave-action" class="btn" hidden>⚡ Use generator (Space)</button>
+    <div id="cave-quest" class="glass" hidden aria-live="polite"></div>
     <div id="party-bar" class="party-bar glass" title="Open party"></div>
 
     <div id="toast" class="toast glass"></div>
     <div class="hint glass">Arrows/WASD: move · Space: fish · V at DIVE buoys: scuba · Swim into creatures underwater · ✨ Sparkles = Shiny!</div>
+
+    <section id="generator" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="generator-title">
+      <div class="generator-card glass">
+        <div class="dex-head"><h2 id="generator-title">⚡ Dinosaur Generator</h2><button id="btn-generator-close" class="btn" aria-label="Close generator">✕</button></div>
+        <p>Put each collected pile into the generator to receive its dinosaur. You can earn all three!</p>
+        <div id="generator-list"></div>
+        <p id="generator-message" role="status">Each pile makes one dinosaur. A full party sends your dinosaur to the Box.</p>
+      </div>
+    </section>
 
     <section id="encounter" class="modal hidden" aria-live="polite">
       <div class="enc-card glass">
@@ -95,6 +106,6 @@
       <button id="btn-a" class="abtn">🎣</button>
     </div>
   </main>
-  <script src="game.js?v=caves-1"></script>
+  <script src="game.js?v=generator-1"></script>
 </body>
 </html>

@@ -73,7 +73,7 @@ catch, preserving shiny state and saved Party/Box entries.
 The ten new woodland species share weight 20 each in the meadow encounter pool
 (16 total meadow species), including sparkling grass. They have no fishing weight
 and do not enter the separate winter or mountain pools. Verify distinct normal
-and shiny sprites for encounters, Party/Box, Collection (38 species), and battles,
+and shiny sprites for encounters, Party/Box, Collection (41 species), and battles,
 as well as catch/save/reload compatibility with existing saves.
 Fishing shiny probabilities: Alligator 75%; Shark, Catfish, Grunt, Spiny Dogfish,
 and Crocodile 50%; Magikarp and Frog retain 1/8. Sparkling casts guarantee a shiny
@@ -128,7 +128,7 @@ There are 18 cave creatures, three each of Mole, Ant, Spider, Cricket, Praying
 Mantis, and Cave Crawfish. They only encounter by contact underground. Crawfish
 stay in shallow pools; the others stay on dirt. All have distinct normal/shiny
 sprites. They never join surface, fishing, winter, mountain, or diving pools.
-Check movement and respawn boundaries, capture, Party/Box, Collection (38 species),
+Check movement and respawn boundaries, capture, Party/Box, Collection (41 species),
 preview sprites, and persistence. Cave encounters use a separate cave background.
 Old saves without underground default to the surface; cave saves reload on the
 cave layer, with invalid cave positions recovered at the ladder. Surface wildlife
@@ -139,3 +139,25 @@ Random grass/mountain encounters have an 8% per-step chance; snow has 10%.
 Verify exact thresholds, four seconds of cooldown after a wild encounter ends,
 and suppression of automatic cave/dive contact encounters during that cooldown.
 Intentional fishing is still available, and trainers retain their existing rules.
+
+## Cave stone generator validation
+
+Rubies (10,5), Sapphires (13,5), and Limestone (16,5) are in the front of the
+entrance chamber. The generator is beside the ladder at (11,10); its tile blocks
+walking, and any adjacent tile can activate it. Verify all objects are reachable
+from the ladder and that bright pile frames, arrows, and labels remain legible.
+Walking onto an uncollected pile or pressing Space/tapping Collect beside it saves
+its collection. No dinosaur is granted until Insert is selected at the generator.
+
+The three generator-only species have habitat=generator and no wild/fishing
+weights. They never spawn as cave wildlife, swimmers, or normal wild encounters.
+Rubies give Tyrannosaurus rex, Sapphires give Spinosaurus, and Limestone gives
+Giganotosaurus. Each is a normal level-10 dinosaur, awarded once per save; every
+pile/reward is independent, allowing all three in any order. Full parties route
+rewards to Box. Collection counts and caveTreasures.collected/generated save
+immediately. Old saves without these fields start with all three available.
+
+Check missing-pile and duplicate-claim guards, collecting without awarding,
+reloads between collecting and generating, all six reward orders, full-party Box
+routing, Collection/Party rendering, and keyboard/touch controls. The generator
+modal pauses encounters/movement and blocks opening other menus; Escape exits.

@@ -2,6 +2,13 @@
 [hidden] { display: none !important; }
 #btn-dive { position: fixed; right: 16px; bottom: 145px; z-index: 2; background: #17627d; }
 #btn-tunnel { position: fixed; right: 16px; bottom: 195px; z-index: 2; background: #5b435e; }
+#btn-cave-action { position: fixed; right: 16px; bottom: 195px; z-index: 2; background: #594b82; }
+#cave-quest { position: fixed; top: 122px; left: 50%; transform: translateX(-50%); max-width: calc(100vw - 24px); width: max-content; padding: 8px 14px; border-radius: 12px; font-size: 13px; pointer-events: none; }
+.generator-card { width: min(700px, 94vw); max-height: 90vh; overflow: auto; padding: 20px; border-radius: 20px; background-color: #263146; }
+#generator-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
+.generator-option { display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 8px; border-radius: 12px; background: #ffffff10; text-align: center; }
+.generator-option .btn { font-size: 13px; }
+@media (max-width: 600px) { #generator-list { grid-template-columns: 1fr; } }
 .enc-scene.cave { background: radial-gradient(ellipse at 50% 25%, #80709b, #323248 65%, #50414c 66%); }
 .modal { z-index: 3; }
 html, body { height: 100%; overflow: hidden; background: #0b1d2e; font-family: 'Outfit', sans-serif; color: #fff; }
