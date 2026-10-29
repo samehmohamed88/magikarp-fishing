@@ -31,8 +31,92 @@ const SPECIES = [
   { id: 'mouse', name: 'Mouse', weight: 20, rate: 0.98, draw: (...a) => drawLandAnimal('mouse', ...a) },
   { id: 'porcupine', name: 'Porcupine', weight: 20, rate: 0.95, draw: (...a) => drawLandAnimal('porcupine', ...a) },
   { id: 'red-panda', name: 'Red Panda', weight: 20, rate: 0.95, draw: (...a) => drawLandAnimal('red-panda', ...a) },
+  ...['narwhal', 'crab', 'lobster', 'starfish', 'mussel', 'octopus', 'squid'].map(id => ({
+    id, name: id[0].toUpperCase() + id.slice(1), water: true, diveOnly: true,
+    rate: 0.96, draw: (...a) => drawSeaCreature(id, ...a),
+  })),
 ];
 const byId = id => SPECIES.find(s => s.id === id);
+
+function drawSeaCreature(id, c, x, y, s, shiny = false, t = 0) {
+  const palettes = {
+    narwhal: ['#73aecb', '#d6eff7', '#ee97c4', '#ffe1f1'],
+    crab: ['#ef7646', '#ffcc89', '#5ad3d0', '#c9fff3'],
+    lobster: ['#d8514b', '#ffac85', '#558aff', '#bcecff'],
+    starfish: ['#f3ba50', '#ffdd93', '#b18af3', '#eddaff'],
+    mussel: ['#495a9a', '#a5b9ed', '#319d85', '#b4f5d1'],
+    octopus: ['#da7aa9', '#ffc1d9', '#e8b33c', '#fff0a7'],
+    squid: ['#a688d8', '#dfccf6', '#69c38a', '#d8ffb6'],
+  };
+  const p = palettes[id], body = p[shiny ? 2 : 0], light = p[shiny ? 3 : 1];
+  c.save(); c.translate(x, y); c.scale(s, s);
+  c.strokeStyle = '#23394b'; c.lineWidth = .05; c.lineJoin = 'round'; c.lineCap = 'round';
+  const oval = (px, py, rx, ry, color, angle = 0) => {
+    c.fillStyle = color; c.beginPath(); c.ellipse(px, py, rx, ry, angle, 0, Math.PI * 2); c.fill(); c.stroke();
+  };
+  const shape = (points, color) => {
+    c.fillStyle = color; c.beginPath(); points.forEach(([px, py], i) => i ? c.lineTo(px, py) : c.moveTo(px, py)); c.closePath(); c.fill(); c.stroke();
+  };
+  const line = (points, color, width = .05) => {
+    c.strokeStyle = color; c.lineWidth = width; c.beginPath();
+    points.forEach(([px, py], i) => i ? c.lineTo(px, py) : c.moveTo(px, py)); c.stroke();
+    c.strokeStyle = '#23394b'; c.lineWidth = .05;
+  };
+  const sway = Math.sin(t * 4) * .1;
+  let eyeY = -.13, eyeX = .23;
+  if (id === 'narwhal') {
+    shape([[.55,-.12],[1.3,-.6+sway],[1.05,0],[1.3,.5+sway],[.55,.16]], body);
+    oval(0, 0, .95, .5, body); oval(-.12, .2, .67, .2, light);
+    shape([[-.15,.15],[.4,.7],[.5,.2]], body);
+    shape([[-.65,-.2],[-1.65,-.5],[-.65,-.35]], '#fff1c9');
+    for (let i = 0; i < 4; i++) line([[-.8-i*.16,-.33-i*.035],[-.85-i*.16,-.26-i*.06]], '#ba9b78', .025);
+    oval(-.58, -.17, .1, .12, '#fff'); oval(-.61, -.15, .045, .07, '#23394b');
+    c.restore(); return;
+  } else if (id === 'crab' || id === 'lobster') {
+    const lobster = id === 'lobster';
+    for (const side of [-1, 1]) {
+      for (let i = 0; i < 3; i++) line([[side*.35,i*.23],[side*(.85+i*.07),i*.2+sway],[side*1.05,.45+i*.2]], body, .1);
+      line([[side*.4,-.2],[side*.95,-.55],[side*1.1,-.8]], body, .16);
+      oval(side*1.05,-.85,lobster?.32:.26,.32,body,side*.4);
+      shape([[side*1.08,-1.16],[side*.99,-.88],[side*1.3,-1.03]], '#c0f0f4');
+    }
+    if (lobster) {
+      for (let i = 3; i >= 0; i--) oval(0,.2+i*.21,.29-i*.03,.2,body);
+      shape([[0,.73],[-.5,1.12],[0,1.03],[.5,1.12]],light);
+      oval(0,-.13,.35,.58,body);
+      for (const side of [-1,1]) line([[side*.12,-.55],[side*.25,-.95],[side*.55,-1.2+sway]], light, .04);
+    } else oval(0,.1,.65,.43,body);
+    eyeY = -.36; eyeX = lobster ? .15 : .32;
+    for (const side of [-1,1]) line([[side*eyeX,-.1],[side*eyeX,eyeY]],body,.1);
+  } else if (id === 'starfish') {
+    const points = [];
+    for (let i=0;i<10;i++) { const a=-Math.PI/2+i*Math.PI/5, r=i%2?.45:1.1; points.push([Math.cos(a)*r,Math.sin(a)*r]); }
+    shape(points,body);
+    for(let i=0;i<5;i++) {const a=-Math.PI/2+i*Math.PI*2/5;oval(Math.cos(a)*.65,Math.sin(a)*.65,.07,.07,light);}
+    oval(0,.2,.13,.08,light); eyeY=-.08; eyeX=.17;
+  } else if (id === 'mussel') {
+    oval(0,0,.59,.99,body,-.35); oval(.18,.04,.4,.81,light,-.35);
+    line([[-.25,-.85],[.05,-.35],[.36,.67]],body,.08);
+    for(let i=0;i<3;i++) line([[-.5+i*.1,-.4],[-.24+i*.1,.2],[-.02+i*.1,.65]], light,.035);
+    oval(.24,.37,.16,.16,'#fff2e6'); eyeY=-.2; eyeX=.15;
+  } else {
+    const squid = id === 'squid', arms = squid ? 10 : 8;
+    for(let i=0;i<arms;i++) {
+      const start=-.55+i*1.1/(arms-1), end=(i-(arms-1)/2)*(squid?.18:.29);
+      c.strokeStyle='#23394b';c.lineWidth=.16;c.beginPath();c.moveTo(start,.1);
+      c.bezierCurveTo(start,.65,end+sway,1.17,end+(i%2?.12:-.12),.78+Math.sin(t*3+i)*.13);c.stroke();
+      c.strokeStyle=body;c.lineWidth=.1;c.stroke();
+    }
+    c.strokeStyle='#23394b';c.lineWidth=.05;
+    if(squid) {
+      shape([[0,-1.15],[-.85,-.2],[.85,-.2]],light);
+      oval(0,-.33,.43,.72,body);
+    } else oval(0,-.32,.73,.72,body);
+    oval(.2,-.52,.15,.22,light,-.4);eyeY=-.12;eyeX=squid?.18:.28;
+  }
+  for (const side of [-1,1]) {oval(side*eyeX,eyeY,.1,.12,'#fff');oval(side*eyeX-.015,eyeY+.015,.045,.065,'#23394b');}
+  c.restore();
+}
 
 // Fixed colors keep the shiny frog visibly blue even without color emoji fonts.
 function drawFrog(c, x, y, s, shiny = false, t = 0) {
@@ -461,6 +545,7 @@ const isDiveWater = (x, y) => tile(x, y) === WA &&
   ((x >= 18 && x <= 20 && y >= 6 && y <= 38) ||
    (x >= 40 && x <= 42 && y >= 8 && y <= 36) ||
    (x >= 21 && x <= 39 && y >= 22 && y <= 24));
+const diveWaterTiles = waterTiles.filter(spot => isDiveWater(spot.x, spot.y));
 const waterWildlife = [];
 for (let i = 0; i < 24; i++) {
   const start = i < 6 ? [{ x: 19, y: 9 }, { x: 19, y: 16 }, { x: 19, y: 30 }, { x: 41, y: 10 }, { x: 41, y: 27 }, { x: 30, y: 23 }][i]
@@ -470,6 +555,13 @@ for (let i = 0; i < 24; i++) {
   waterWildlife.push({ id: waterSpecies[i % waterSpecies.length], ...spot, fx: spot.x, fy: spot.y, progress: 1,
     shiny: R() < 1 / 8, moveIn: 2 + i * .1, life: 45 + i });
 }
+// Three of each exclusive species live below the surface in reachable dive areas.
+for (const sp of SPECIES.filter(sp => sp.diveOnly)) for (let i = 0; i < 3; i++) {
+  const available = diveWaterTiles.filter(spot => !waterWildlife.some(mon => mon.x === spot.x && mon.y === spot.y));
+  const spot = available[Math.floor(R() * available.length)];
+  waterWildlife.push({ id: sp.id, ...spot, fx: spot.x, fy: spot.y, progress: 1,
+    shiny: R() < 1 / 8, moveIn: 2 + R() * 2, life: 45 + R() * 30 });
+}
 function pickWaterAnimal(excludeId = null) {
   const pool = SPECIES.filter(sp => sp.fishingWeight && sp.id !== excludeId), total = pool.reduce((sum, sp) => sum + sp.fishingWeight, 0);
   let roll = Math.random() * total;
@@ -478,7 +570,7 @@ function pickWaterAnimal(excludeId = null) {
 function pickFishingAnimal(x, y) {
   // Sparkles override visible swimmers; the remaining 5% excludes Alligator.
   if (spotAt(x, y)) return Math.random() < .95 ? byId('alligator') : pickWaterAnimal('alligator');
-  const swimmer = waterWildlife.find(mon => mon.x === x && mon.y === y);
+  const swimmer = waterWildlife.find(mon => mon.x === x && mon.y === y && !byId(mon.id).diveOnly);
   return swimmer ? byId(swimmer.id) : pickWaterAnimal();
 }
 function updateWaterWildlife(dt) {
@@ -486,13 +578,14 @@ function updateWaterWildlife(dt) {
     mon.progress = Math.min(1, mon.progress + dt / .7);
     mon.life -= dt; mon.moveIn -= dt;
     if (mon.life <= 0) {
-      const available = waterTiles.filter(spot => (spot.x !== P.x || spot.y !== P.y) && !waterWildlife.some(other => other !== mon && other.x === spot.x && other.y === spot.y));
+      const habitat = byId(mon.id).diveOnly ? diveWaterTiles : waterTiles;
+      const available = habitat.filter(spot => (spot.x !== P.x || spot.y !== P.y) && !waterWildlife.some(other => other !== mon && other.x === spot.x && other.y === spot.y));
       const spot = available[Math.floor(R() * available.length)];
       Object.assign(mon, spot, { fx: spot.x, fy: spot.y, progress: 1, shiny: R() < 1 / 8 }); mon.life = 45 + R() * 30;
     }
     if (mon.moveIn <= 0) {
       const [dx, dy] = [[0, 1], [0, -1], [1, 0], [-1, 0]][Math.floor(R() * 4)];
-      if (tile(mon.x + dx, mon.y + dy) === WA && !waterWildlife.some(other => other !== mon && other.x === mon.x + dx && other.y === mon.y + dy)) {
+      if (tile(mon.x + dx, mon.y + dy) === WA && (!byId(mon.id).diveOnly || isDiveWater(mon.x + dx, mon.y + dy)) && !waterWildlife.some(other => other !== mon && other.x === mon.x + dx && other.y === mon.y + dy)) {
         mon.fx = mon.x; mon.fy = mon.y; mon.progress = 0;
         mon.x += dx; mon.y += dy;
       }
@@ -508,6 +601,7 @@ function drawSwimmer(mon, c, x, y, scale) {
 }
 function drawWaterWildlife(camX, camY) {
   for (const mon of waterWildlife) {
+    if (!P.diving && byId(mon.id).diveOnly) continue;
     if (P.diving && !isDiveWater(mon.x, mon.y)) continue;
     const x = (mon.fx + (mon.x - mon.fx) * mon.progress + .5) * T - camX;
     const y = (mon.fy + (mon.y - mon.fy) * mon.progress + .5) * T - camY;
@@ -786,7 +880,7 @@ function action() {
   }
   const fx = P.x + P.dir[0], fy = P.y + P.dir[1];
   if (tile(fx, fy) !== WA) { toast(P.boat ? 'Face open water to fish!' : 'Face the water to cast your rod 🎣'); return; }
-  const swimmer = waterWildlife.find(mon => mon.x === fx && mon.y === fy);
+  const swimmer = waterWildlife.find(mon => mon.x === fx && mon.y === fy && !byId(mon.id).diveOnly);
   fishing = { x: fx, y: fy, wait: 1.5 + Math.random() * 3, bite: false, shiny: !!spotAt(fx, fy) || !!swimmer?.shiny, species: pickFishingAnimal(fx, fy).id };
   toast(fishing.shiny ? '✨ You cast into the sparkles! A shiny is biting!' : '🎣 Cast! Wait for a bite…');
 }
@@ -922,7 +1016,7 @@ function openDex() {
     else if (visible && s.draw) { const c = document.createElement('canvas'); c.width = 90; c.height = 60; s.draw(c.getContext('2d'), 45, 30, 22, shiny); icon.appendChild(c); }
     else if (visible) icon.appendChild(emojiEl(s.emoji, 40, shiny)); else icon.textContent = '❔';
     el.appendChild(icon);
-    el.insertAdjacentHTML('beforeend', `<b>${visible ? s.name : '???'}</b><br><small>${previewShinies ? `✨ Shiny preview · ${d?.shiny ? 'caught' : 'not caught'}` : d ? `×${d.count}${d.shiny ? ` · ✨${d.shiny}` : ''}` : (s.habitat === 'winter' ? '❄ Winter Area · South' : s.id === 'bouldersaur' ? '🏔️ East Mountains' : s.water ? 'Fish in rivers' : s.id === 'frog' ? 'Grass or rivers' : 'Tall grass')}</small>`);
+    el.insertAdjacentHTML('beforeend', `<b>${visible ? s.name : '???'}</b><br><small>${previewShinies ? `✨ Shiny preview · ${d?.shiny ? 'caught' : 'not caught'}` : d ? `×${d.count}${d.shiny ? ` · ✨${d.shiny}` : ''}` : (s.diveOnly ? '🤿 Diving only' : s.habitat === 'winter' ? '❄ Winter Area · South' : s.id === 'bouldersaur' ? '🏔️ East Mountains' : s.water ? 'Fish in rivers' : s.id === 'frog' ? 'Grass or rivers' : 'Tall grass')}</small>`);
     list.appendChild(el);
   }
   $('dex').classList.remove('hidden');

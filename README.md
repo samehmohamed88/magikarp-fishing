@@ -48,7 +48,7 @@ Sharks, Catfish, Grunt, Spiny Dogfish, Crocodiles, and Alligators now swim in th
 rivers. Watch for their sprites from the bank or your boat. Face one and fish
 into its non-sparkling tile to encounter that species; casting elsewhere can find any of the
 six, along with Magikarp and Frog. Water creatures stay in the rivers and respawn
-over time, with 24 swimmers spread across the waterways (four of each species).
+over time, with 24 surface swimmers spread across the waterways (three per fishing species).
 In non-sparkling open-water fishing, the six new creatures make up 90% of encounters: Catfish
 has a 20% chance, and Shark, Grunt, Spiny Dogfish, Crocodile, and Alligator each
 have a 14% chance. Magikarp and Frog each have a 5% chance. Fishing directly into
@@ -123,7 +123,7 @@ Catching is forgiving: every species has at least a 92% chance on the first ball
 and the second ball always succeeds. Creatures won't run away after breaking free.
 You have four seconds to reel in after a bite.
 
-Discover twenty-five species, including Magikarp, Frog, Fox, Bouldersaur, Snowy,
+Discover thirty-two species, including Magikarp, Frog, Fox, Bouldersaur, Snowy,
 and the six new water creatures.
 Every species has a shiny form, including pink Bunny, blue Duck, purple
 Squirrel, blue Fox, and mint Hedgehog. Magikarp, Frog, and Bouldersaur keep their
@@ -133,7 +133,7 @@ You can move even the last creature into the Box, or choose **Move all to Box**
 to empty your party at once. Your creatures and Collection progress stay saved.
 Click any creature in the Box to add it back. Put at least one in your party
 before approaching a trainer to battle.
-In Collection, choose **✨ Preview shiny forms** to see all twenty-five shiny designs
+In Collection, choose **✨ Preview shiny forms** to see all thirty-two shiny designs
 without changing your catches or saved progress. Bunny, Duck, Squirrel, Fox,
 and Hedgehog use drawn sprites so their colors are consistent across devices.
 
@@ -144,7 +144,14 @@ docks), the eastern river, and the middle river crossing. Sail onto a buoy and
 press **V** or tap **Dive**. Swim with the arrow keys or WASD and touch a swimming
 creature to encounter it—no fishing rod needed underwater!
 
-All eight fishing species swim here, including Magikarp and Frog. Shiny swimmers
+All eight fishing species swim here, including Magikarp and Frog.
+Seven more species—**Narwhal, Crab, Lobster, Starfish, Mussel, Octopus, and Squid**—
+can only be encountered and caught while diving. They are hidden above the surface
+and cannot be hooked with a fishing rod. All seven have distinct shiny forms.
+
+![Narwhal, Crab, Lobster, Starfish, Mussel, Octopus, and Squid: normal forms on top, shiny forms below](docs/screenshots/diving-creatures.png)
+
+Shiny swimmers
 have their alternate colors and a small star; their shiny form stays with them
 when encountered and caught. Press **V** or tap **Surface** anywhere underwater
 to return to your boat. There is no air timer. Normal fishing still works above

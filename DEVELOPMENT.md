@@ -62,7 +62,8 @@ tile to target it; open-water fishing should include all eight fishing species.
 Verify each new aquatic creature has a distinct normal/shiny sprite in encounters,
 Collection, Party/Box, and battles, and survives save/reload. They must not appear
 in grass or winter encounter pools.
-There should be 24 visible swimmers, three per fishing species, with no shared tiles.
+There should be 24 surface swimmers, three per fishing species, plus 21 diving-only
+creatures (three per exclusive species). All 45 occupy distinct water tiles.
 Open-water weights total 100: Catfish 20, each other new water creature 14,
 Magikarp 5, and Frog 5. Visible-swimmer targeting overrides these weights.
 Catch difficulty: every species has a first-ball rate of at least 92%, second
@@ -72,7 +73,7 @@ catch, preserving shiny state and saved Party/Box entries.
 The ten new woodland species share weight 20 each in the meadow encounter pool
 (16 total meadow species), including sparkling grass. They have no fishing weight
 and do not enter the separate winter or mountain pools. Verify distinct normal
-and shiny sprites for encounters, Party/Box, Collection (25 species), and battles,
+and shiny sprites for encounters, Party/Box, Collection (32 species), and battles,
 as well as catch/save/reload compatibility with existing saves.
 Fishing shiny probabilities: Alligator 75%; Shark, Catfish, Grunt, Spiny Dogfish,
 and Crocodile 50%; Magikarp and Frog retain 1/8. Sparkling casts guarantee a shiny
@@ -105,3 +106,12 @@ a short grace period prevents immediate repeat encounters. Collision encounters
 only happen while diving. There is no oxygen timer. Dive state saves under mkrq
 and old saves without it remain compatible. The frog uses a drawn green/blue
 sprite so its shiny no longer depends on the operating system's emoji font.
+
+Diving-only species: Narwhal, Crab, Lobster, Starfish, Mussel, Octopus, Squid.
+They have water and diveOnly flags but no fishingWeight or land weight. Verify
+that fishing a tile occupied by one uses the normal fishing pool, including
+sparkling casts; they must never appear in fishing or land encounter pools.
+They are hidden above water, stay in dive regions when moving or respawning,
+and keep their species and shiny flag through collision/capture/save/reload.
+Check all seven normal/shiny drawings in Collection, encounters, Party/Box, and
+battles. Collection gives a Diving only hint for undiscovered exclusive species.
