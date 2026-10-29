@@ -10,6 +10,7 @@
 .generator-option .btn { font-size: 13px; }
 @media (max-width: 600px) { #generator-list { grid-template-columns: 1fr; } }
 .enc-scene.cave { background: radial-gradient(ellipse at 50% 25%, #80709b, #323248 65%, #50414c 66%); }
+.enc-scene.halloween-cavern { background: radial-gradient(ellipse at 50% 15%, #e8bd80, #63417f 45%, #2a193e 65%, #784760 66%); box-shadow: inset 0 0 24px #f6c76d55; }
 .enc-scene.halloween { background: radial-gradient(circle at 75% 20%, #ffe7ac 0 9%, transparent 10%), linear-gradient(#352e56, #655078 60%, #463447 60%); }
 .modal { z-index: 3; }
 html, body { height: 100%; overflow: hidden; background: #0b1d2e; font-family: 'Outfit', sans-serif; color: #fff; }

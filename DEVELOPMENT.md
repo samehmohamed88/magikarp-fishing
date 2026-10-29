@@ -149,8 +149,9 @@ from the ladder and that bright pile frames, arrows, and labels remain legible.
 Walking onto an uncollected pile or pressing Space/tapping Collect beside it saves
 its collection. No dinosaur is granted until Insert is selected at the generator.
 
-The three generator-only species have habitat=generator and no wild/fishing
-weights. They never spawn as cave wildlife, swimmers, or normal wild encounters.
+The three dinosaur species have habitat=generator and no wild/fishing weights.
+They never spawn in the normal cave, as swimmers, or in normal wild encounters.
+Their shiny forms also roam the separate seasonal Halloween Cavern.
 Rubies give Tyrannosaurus rex, Sapphires give Spinosaurus, and Limestone gives
 Giganotosaurus. Each is a normal level-10 dinosaur, awarded once per save; every
 pile/reward is independent, allowing all three in any order. Full parties route
@@ -186,9 +187,30 @@ and the following October with a browser clock and America/New_York timezone.
 Skeleton, Crow, and Zombie are forest-only encounters; Ghost is available on
 Oct 31 only with 5% probability per forest encounter (strictly below .05).
 Forest step encounters remain 8% with the existing four-second cooldown. None of
-the four species enters meadow, fishing, cave, or swimmer pools. Encounter entry
+the four species enters meadow, fishing, normal cave, or swimmer pools. Encounter entry
 also checks the calendar to prevent stale seasonal availability.
 
 Test all four normal/shiny sprite pairs, catching, and save/reload into November.
 Party, Box, and Collection (45 species) must keep seasonal catches after the event.
 An in-progress encounter may finish after midnight; only new spawns are gated.
+
+## Halloween Cavern validation
+
+During October, the surface entrance is (12,14) in Halloween Forest. Its separate
+map has an exit at (8,8), connected rooms, and walkable crawfish pools. `underground`
+stays true while `halloweenCavern` selects this map, wildlife, rendering, and save
+location. Legacy saves without the new flag still load in the normal Crystal Caves.
+No treasure piles, generator, or stone rewards are present in the seasonal cavern.
+
+Each of the six cave species and three dinosaurs has two roaming shiny spawns.
+One shiny Ghost joins them on October 31 only. Initial spawns, respawns, encounter
+sprites, catches, Party/Box, and Collection must all keep the shiny variant.
+Calendar refresh removes Ghost spawns outside Halloween and empties cavern
+wildlife outside October. Closing the cavern returns the player to (7,5), cancels
+an unfinished encounter safely (including a throw animation), and keeps catches.
+An old cavern save loaded outside October also returns safely to the meadow.
+
+Verify keyboard and touch entry/exit, reachable wildlife, collision encounters,
+all-shiny respawns, capture with a full party, save/reload, and October 30 → 31 →
+November 1 plus the following October. Recheck normal cave entry, generator
+rewards, and seasonal forest sparkles because these share navigation/calendar code.

@@ -194,7 +194,8 @@ choose **Insert** for that pile:
 | Sapphires | Spinosaurus |
 | Limestone | Giganotosaurus |
 
-**These dinosaurs can only be obtained by putting their stones into the generator.**
+**The generator gives you the normal forms of these dinosaurs.** During October,
+you can also catch their shiny forms in the limited-edition Halloween Cavern.
 Collecting a pile alone does not award a dinosaur. You can earn **all three**, in
 any order, once each per save. Each dinosaur starts at level 10 and joins your
 party, or your Box if your party is full. Collected piles and claimed rewards save
@@ -211,7 +212,8 @@ disappear after the encounter starts. Ghosts still appear only on October 31.
 During **October**, walk east/northeast from the starting clearing to the
 pumpkin sign for **Halloween Forest**. Skeletons, Crows, and Zombies appear only
 in this seasonal forest. On **October 31 only**, a **Ghost** has a rare 5% chance
-among forest encounters. Ghosts cannot spawn on other dates or in other habitats.
+among forest encounters. A shiny Ghost also roams Halloween Cavern on October 31.
+Ghosts cannot spawn on other dates.
 The forest uses the same 8% per-step encounter rate and four-second cooldown.
 
 ![Halloween Forest with purple trees, pumpkins, and its seasonal entrance sign](docs/screenshots/halloween-forest.png)
@@ -223,6 +225,27 @@ forest appears/disappears as the date changes, even with the game open. Catches,
 including Ghosts, remain in Party, Box, and Collection all year. If the forest
 closes while you are standing where a normal tree returns, you move safely to
 the starting clearing. An encounter already underway can still be completed.
+
+## Halloween Cavern — every creature is shiny!
+
+During **October**, find the glowing **HALLOWEEN CAVERN** ladder in the southern
+part of Halloween Forest. Stand on or beside it and press **Space**, or tap
+**Enter Halloween Cavern**. Explore pumpkin-lit chambers and purple pools, then
+walk into the roaming creatures to encounter them. **Every creature is shiny**,
+both on the map and when caught:
+
+- **Spinosaurus, Tyrannosaurus rex, and Giganotosaurus**
+- **Mole, Ant, Spider, Cricket, Praying Mantis, and Cave Crawfish**
+- A rare **Ghost on October 31 only**
+
+![Halloween Cavern with glowing pumpkins and roaming shiny dinosaurs and cave creatures](docs/screenshots/halloween-cavern.png)
+
+Return to the **EXIT TO FOREST** ladder and press Space or tap **Exit to forest**.
+Your location and catches save automatically. On November 1 the cavern closes
+and returns you safely to the starting clearing, including if you reload an old
+cavern save. An unfinished cavern encounter ends when it closes; creatures
+already caught remain in your Party, Box, and Collection all year. The cavern
+returns each October according to your device's local date.
 
 ## Saved progress
 
