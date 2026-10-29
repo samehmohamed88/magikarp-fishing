@@ -447,10 +447,16 @@ for (let i = 0; i < 24; i++) {
   const spot = occupied(start) ? waterTiles.find(candidate => !occupied(candidate)) : start;
   waterWildlife.push({ id: waterSpecies[i % waterSpecies.length], ...spot, moveIn: 2 + i * .1, life: 45 + i });
 }
-function pickWaterAnimal() {
-  const pool = SPECIES.filter(sp => sp.fishingWeight), total = pool.reduce((sum, sp) => sum + sp.fishingWeight, 0);
+function pickWaterAnimal(excludeId = null) {
+  const pool = SPECIES.filter(sp => sp.fishingWeight && sp.id !== excludeId), total = pool.reduce((sum, sp) => sum + sp.fishingWeight, 0);
   let roll = Math.random() * total;
   return pool.find(sp => (roll -= sp.fishingWeight) < 0) || pool[0];
+}
+function pickFishingAnimal(x, y) {
+  // Sparkles override visible swimmers; the remaining 5% excludes Alligator.
+  if (spotAt(x, y)) return Math.random() < .95 ? byId('alligator') : pickWaterAnimal('alligator');
+  const swimmer = waterWildlife.find(mon => mon.x === x && mon.y === y);
+  return swimmer ? byId(swimmer.id) : pickWaterAnimal();
 }
 function updateWaterWildlife(dt) {
   for (const mon of waterWildlife) {
@@ -713,7 +719,7 @@ function action() {
   }
   const fx = P.x + P.dir[0], fy = P.y + P.dir[1];
   if (tile(fx, fy) !== WA) { toast(P.boat ? 'Face open water to fish!' : 'Face the water to cast your rod 🎣'); return; }
-  fishing = { x: fx, y: fy, wait: 1.5 + Math.random() * 3, bite: false, shiny: !!spotAt(fx, fy), species: waterWildlife.find(mon => mon.x === fx && mon.y === fy)?.id || pickWaterAnimal().id };
+  fishing = { x: fx, y: fy, wait: 1.5 + Math.random() * 3, bite: false, shiny: !!spotAt(fx, fy), species: pickFishingAnimal(fx, fy).id };
   toast(fishing.shiny ? '✨ You cast into the sparkles! A shiny is biting!' : '🎣 Cast! Wait for a bite…');
 }
 

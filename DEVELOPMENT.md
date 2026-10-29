@@ -78,6 +78,10 @@ Fishing shiny probabilities: Alligator 75%; Shark, Catfish, Grunt, Spiny Dogfish
 and Crocodile 50%; Magikarp and Frog retain 1/8. Sparkling casts guarantee a shiny
 of any fishing species. Verify threshold boundaries and a shiny Alligator's
 capture/save/reload. Land shiny probabilities remain unchanged.
+Sparkling fishing spots override visible swimmer targeting: 95% shiny Alligator,
+5% another shiny fishing species (the fallback pool excludes Alligator). Test
+the .95 boundary and the full cast/bite/reel flow; non-sparkling casts retain
+their existing species and shiny odds. Land sparkles are unaffected.
 
 Cloud tasks already have isolated checkouts. Use this checkout directly;
 do not create a Git worktree unless explicitly requested.
