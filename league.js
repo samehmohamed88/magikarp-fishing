@@ -106,7 +106,7 @@ function openLeagueGuide() {
   if(!openLeaguePanel('league'))return;
   leagueSite=null;
   $('league-title').textContent='🏅 Six badges, one secret door';
-  $('league-intro').textContent=`${badgeCount()}/6 badges · ${journey.coins} coins. Win all six gyms to reveal a door north of the starting tunnel. Catches earn 10–25 coins; defeating a wild creature lets you choose 100 coins instead. Trainer wins earn 30, gym wins 120.${fireCaveUnlocked()?' Your Fire Dragon Cave is open!':''}`;
+  $('league-intro').textContent=`${badgeCount()}/6 badges · ${journey.coins} coins. Win all six gyms to reveal a door north of the starting tunnel. Catches earn 10–25 coins; defeating a wild creature lets you choose 100 coins instead, or 1000 for a shiny! Trainer wins earn 30, gym wins 120.${fireCaveUnlocked()?' Your Fire Dragon Cave is open!':''}`;
   const list=$('league-content');list.replaceChildren();
   for(const site of [...GYMS,...MARKETS,...(championDoorOpen()?[CHAMPION_DOOR]:[]),...(fireCaveUnlocked()?[FIRE_CAVE_SITE]:[])]) {
     const card=document.createElement('article');card.className='league-option';

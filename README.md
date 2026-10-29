@@ -392,8 +392,9 @@ level 2. There is no oxygen timer.
 Wild encounters show both creatures' HP. With a creature in your party, choose
 **Attack (X)** to lower the wild creature's HP and improve the catch chance.
 You can now defeat it completely at **0 HP**. It stops fighting and gives you
-two choices: **catch it with a regular ball (100% chance)**, or **Take 100 coins
-& leave**. The coin choice awards exactly 100 coins instead of a creature;
+two choices: **catch it with a regular ball (100% chance)**, or **take coins
+and leave**. The coin choice awards **1,000 coins for a shiny** or **100 coins
+for a regular creature**, instead of keeping the creature;
 catching gives the creature and its usual catch coins. You cannot collect both
 rewards from the same encounter. Coins save immediately.
 

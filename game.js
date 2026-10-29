@@ -1860,6 +1860,7 @@ const setBtns = on => {
   $('btn-perfect-ball').textContent=`💎 100% Ball (Z) · ${journey.perfectBalls}`;
   $('btn-defeat-coins').hidden=!enc||enc.hp>0;
   $('btn-defeat-coins').disabled=!on||!!enc?.lost;
+  $('btn-defeat-coins').textContent=`🪙 Take ${defeatCoinReward()} coins & leave`;
   $('btn-run').textContent=enc?.lost?'Back to exploring':'🏃 Run';updateEncounterHealth();
 };
 function encounterCatchChance() {
@@ -1875,20 +1876,21 @@ function updateEncounterHealth() {
   $('enc-ally').hidden=!ally;
   if(ally){$('enc-ally-hp').max=maxHP(ally);$('enc-ally-hp').value=ally.hp;$('enc-ally-text').textContent=`Your ${byId(ally.id).name}: HP ${ally.hp} / ${maxHP(ally)}`;}
   $('btn-weaken').disabled=enc.busy||!ally||enc.lost||enc.hp===0;
-  $('enc-help').textContent=enc.lost?'Your party is knocked out. Leave this encounter to recover.':enc.hp===0?'Defeated! Choose a regular ball (100% catch) OR take 100 coins and leave.':!ally?'Catch your first creature to unlock Attack.':enc.hp===1?'Regular balls now catch for sure. Attack once more to defeat it and unlock the 100-coin choice.':`Attack with ${byId(ally.id).name} to lower HP. The wild creature will fight back!`;
+  $('enc-help').textContent=enc.lost?'Your party is knocked out. Leave this encounter to recover.':enc.hp===0?`Defeated! Choose a regular ball (100% catch) OR take ${defeatCoinReward()} coins and leave.`:!ally?'Catch your first creature to unlock Attack.':enc.hp===1?`Regular balls now catch for sure. Attack once more to defeat it and unlock the ${defeatCoinReward()}-coin choice.`:`Attack with ${byId(ally.id).name} to lower HP. The wild creature will fight back!`;
 }
 function weakenEncounter() {
   if(modal!=='enc'||!enc||enc.busy||enc.lost||!enc.allies.length||enc.hp===0)return;
   const ally=enc.allies[enc.ally];
   const damage=Math.min(enc.hp,7+ally.lv*2+Math.floor(Math.random()*4));
   enc.hp-=damage;
-  if(enc.hp===0){setText(`You defeated ${enc.sp.name}! Catch it or take 100 coins instead.`);setBtns(true);return;}
+  if(enc.hp===0){setText(`You defeated ${enc.sp.name}! Catch it or take ${defeatCoinReward()} coins instead.`);setBtns(true);return;}
   wildRetaliation(`${byId(ally.id).name} dealt ${damage} damage! ${enc.sp.name} ${enc.hp===1?'is fully weakened.':'is easier to catch now.'} `);
 }
+function defeatCoinReward() { return enc?.shiny ? 1000 : 100; }
 function claimDefeatCoins() {
   if(modal!=='enc'||!enc||enc.busy||enc.lost||enc.hp!==0)return;
-  const name=enc.sp.name;enc.busy=true;journey.coins+=100;
-  closeEnc();persist();hud();toast(`🪙 +100 coins! You left ${name} behind.`);
+  const name=enc.sp.name,reward=defeatCoinReward();enc.busy=true;journey.coins+=reward;
+  closeEnc();persist();hud();toast(`🪙 +${reward} coins! You left ${name} behind.`);
 }
 function wildRetaliation(message) {
   const ally=enc.allies[enc.ally];

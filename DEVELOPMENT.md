@@ -25,7 +25,9 @@ All new fields default safely for old saves; ball inventory and cave progress
 persist independently from candies, lures, badges, and generator rewards.
 
 Wild attacks now reach 0 HP; a final hit never triggers retaliation. At 0 HP,
-the player chooses an ordinary guaranteed catch or exactly 100 coins. Coin claims
+the player chooses an ordinary guaranteed catch or coins: 1,000 for a shiny,
+100 for a regular creature. `defeatCoinReward()` supplies the button, help,
+defeat message, payment, and toast so the displayed amount matches the reward. Coin claims
 are guarded by the active encounter, zero HP, and busy/lost state, then close the
 encounter immediately before saving. Catch animations lock the coin choice, so
 repeated input cannot collect both rewards. Coins do not add Collection entries.
@@ -370,7 +372,7 @@ Depth changes and wild encounters must remain paused during trainer battles.
 
 Wild encounters keep HP and temporary party HP in enc. X / Attack lowers wild HP
 to a minimum of 0 and improves catch odds. At 0 HP the player chooses a guaranteed
-regular-ball catch or 100 coins. The wild creature retaliates after non-final
+regular-ball catch or coins (1,000 for shinies, 100 otherwise). The wild creature retaliates after non-final
 attacks and failed balls, knocks out allies at 0 HP, and auto-switches to the next
 survivor. A full-party knockout disables attacks and catches until leaving. Party
 HP resets on the next encounter; saved catches and party membership remain intact.
