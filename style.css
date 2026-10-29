@@ -14,6 +14,36 @@
 .gym-team { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; }
 .gym-team .icon, .champion-prize .icon { display: grid; place-items: center; }
 .champion-prize { background: radial-gradient(ellipse at 50% 20%, #8d704b66, #ffffff08 70%); }
+#btn-elite-enter { grid-column: 1 / -1; padding: 14px; }
+.elite-roster { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; text-align: center; }
+.elite-roster .icon { display: grid; place-items: center; }
+.elite-roster small { display: block; overflow-wrap: anywhere; line-height: 1.3; }
+#battle-progress { margin: -6px 0 14px; color: #d9e8f3; font-size: 13px; }
+.elite-battle .battle-card { border: 1px solid #ebcc82; background-color: #302d49; }
+.elite-battle #battle-canvas { background: radial-gradient(ellipse at 50% 0%, #8973a8, #3c3c67 60%, #5a5266 61%); }
+.elite-prizes { grid-column: 1 / -1; }
+.elite-prizes h3 { margin-bottom: 14px; }
+.battle-rosters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 10px; }
+.battle-rosters h3 { font-size: 13px; margin-bottom: 8px; }
+.battle-team { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+.battle-team-slot { min-width: 0; padding: 4px 2px; border-radius: 8px; border: 1px solid #ffffff20; text-align: center; background: #ffffff08; }
+.battle-team-slot .icon { display: grid; place-items: center; }
+.battle-team-slot canvas { max-width: 100%; height: auto; }
+.battle-team-slot small { display: block; font-size: 10px; overflow-wrap: anywhere; line-height: 1.2; }
+.battle-team-state { margin-top: 3px; color: #cfe9da; }
+.battle-team-slot.active { border-color: #ffd87d; background: #f4c46922; }
+.battle-team-slot.fainted { opacity: .5; filter: grayscale(1); }
+@media (max-width: 600px) {
+  .battle-card { padding: 12px; max-height: 94vh; }
+  .battle-card h2 { font-size: 17px; margin-bottom: 10px; }
+  #battle-progress { font-size: 11px; margin-bottom: 10px; }
+  .battle-rosters { gap: 8px; }
+  .battle-team-slot .icon canvas { height: 28px; width: auto; max-width: 100%; }
+  .battle-team-slot small { font-size: 9px; }
+  .battle-team-slot small:first-of-type { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #battle-text { font-size: 13px; min-height: 3em; padding: 8px 0; }
+  .battle-actions .btn { padding: 8px 10px; font-size: 13px; }
+}
 @media (max-width: 600px) {
   #league-content { grid-template-columns: 1fr; }
   .league-card.glass { padding: 16px; }

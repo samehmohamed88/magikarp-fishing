@@ -34,6 +34,33 @@ GAME_URL=http://127.0.0.1:8000 node tests/league-smoke.cjs
 The test uses disposable browser contexts and writes screenshots under `/tmp`.
 It does not touch player saves or require production dependencies.
 
+## Elite Four and battle portraits
+
+`league.js` defines four six-creature teams at level 30. The Champion prize and
+all six badges gate entry. Walking onto the unlocked door starts the next battle;
+the hall button supports keyboard and touch entry. Empty parties receive six
+unique, randomly selected, non-shiny level-20 creatures, without filtering by
+collection ownership. Nonempty parties and the Box are preserved. Gifts update
+Collection and are saved before combat. Seasonal candidates obey the calendar.
+
+`journey.eliteRound` is the next member (0–3), or 4 after completion;
+`eliteCleared` records a completed challenge and `eliteReward` prevents duplicate
+prizes. Old saves default to round 0. Each victory advances only the matching
+current member. Reloading resumes at the next unbeaten opponent with a healed
+party, and running/losses leave the round unchanged. Entry saves the return tile
+outside the door. Rematches reset the round but keep the reward flag.
+
+The fourth victory automatically gives shiny Megalodon, Mosasaurus, and Elasmosaurus
+at level 30, filling Party slots first and then the Box. Reward creatures are
+added after the normal party level-up so they remain exactly level 30.
+`renderBattleTeams()` uses the same sprite functions as the active battle canvas
+and updates active/fainted states after attacks, heals, switches, and victories.
+
+Run `tests/elite-smoke.cjs` with the same Playwright environment as the league test.
+It exercises walk-in and touch entry, old Champion saves, empty/nonempty parties,
+sprite rendering, switching, losses, all 24 opponents through actual combat,
+continuation/reload, final prizes and overflow, duplicate protection, and rematches.
+
 This is a static HTML/CSS/JavaScript game. It needs Python 3 to serve it.
 There are no npm dependencies, build steps, backend services, or required secrets.
 

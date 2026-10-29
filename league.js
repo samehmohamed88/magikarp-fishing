@@ -16,6 +16,13 @@ const MARKETS = [
   {id:'market-moon',name:'Moon Market',x:50,y:40},
 ];
 const CHAMPION_DOOR = {id:'champion-door',name:'Champion Door',x:6,y:3};
+const ELITE_FOUR = [
+  {id:'elite-marina',name:'Marina',title:'Master of the Tides',icon:'🌊',color:'#7ed4ed',species:['shark','great-white-shark','orca','narwhal','megalodon','mosasaurus']},
+  {id:'elite-rowan',name:'Rowan',title:'Keeper of the Wilds',icon:'🌿',color:'#a7df92',species:['gorilla','tiger','leaf-dragon','bear','bouldersaur','mushroom-guardian']},
+  {id:'elite-cinder',name:'Cinder',title:'Heart of the Volcano',icon:'🔥',color:'#ffb084',species:['lava-gecko','ash-wolf','ember-ram','phoenix','tyrannosaurus-rex','spinosaurus']},
+  {id:'elite-luna',name:'Luna',title:'Guardian of Midnight',icon:'🌙',color:'#d0b4ff',species:['moon-hare','luna-moth','silver-stag','moon-lynx','moon-unicorn','dragonfish']},
+].map((member,index)=>({...member,elite:true,index,team:member.species.map(id=>({id,lv:30}))}));
+const ELITE_PRIZES = ['megalodon','mosasaurus','elasmosaurus'];
 const LURES = [
   {id:'rare',name:'Rare Lure',price:40,uses:10,multiplier:3,bonus:.05},
   {id:'deluxe',name:'Deluxe Rare Lure',price:90,uses:20,multiplier:5,bonus:.1},
@@ -30,10 +37,14 @@ function loadJourney(saved) {
     gymWins:Object.fromEntries(GYMS.map(g=>[g.id,data.gymWins?.[g.id]===true])),
     lure:lure&&Number.isSafeInteger(data.lure.remaining)&&data.lure.remaining>0?{id:lure.id,remaining:data.lure.remaining}:null,
     championReward:data.championReward===true,
+    eliteRound:Number.isInteger(data.eliteRound)&&data.eliteRound>=0&&data.eliteRound<=4?data.eliteRound:0,
+    eliteCleared:data.eliteCleared===true||data.eliteRound===4,
+    eliteReward:data.eliteReward===true,
   };
 }
 const badgeCount = () => GYMS.filter(g=>journey.gymWins[g.id]).length;
 const championDoorOpen = () => badgeCount()===GYMS.length;
+const eliteFourUnlocked = () => championDoorOpen()&&journey.championReward;
 const activeLure = () => journey.lure ? LURES.find(l=>l.id===journey.lure.id) : null;
 function lureWeight(sp,weight) {return weight*(isRareCreature(sp)?activeLure()?.multiplier||1:1);}
 function useEncounterLure() {
@@ -64,7 +75,7 @@ function leagueHud() {
   $('journey-status').textContent=`🪙 ${journey.coins} · 🏅 ${badgeCount()}/6${lure?` · 🪶 ${lure.name}: ${journey.lure.remaining} left`:''}`;
   const site=nearLeagueSite();
   $('btn-site').hidden=!site;
-  if(site)$('btn-site').textContent=`${site.gym?'🏅':site===CHAMPION_DOOR?'🚪':'🛒'} ${site.name} (Space)`;
+  if(site)$('btn-site').textContent=site===CHAMPION_DOOR&&eliteFourUnlocked()?'🚪 Elite Four / Champion Hall (Space)':`${site.gym?'🏅':site===CHAMPION_DOOR?'🚪':'🛒'} ${site.name} (Space)`;
 }
 let leagueSite=null;
 function openLeaguePanel(mode) {
@@ -96,7 +107,7 @@ function openLeagueGuide() {
     const card=document.createElement('article');card.className='league-option';
     const won=site.gym&&journey.gymWins[site.id];
     const heading=document.createElement('h3');heading.textContent=`${site.icon||(site===CHAMPION_DOOR?'🚪':'🛒')} ${site.name}${won?' ✓':''}`;
-    const detail=document.createElement('p');detail.textContent=site.gym?`${site.badge} Badge · ${site.leader} · Lv ${site.team[0].lv}–${site.team.at(-1).lv}`:site===CHAMPION_DOOR?'Your Champion Hall is open!':'Buy lures to find and catch rare creatures.';
+    const detail=document.createElement('p');detail.textContent=site.gym?`${site.badge} Badge · ${site.leader} · Lv ${site.team[0].lv}–${site.team.at(-1).lv}`:site===CHAMPION_DOOR?(eliteFourUnlocked()?`Elite Four: ${journey.eliteRound}/4 defeated. Walk into the door to battle!`:'Your Champion Hall is open!'):'Buy lures to find and catch rare creatures.';
     card.append(heading,detail,leagueButton('Travel here',()=>travelToLeagueSite(site.id),!canTravel()));list.append(card);
   }
   if(!canTravel()){$('league-intro').textContent+=' Return to surface land to travel.';}
@@ -137,13 +148,32 @@ function renderLeagueSite() {
     const button=leagueButton(won?'Badge earned':party.length?'Challenge gym':'Add a creature to your party first',()=>challengeGym(gym.id),won||!party.length);
     button.id='btn-gym-challenge';list.append(card,button);
   } else if(modal==='champion') {
-    $('league-title').textContent='✨ Champion Hall';
-    $('league-intro').textContent='All six badges opened this door. Welcome, Champion! Your prize is a shiny Phoenix (Lv 20) and 200 coins.';
+    $('league-title').textContent=journey.championReward?'🏆 The Elite Four':'✨ Champion Hall';
+    $('league-intro').textContent=journey.championReward
+      ?`Four masters. Six level-30 creatures each. ${journey.eliteRound}/4 defeated. Your party heals between battles and your progress saves. Enter with an empty party to receive six random level-20 creatures to keep—even ones you have never caught!`
+      :'All six badges opened this door. Welcome, Champion! Claim your shiny Phoenix (Lv 20) and 200 coins to unlock the Elite Four beyond the door.';
     const card=document.createElement('article');card.className='league-option champion-prize';
     card.append(monIcon({id:'phoenix',shiny:true},160,110));
     const label=document.createElement('p');label.textContent=GYMS.map(g=>`${g.icon} ${g.badge}`).join(' · ');card.append(label);
     const reward=leagueButton(journey.championReward?'Prize already collected':'Claim Champion prize',claimChampionReward,journey.championReward);
     reward.id='btn-champion-reward';card.append(reward);list.append(card);
+    if(journey.championReward) {
+      const start=leagueButton(journey.eliteRound===4?'Rematch the Elite Four':`Face ${ELITE_FOUR[journey.eliteRound].name} · Round ${journey.eliteRound+1}/4`,()=>enterEliteFour());
+      start.id='btn-elite-enter';start.classList.add('primary');list.append(start);
+      const prizes=document.createElement('article');prizes.className='league-option elite-prizes';
+      const prizeTitle=document.createElement('h3');prizeTitle.textContent=journey.eliteReward?'🏆 Elite Four prize collected':'🏆 Defeat all four to win these shinies!';
+      const prizeTeam=document.createElement('div');prizeTeam.className='elite-roster';
+      for(const id of ELITE_PRIZES){const slot=document.createElement('div');slot.append(monIcon({id,shiny:true},72,52));const label=document.createElement('small');label.textContent=`✨ ${byId(id).name} · Lv 30`;slot.append(label);prizeTeam.append(slot);}
+      prizes.append(prizeTitle,prizeTeam);list.append(prizes);
+      for(const member of ELITE_FOUR) {
+        const preview=document.createElement('article');preview.className='league-option elite-preview';
+        const title=document.createElement('h3');title.textContent=`${member.icon} ${member.index+1}. ${member.name}${journey.eliteRound>member.index?' ✓':''}`;
+        const subtitle=document.createElement('p');subtitle.textContent=`${member.title} · Six creatures, all Lv 30`;
+        const team=document.createElement('div');team.className='elite-roster';
+        for(const mon of member.team){const slot=document.createElement('div');slot.append(monIcon(mon,62,44));const label=document.createElement('small');label.textContent=byId(mon.id).name;slot.append(label);team.append(slot);}
+        preview.append(title,subtitle,team);list.append(preview);
+      }
+    }
   }
 }
 function buyLure(id) {
@@ -157,6 +187,16 @@ function challengeGym(id) {
   closeLeague();startTrainerBattle(gym);
 }
 function awardBattleVictory(trainer) {
+  if(trainer.elite) {
+    if(ELITE_FOUR[journey.eliteRound]?.id!==trainer.id)return '';
+    journey.eliteRound++;
+    if(journey.eliteRound===4){
+      journey.eliteCleared=true;
+      const awarded=awardElitePrizes();
+      return ` You defeated all four masters and all 24 creatures! You are the Elite Four Champion!${awarded?' Prizes: shiny Megalodon, Mosasaurus, and Elasmosaurus (Lv 30)! Check your Party and Box.':' Your Elite Four prizes were already collected.'}`;
+    }
+    return ` Elite Four: ${journey.eliteRound}/4 defeated. ${ELITE_FOUR[journey.eliteRound].name} is next!`;
+  }
   const wins=trainer.gym?journey.gymWins:trainerWins;
   if(wins[trainer.id])return '';
   wins[trainer.id]=true;const coins=trainer.gym?120:30;journey.coins+=coins;
@@ -171,6 +211,43 @@ function claimChampionReward() {
   const mon={id:'phoenix',shiny:true,lv:20};(party.length<6?party:box).push(mon);
   const entry=dex.phoenix||={count:0,shiny:0};entry.count++;entry.shiny++;
   persist();hud();renderLeagueSite();
+}
+function giveEliteStarterParty() {
+  if(party.length)return false;
+  const season=halloweenCalendar();
+  // Seasonal creatures keep their calendar rules; collection ownership is never a filter.
+  const pool=SPECIES.filter(sp=>sp.habitat!=='halloween'||(season.open&&(sp.id!=='ghost'||season.ghosts)));
+  for(let i=0;i<6;i++) {
+    const [sp]=pool.splice(Math.floor(Math.random()*pool.length),1);
+    party.push({id:sp.id,lv:20,shiny:false});
+    const entry=dex[sp.id]||={count:0,shiny:0};entry.count++;
+  }
+  return true;
+}
+function awardElitePrizes() {
+  if(journey.eliteRound!==4||journey.eliteReward)return false;
+  journey.eliteReward=true;
+  for(const id of ELITE_PRIZES) {
+    const mon={id,shiny:true,lv:30};(party.length<6?party:box).push(mon);
+    const entry=dex[id]||={count:0,shiny:0};entry.count++;entry.shiny++;
+  }
+  return true;
+}
+function enterEliteFour() {
+  if(!eliteFourUnlocked()||nearLeagueSite()!==CHAMPION_DOOR||P.prog<1||
+    (modal!==null&&modal!=='champion'))return;
+  if(modal==='champion')closeLeague();
+  if(journey.eliteRound===4)journey.eliteRound=0;
+  const supplied=giveEliteStarterParty();
+  // Keep the saved return position outside the door, including after a browser reload.
+  P.x=P.fx=CHAMPION_DOOR.x;P.y=P.fy=CHAMPION_DOOR.y+1;P.prog=1;
+  const member=ELITE_FOUR[journey.eliteRound];
+  startTrainerBattle(member);hud();persist();
+  if(supplied)updateBattle(`You received six random level-20 creatures to keep! ${member.name} has six level-30 creatures. Go, ${byId(party[0].id).name}!`);
+}
+function continueEliteFour() {
+  if(!battle?.trainer.elite||!battle.over||!battle.won||journey.eliteRound>=4)return;
+  closeBattle();enterEliteFour();
 }
 function drawLeagueSites(camX,camY) {
   if(P.diving)return;

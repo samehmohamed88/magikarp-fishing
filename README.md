@@ -46,6 +46,40 @@ north of the starting tunnel. Enter it to claim a **shiny Phoenix (Lv 20)** and
 Coins, badges, lures, and the Champion prize save with your existing collection.
 After updating, refresh the game and look for **Gyms & Markets (G)**.
 
+## 🏆 Beyond the Champion Door: the Elite Four
+
+Claim the Champion prize, then **walk into the glowing door** to face the Elite
+Four. You can also press Space beside it and choose the next battle in the hall.
+Each member has a full team of **six level-30 creatures**:
+
+| Member | Specialty | Team |
+| --- | --- | --- |
+| Marina | Tides | Shark, Great White Shark, Orca, Narwhal, Megalodon, Mosasaurus |
+| Rowan | Wilds | Gorilla, Tiger, Leaf Dragon, Bear, Bouldersaur, Mushroom Guardian |
+| Cinder | Volcano | Lava Gecko, Ash Wolf, Ember Ram, Phoenix, Tyrannosaurus rex, Spinosaurus |
+| Luna | Midnight | Moon Hare, Luna Moth, Silver Stag, Moon Lynx, Moon Unicorn, Dragonfish |
+
+If your party is empty when you enter, you receive **six different random
+level-20 creatures to keep**. They can be creatures you already own or brand-new
+discoveries—even when you have creatures in the Box. They are added to Collection.
+Seasonal creatures follow their usual calendar rules. An existing party keeps
+its creatures and levels; you can use **Party → Move all to Box** if you want to
+enter with an empty party.
+
+Battles show large sprites of both active fighters and portraits of **both full
+teams**. The current fighter is highlighted, and fainted creatures turn gray.
+Use Attack, Heal, and Switch to defeat each opponent's whole team. After a win,
+choose **Next** to face the next member. Your party heals between battles and
+gains the normal victory level-up. You can leave and resume at the next unbeaten
+member; losses and running away do not count as victories.
+
+Defeat all four members to receive **a shiny Megalodon, a shiny Mosasaurus, and
+a shiny Elasmosaurus**, all **level 30**! They join your Party when there is room
+and otherwise go to your Box. The three-creature prize is awarded once per save;
+you can rematch the Elite Four after completing the challenge.
+
+![An Elite Four battle showing both active creatures and all six creatures on each team](docs/screenshots/elite-four.png)
+
 ## 🧭 Five new biomes, 30 new creatures
 
 Press **M** or tap **Explore** to find the new areas and travel to them from land.

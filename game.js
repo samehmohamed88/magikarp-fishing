@@ -1437,7 +1437,7 @@ function tryMove(dx, dy) {
   if(underground&&!halloweenCavern&&nx===caveGenerator.x&&ny===caveGenerator.y)return;
   if(deepDiving&&!abyssDiving&&nx===deepGenerator.x&&ny===deepGenerator.y)return;
   if (activeTrainers().some(trainer => trainer.x === nx && trainer.y === ny)) return;
-  if(!underground&&!P.diving&&surfaceSites().some(site=>site.x===nx&&site.y===ny))return;
+  if(!underground&&!P.diving&&surfaceSites().some(site=>site.x===nx&&site.y===ny&&!(site===CHAMPION_DOOR&&eliteFourUnlocked())))return;
   let ok;
   if (underground) ok = t === CF || t === CP;
   else if (P.diving) ok = isDiveWater(nx, ny);
@@ -1458,6 +1458,7 @@ function arrive() {
     if(challengeTrainer()){hud();return;}
     checkDiveEncounter(); hud(); return;
   }
+  if(eliteFourUnlocked()&&P.x===CHAMPION_DOOR.x&&P.y===CHAMPION_DOOR.y){enterEliteFour();return;}
   if(leagueSafeTile(P.x,P.y)){hud();return;}
   if (challengeTrainer()) { hud(); return; }
   const biome=newBiomeByTile(t), forestSparkle = t === HF && spotAt(P.x, P.y);
@@ -1550,13 +1551,14 @@ function startTrainerBattle(trainer) {
   battle = {
     trainer, allies: party.map(mon => ({ ...mon, hp: maxHP(mon) })),
     foes: trainer.team.map(mon => ({ ...mon, hp: maxHP(mon) })),
-    ally: 0, foe: 0, healed: false, over: false, switching: false,
+    ally: 0, foe: 0, healed: false, over: false, won: false, switching: false,
   };
   modal = 'battle';
   clearTimeout(toastT); $('toast').classList.remove('show');
   $('battle').classList.remove('hidden');
   $('battle').classList.toggle('underwater',!!trainer.diver);
-  $('battle-title').textContent = trainer.gym?`${trainer.name} · Leader ${trainer.leader}`:`${trainer.name} challenges you!`;
+  $('battle').classList.toggle('elite-battle',!!trainer.elite);
+  $('battle-title').textContent = trainer.elite?`${trainer.icon} Elite Four ${trainer.index+1}/4 · ${trainer.name}`:trainer.gym?`${trainer.name} · Leader ${trainer.leader}`:`${trainer.name} challenges you!`;
   $('battle-run').textContent = 'Run';
   updateBattle(`Go, ${byId(battle.allies[0].id).name}!`);
   $('battle-attack').focus();
@@ -1570,10 +1572,15 @@ function updateBattle(message) {
     $(side + '-bar').max = maxHP(mon); $(side + '-bar').value = mon.hp;
   }
   $('battle-text').textContent = message;
+  $('battle-progress').textContent=`Your team: ${battle.allies.filter(mon=>mon.hp>0).length}/${battle.allies.length} standing · Opponents: ${battle.foes.filter(mon=>mon.hp>0).length}/${battle.foes.length} standing`;
+  const nextElite=battle.trainer.elite&&battle.over&&battle.won&&journey.eliteRound<4;
+  $('battle-next').hidden=!nextElite;
+  if(nextElite)$('battle-next').textContent=`Next: ${ELITE_FOUR[journey.eliteRound].name} →`;
   $('battle-attack').disabled = battle.over;
   $('battle-heal').disabled = battle.over || battle.healed || ally.hp === maxHP(ally);
   $('battle-heal').textContent = battle.healed ? 'Heal used' : 'Heal (1)';
   $('battle-switch').disabled = battle.over || !battle.allies.some((mon, i) => i !== battle.ally && mon.hp > 0);
+  renderBattleTeams();
   renderBattleSwitch();
   drawBattle();
 }
@@ -1597,6 +1604,21 @@ function renderBattleSwitch() {
     button.onclick = () => switchBattleAlly(i);
     list.appendChild(button);
   });
+}
+function renderBattleTeams() {
+  for(const [side,team,active] of [['ally',battle.allies,battle.ally],['foe',battle.foes,battle.foe]]) {
+    const list=$('battle-'+side+'-team');list.replaceChildren();
+    for(const [index,mon] of team.entries()) {
+      const slot=document.createElement('div');slot.className='battle-team-slot';
+      slot.classList.toggle('active',index===active&&mon.hp>0);slot.classList.toggle('fainted',mon.hp<=0);
+      const description=`${mon.shiny?'Shiny ':''}${byId(mon.id).name}, level ${mon.lv}, ${mon.hp<=0?'fainted':`HP ${mon.hp}/${maxHP(mon)}`}${index===active&&mon.hp>0?', fighting now':''}`;
+      slot.setAttribute('role','img');slot.setAttribute('aria-label',description);slot.title=description;
+      slot.append(monIcon(mon,52,38));
+      const name=document.createElement('small');name.textContent=`${mon.shiny?'✨ ':''}${byId(mon.id).name}`;
+      const status=document.createElement('small');status.className='battle-team-state';status.textContent=mon.hp<=0?'Fainted':`Lv ${mon.lv}${index===active?' · Active':''}`;
+      slot.append(name,status);list.append(slot);
+    }
+  }
 }
 function toggleBattleSwitch() {
   if (!battle || battle.over || $('battle-switch').disabled) return;
@@ -1639,9 +1661,9 @@ function battleTurn(heal = false) {
     if (!foe.hp) {
       message += `${byId(foe.id).name} fainted. `;
       if (battle.foe + 1 === battle.foes.length) {
-        battle.over = true;
-        const reward=awardBattleVictory(battle.trainer);
+        battle.over = true; battle.won = true;
         party.forEach(mon => { mon.lv = Math.min(100, mon.lv + 1); });
+        const reward=awardBattleVictory(battle.trainer);
         persist(); hud(); $('battle-run').textContent = 'Back to exploring';
         updateBattle(`You beat ${battle.trainer.name}! Each party creature gained a level. Everyone is healed!${reward}`);
         return;
@@ -1683,6 +1705,7 @@ $('battle-heal').onclick = () => battleTurn(true);
 $('battle-switch').onclick = toggleBattleSwitch;
 $('battle-switch-cancel').onclick = toggleBattleSwitch;
 $('battle-run').onclick = closeBattle;
+$('battle-next').onclick=continueEliteFour;
 
 // ---------- Fishing ----------
 function action() {

@@ -7,7 +7,7 @@
   <meta name="description" content="Explore rivers by boat, fish for Magikarp and catch wild animals in the tall grass." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=league-1" />
+  <link rel="stylesheet" href="style.css?v=elite-four-1" />
 </head>
 <body>
   <main>
@@ -76,13 +76,19 @@
     <section id="battle" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="battle-title">
       <div class="battle-card glass">
         <h2 id="battle-title">Trainer battle</h2>
+        <p id="battle-progress" aria-live="polite"></p>
         <div class="battle-stats">
           <div><b id="ally-name"></b><progress id="ally-bar" aria-label="Your creature's health"></progress><small id="ally-hp"></small></div>
           <div><b id="foe-name"></b><progress id="foe-bar" aria-label="Opponent's health"></progress><small id="foe-hp"></small></div>
         </div>
         <canvas id="battle-canvas" width="520" height="240"></canvas>
+        <div class="battle-rosters">
+          <section aria-labelledby="battle-your-team"><h3 id="battle-your-team">Your team</h3><div id="battle-ally-team" class="battle-team"></div></section>
+          <section aria-labelledby="battle-their-team"><h3 id="battle-their-team">Opponent's team</h3><div id="battle-foe-team" class="battle-team"></div></section>
+        </div>
         <p id="battle-text" role="status" aria-live="polite"></p>
         <div class="battle-actions">
+          <button id="battle-next" class="btn primary" hidden>Next Elite Four battle →</button>
           <button id="battle-attack" class="btn primary">Attack (Space)</button>
           <button id="battle-heal" class="btn">Heal (1)</button>
           <button id="battle-switch" class="btn" aria-expanded="false" aria-controls="battle-switch-panel">Switch</button>
@@ -137,8 +143,8 @@
       <button id="btn-a" class="abtn">🎣</button>
     </div>
   </main>
-  <script src="biomes.js?v=league-1"></script>
-  <script src="league.js?v=league-1"></script>
-  <script src="game.js?v=league-1"></script>
+  <script src="biomes.js?v=elite-four-1"></script>
+  <script src="league.js?v=elite-four-1"></script>
+  <script src="game.js?v=elite-four-1"></script>
 </body>
 </html>
