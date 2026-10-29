@@ -164,6 +164,14 @@ modal pauses encounters/movement and blocks opening other menus; Escape exits.
 
 ## Seasonal Halloween validation
 
+Forest floor (HF) tiles support the same golden sparkle spots as other habitats.
+Walking onto one consumes it and guarantees a shiny seasonal encounter, including
+during the short grace period after a previous encounter. The species picker
+still restricts Ghosts to October 31. Verify sparkle spawning and visible rendering,
+capture/save of the shiny form, and season rollover: forest sparkles survive a
+date change within October, but spots on restored non-sparkle terrain disappear
+when the forest closes.
+
 Halloween Forest replaces meadow tiles x=8..16, y=2..17 northeast of spawn during
 October only. Its entrance path is at (8,5). Trainer clearings and the cave tunnel
 are preserved. Outside October, the exact original terrain returns. Seasonal map

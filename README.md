@@ -204,6 +204,10 @@ immediately, so you can leave, reload, and finish later.
 
 ## Halloween Forest — October event
 
+Golden sparkles appear on the forest floor too! Step onto a sparkling tile for
+a guaranteed shiny Halloween creature with its special colors. The sparkles
+disappear after the encounter starts. Ghosts still appear only on October 31.
+
 During **October**, walk east/northeast from the starting clearing to the
 pumpkin sign for **Halloween Forest**. Skeletons, Crows, and Zombies appear only
 in this seasonal forest. On **October 31 only**, a **Ghost** has a rare 5% chance

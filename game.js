@@ -963,7 +963,7 @@ function hud() {
   $('hud-biome').textContent = underground ? '💎 Crystal Caves' : P.diving ? '🫧 Underwater' : tile(P.x,P.y)===HF ? '🎃 Halloween Forest' : tile(P.x, P.y) === SN ? '❄ Winter Area' : P.x >= 44 ? '🏔️ Mountains' : '🌿 Meadows';
   document.querySelector('.hint').textContent = underground
     ? 'Space: collect piles / use generator · Generator: beside the entrance ladder · Return to the ladder to exit'
-    : tile(P.x,P.y)===HF ? `🎃 October forest · ${halloweenSeason.ghosts?'Halloween today: rare Ghosts can appear!':'Rare Ghosts appear on October 31 only'}`
+    : tile(P.x,P.y)===HF ? `🎃 October forest · ✨ Sparkles = Shiny! · ${halloweenSeason.ghosts?'Halloween today: rare Ghosts can appear!':'Rare Ghosts appear on October 31 only'}`
     : 'Arrows/WASD: move · Space: fish / use tunnel · V at DIVE buoys: scuba · ✨ Sparkles = Shiny!';
   renderPartyBar();
 }
@@ -991,9 +991,19 @@ function arrive() {
   }
   if (P.diving) { checkDiveEncounter(); hud(); return; }
   if (challengeTrainer()) { hud(); return; }
-  if (encounterGrace > 0 && t !== WA && t !== DK) { hud(); return; }
+  const forestSparkle = t === HF && spotAt(P.x, P.y);
+  if (encounterGrace > 0 && t !== WA && t !== DK && !forestSparkle) { hud(); return; }
   if(t===HF) {
-    if(Math.random()<.08){const sp=pickHalloweenAnimal();if(sp)startEncounter(sp,Math.random()<1/8);}
+    if(forestSparkle || Math.random()<.08) {
+      const sp=pickHalloweenAnimal();
+      if(sp) {
+        if(forestSparkle) {
+          removeSpot(P.x,P.y);
+          toast('✨ A shiny creature appeared in the sparkling Halloween Forest!');
+        }
+        startEncounter(sp,!!forestSparkle || Math.random()<1/8);
+      }
+    }
     hud();return;
   }
   if (t === WA && !P.boat) { P.boat = true; toast('⛵ You hopped into a boat!'); }
@@ -1215,7 +1225,7 @@ function updateSpots(dt) {
     const x = P.x + Math.round((Math.random() - 0.5) * 26);
     const y = P.y + Math.round((Math.random() - 0.5) * 20);
     const t = tile(x, y);
-    if ((t === TG || t === WA || t === MT || t === SN) && !spotAt(x, y) && Math.hypot(x - P.x, y - P.y) > 1.5) {
+    if ((t === TG || t === WA || t === MT || t === SN || t === HF) && !spotAt(x, y) && Math.hypot(x - P.x, y - P.y) > 1.5) {
       spots.push({ x, y, life: 45 + Math.random() * 45 });
     }
   }
@@ -1682,7 +1692,7 @@ function refreshHalloweenSeason() {
   const next=halloweenCalendar();
   if(next.key===halloweenSeason.key)return;
   halloweenSeason=next;applyHalloweenMap();
-  spots=spots.filter(s=>[TG,WA,MT,SN].includes(map[s.y]?.[s.x]));
+  spots=spots.filter(s=>[TG,WA,MT,SN,HF].includes(map[s.y]?.[s.x]));
   if(!underground&&halloweenPatch.some(c=>c.x===P.x&&c.y===P.y)&&[TR,HT].includes(tile(P.x,P.y))) {
     Object.assign(P,{x:7,y:5,fx:7,fy:5,prog:1});keys.clear();
   }
