@@ -7,7 +7,7 @@
   <meta name="description" content="Explore rivers by boat, fish for Magikarp and catch wild animals in the tall grass." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=abyss-2" />
+  <link rel="stylesheet" href="style.css?v=wild-world-1" />
 </head>
 <body>
   <main>
@@ -22,6 +22,7 @@
       <button id="btn-party" class="btn">🎒 Party (P)</button>
       <button id="btn-dex" class="btn">📖 Collection (C)</button>
     </header>
+    <button id="btn-explore" class="btn">🧭 Explore (M)</button>
     <button id="btn-dive" class="btn" hidden>🤿 Dive (V)</button>
     <button id="btn-depth" class="btn" hidden>🌊 Dive deeper (B)</button>
     <button id="btn-deep-action" class="btn" hidden>⚡ Use deep sea generator (Space)</button>
@@ -89,7 +90,19 @@
       <div class="dex-card glass">
         <div class="dex-head"><h2>📖 Collection</h2><button id="btn-dex-close" class="btn">✕</button></div>
         <p><button id="btn-shiny-preview" class="btn" aria-pressed="false">✨ Preview shiny forms</button></p>
+        <p id="dex-progress" class="dex-progress"></p>
+        <label class="dex-filter">Area <select id="dex-filter"><option value="all">All areas</option><option value="new">All 30 new creatures</option></select></label>
         <div id="dex-list" class="dex-list"></div>
+      </div>
+    </section>
+
+    <section id="explore" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="explore-title">
+      <div class="explore-card glass">
+        <div class="dex-head"><h2 id="explore-title">🧭 A bigger world</h2><button id="btn-explore-close" class="btn" aria-label="Close exploration guide">✕</button></div>
+        <p>Five new places. Thirty new creatures. Every one has a shiny form!</p>
+        <p id="explore-help" class="explore-help"></p>
+        <div id="explore-list"></div>
+        <button id="btn-home" class="btn">🏡 Return to starting meadow</button>
       </div>
     </section>
 
@@ -113,6 +126,7 @@
       <button id="btn-a" class="abtn">🎣</button>
     </div>
   </main>
-  <script src="game.js?v=abyss-2"></script>
+  <script src="biomes.js?v=wild-world-1"></script>
+  <script src="game.js?v=wild-world-1"></script>
 </body>
 </html>

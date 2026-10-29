@@ -1,4 +1,28 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
+#btn-explore { position: fixed; right: 16px; top: 82px; z-index: 2; background: #315d68; }
+.explore-card { width: min(780px, 94vw); max-height: 90vh; overflow-y: auto; padding: 22px; border-radius: 24px; background-color: #19313e; }
+.explore-card.glass { background: #19313ef5; }
+.explore-card > p { line-height: 1.5; color: #d8e9ed; }
+.explore-help { margin: 8px 0 16px; }
+#explore-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+.explore-region { border: 1px solid #ffffff25; padding: 14px; border-radius: 16px; background: #ffffff08; }
+.explore-region h3 { font-size: 17px; }
+.explore-region p { margin: 8px 0; font-size: 13px; line-height: 1.5; color: #d8e9ed; }
+.explore-region .region-creatures { display: flex; flex-wrap: wrap; justify-content: center; }
+.explore-region .btn { width: 100%; }
+.dex-progress, .dex-filter { display: block; font-size: 13px; margin: 10px 0; }
+.dex-habitat { margin-top: 6px; font-size: 12px; color: #d1e4ed; }
+.dex-filter select { margin-left: 6px; max-width: 72%; padding: 6px; border-radius: 8px; background: #253e50; color: white; border: 1px solid #ffffff40; }
+.enc-scene.jungle { background: radial-gradient(ellipse at 20% 0%, #98e1af, transparent 45%), linear-gradient(#1c6954, #2f926e 60%, #216148 60%); }
+.enc-scene.desert { background: radial-gradient(circle at 75% 20%, #fff3b9 0 10%, transparent 11%), linear-gradient(#f1ca87, #f5deb1 60%, #c89b60 60%); }
+.enc-scene.marsh { background: radial-gradient(ellipse at 50% 20%, #d2ace9, #668f91 60%, #3b675e 61%); }
+.enc-scene.volcano { background: radial-gradient(ellipse at 50% 90%, #f7a067, transparent 60%), linear-gradient(#483c5e, #8a5b6d 60%, #4a3a4c 61%); }
+.enc-scene.moon { background: radial-gradient(circle at 75% 20%, #f7edff 0 11%, transparent 12%), linear-gradient(#2e3769, #6a76a5 60%, #404b79 61%); }
+@media (max-width: 600px) {
+  #explore-list { grid-template-columns: 1fr; }
+  .explore-card { padding: 16px; }
+}
+@media (pointer: coarse) { #btn-explore { top: auto; bottom: 145px; left: 16px; right: auto; } }
 [hidden] { display: none !important; }
 #btn-dive { position: fixed; right: 16px; bottom: 145px; z-index: 2; background: #17627d; }
 #btn-depth, #btn-deep-action { position: fixed; right: 16px; bottom: 195px; z-index: 2; background: #244781; }

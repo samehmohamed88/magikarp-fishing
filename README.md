@@ -4,6 +4,44 @@ A browser adventure made for exploring, fishing, and collecting creatures. Wande
 through tall grass, hop into boats at the docks, and explore the eastern mountains
 in search of Bouldersaur. Watch for sparkles—you might find a shiny!
 
+## 🧭 Five new biomes, 30 new creatures
+
+Press **M** or tap **Explore** to find the new areas and travel to them from land.
+You can also reach them on foot and by boat through the existing world. The guide
+shows how many of each area's six creatures you have discovered and can take you
+back to the starting meadow. All five areas are open all year.
+
+| Area | Creatures | Rare special creature |
+| --- | --- | --- |
+| 🌴 Emerald Jungle | Tiger, Toucan, Chameleon, Gorilla, Sloth | Leaf Dragon |
+| 🏜️ Sunstone Desert | Fennec Fox, Camel, Scorpion, Meerkat, Cobra | Sun Sphinx |
+| 🍄 Mushroom Marsh | Axolotl, Salamander, Firefly, Snail, Dragonfly | Mushroom Guardian |
+| 🌋 Ember Highlands | Lava Gecko, Obsidian Beetle, Cinder Bat, Ash Wolf, Ember Ram | Phoenix |
+| 🌙 Moonlit Grove | Moon Hare, Luna Moth, Silver Stag, Moon Lynx, Star Tortoise | Moon Unicorn |
+
+Walk through each habitat to encounter its creatures. Step into golden sparkles
+for a **guaranteed shiny**, including a chance at a shiny special creature. All
+30 have their own drawn sprites and alternate colors in encounters, Party, Box,
+Collection, and battles. Specials are rarer encounters (about 6%); they can be
+caught with the same balls as other creatures.
+
+![The Explore menu with new habitats, creature previews, and travel buttons](docs/screenshots/explore-biomes.png)
+
+![All 30 new creatures grouped by biome, with normal forms above shiny forms](docs/screenshots/new-creatures.png)
+
+![Exploring the Emerald Jungle, with golden sparkle tiles](docs/screenshots/emerald-jungle.png)
+
+![A shiny Moon Unicorn encounter in the Moonlit Grove](docs/screenshots/moon-unicorn.png)
+
+Collection now has **95 species**, a discovery counter, and filters for the new
+areas. Your existing catches, shiny forms, trainer wins, and generator rewards
+stay saved. The limited-edition Ghost still appears **only on October 31**.
+Return to land before using fast travel; it is unavailable during encounters.
+
+Already using the local updater? Wait for it to report the latest update, then
+refresh your game. If you still see an older version, do a hard refresh
+(Ctrl+Shift+R on Windows/Linux, Command+Shift+R on Mac). Look for **Explore (M)**.
+
 ## ❄ Winter Area
 
 Head south from the starting meadow, following the path and **↓ Winter Area**
@@ -117,6 +155,7 @@ Build a party of up to six creatures, with extra catches stored in your Box.
 | Attack during a trainer battle | Space or **Attack** |
 | Open or close Party | P |
 | Open or close Collection | C |
+| Explore new biomes / travel from land | M or **Explore** |
 | Close a menu or run from an encounter | Escape |
 
 Touch devices also have an on-screen direction pad and fishing button.
@@ -128,7 +167,7 @@ that chance, and a second ball always succeeds if your party is still in the fig
 Creatures won't run away after breaking free, but they may knock out your party.
 You have four seconds to reel in after a bite.
 
-Discover 65 species across the meadows, rivers, caves, seasonal forest, and three
+Discover 95 species across the five new biomes, meadows, rivers, caves, seasonal forest, and three
 diving levels, including Magikarp, Bouldersaur, Orca, and Anglerfish.
 Every species has a shiny form, including pink Bunny, blue Duck, purple
 Squirrel, blue Fox, and mint Hedgehog. Magikarp, Frog, and Bouldersaur keep their
@@ -138,7 +177,7 @@ You can move even the last creature into the Box, or choose **Move all to Box**
 to empty your party at once. Your creatures and Collection progress stay saved.
 Click any creature in the Box to add it back. Put at least one in your party
 before approaching a trainer to battle.
-In Collection, choose **✨ Preview shiny forms** to see all 65 shiny designs
+In Collection, choose **✨ Preview shiny forms** to see all 95 shiny designs
 without changing your catches or saved progress. Bunny, Duck, Squirrel, Fox,
 and Hedgehog use drawn sprites so their colors are consistent across devices.
 

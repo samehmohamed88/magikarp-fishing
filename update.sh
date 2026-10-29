@@ -8,6 +8,7 @@ fi
 # Git also refuses to overwrite untracked files or merge divergent history.
 git pull --ff-only origin main
 if command -v node >/dev/null; then
+  node --check biomes.js
   node --check game.js
 fi
 echo 'Update complete. Refresh the browser; no build or dependency install is needed.'

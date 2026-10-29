@@ -73,7 +73,7 @@ catch, preserving shiny state and saved Party/Box entries.
 The ten new woodland species share weight 20 each in the meadow encounter pool
 (16 total meadow species), including sparkling grass. They have no fishing weight
 and do not enter the separate winter or mountain pools. Verify distinct normal
-and shiny sprites for encounters, Party/Box, Collection (65 species), and battles,
+and shiny sprites for encounters, Party/Box, Collection (95 species), and battles,
 as well as catch/save/reload compatibility with existing saves.
 Fishing shiny probabilities: Alligator 75%; Shark, Catfish, Grunt, Spiny Dogfish,
 and Crocodile 50%; Magikarp and Frog retain 1/8. Sparkling casts guarantee a shiny
@@ -128,7 +128,7 @@ There are 18 cave creatures, three each of Mole, Ant, Spider, Cricket, Praying
 Mantis, and Cave Crawfish. They only encounter by contact underground. Crawfish
 stay in shallow pools; the others stay on dirt. All have distinct normal/shiny
 sprites. They never join surface, fishing, winter, mountain, or diving pools.
-Check movement and respawn boundaries, capture, Party/Box, Collection (65 species),
+Check movement and respawn boundaries, capture, Party/Box, Collection (95 species),
 preview sprites, and persistence. Cave encounters use a separate cave background.
 Old saves without underground default to the surface; cave saves reload on the
 cave layer, with invalid cave positions recovered at the ladder. Surface wildlife
@@ -191,7 +191,7 @@ the four species enters meadow, fishing, normal cave, or swimmer pools. Encounte
 also checks the calendar to prevent stale seasonal availability.
 
 Test all four normal/shiny sprite pairs, catching, and save/reload into November.
-Party, Box, and Collection (65 species) must keep seasonal catches after the event.
+Party, Box, and Collection (95 species) must keep seasonal catches after the event.
 An in-progress encounter may finish after midnight; only new spawns are gated.
 
 ## Deep Sea validation
@@ -241,7 +241,7 @@ collision capture; saved shiny catches; and exclusion from other wildlife pools.
 Load a pre-expansion Abyss save to verify old catches, generator rewards, trainer
 wins, and both return points survive while all new species become available.
 Catch new species into both Party and a full-party Box, reload, and use one in a
-diver battle. Collection must list 65 species and preview every shiny form.
+diver battle. Collection must list 95 species and preview every shiny form.
 No stone piles, generator interactions, or level-2 trainers appear in the Abyss.
 
 Level-2 diver trainers have separate IDs in trainerWins. Their tiles block movement
@@ -279,3 +279,27 @@ Verify keyboard and touch entry/exit, reachable wildlife, collision encounters,
 all-shiny respawns, capture with a full party, save/reload, and October 30 → 31 →
 November 1 plus the following October. Recheck normal cave entry, generator
 rewards, and seasonal forest sparkles because these share navigation/calendar code.
+
+## Permanent habitat expansion
+
+`biomes.js` loads before `game.js`. It defines five surface tile types (14–18),
+30 species, fixed normal/shiny palettes, and terrain rendering. New species have
+explicit habitat IDs so they never enter meadow, water, diving, cave, or seasonal
+pools. Each habitat has five common species (weight 20 each) and one special
+(weight 6); walking has a 10% encounter chance after the usual grace period.
+Sparkling tiles bypass grace, are consumed on arrival, and guarantee a shiny.
+At least two sparkle spots are maintained near a player exploring a new biome.
+
+The new surface patches preserve rivers, docks, seasonal tiles, trainer clearings,
+other world layers, and existing save fields. Verify walking/boating reachability
+from spawn, not only fast travel. Explore (M) shows discovery counts and travel
+buttons. Travel requires surface land and the Explore modal; encounters and
+trainer battles cannot be escaped by traveling. The home destination is (5,7).
+Collection filters and shiny previews must not alter saved catches.
+
+Browser validation should exercise all 30 weighted encounter choices, distinct
+normal/shiny art at icon and encounter sizes, shiny sparkle capture in all five
+habitats, full-party Box storage, reloading an older save, mobile travel, and
+returning to the meadow. Also check the Halloween sparkle guarantee, October 31
+Ghost restriction, and all three diving levels. New art uses the same draw
+functions for encounters, Collection, Party/Box, and battles.

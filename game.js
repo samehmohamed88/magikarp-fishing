@@ -60,6 +60,7 @@ const SPECIES = [
     id,name,water:true,abyssOnly:true,rate:.95,draw:(...a)=>drawAbyssCreature(id,...a),
   })),
 ];
+SPECIES.push(...BIOME_SPECIES);
 const byId = id => SPECIES.find(s => s.id === id);
 
 // Seasonal events follow the player's device calendar and recur each year.
@@ -912,6 +913,19 @@ function applyHalloweenMap() {
 }
 applyHalloweenMap();
 
+// Permanent habitats leave the seasonal forest, waterways, and trainers intact.
+for(const biome of NEW_BIOMES) {
+  const [x1,y1,x2,y2]=biome.bounds;
+  for(let y=y1;y<=y2;y++)for(let x=x1;x<=x2;x++) {
+    if([WA,DK].includes(map[y][x])||TRAINERS.some(t=>Math.abs(t.x-x)+Math.abs(t.y-y)<=1))continue;
+    map[y][x]=biome.tile;
+  }
+}
+// Short footpaths connect the habitats to existing routes and docks.
+for(const [x1,y1,x2,y2] of [[21,8,24,8],[21,36,24,36],[43,12,48,12],[48,8,48,12],[43,34,48,34],[48,34,48,36]]) {
+  for(let y=y1;y<=y2;y++)for(let x=x1;x<=x2;x++)if([TR,MP].includes(map[y][x]))map[y][x]=G;
+}
+
 // Separate cave layer: connected chambers under the starting clearing.
 const tunnelEntrance = { x: 5, y: 5 }, caveExit = { x: 8, y: 8 };
 const caveGenerator = { x: 11, y: 10 };
@@ -1369,8 +1383,48 @@ function hud() {
     : P.diving ? 'Swim into creatures · B / Dive deeper: explore the deep sea · V: surface'
     : tile(P.x,P.y)===HF ? `🎃 October forest · ✨ Sparkles = Shiny! · ${halloweenSeason.ghosts?'Halloween today: rare Ghosts can appear!':'Rare Ghosts appear on October 31 only'}`
     : 'Arrows/WASD: move · Space: fish / use tunnel · V at DIVE buoys: scuba · ✨ Sparkles = Shiny!';
+  const biome=!underground&&!P.diving&&newBiomeByTile(tile(P.x,P.y));
+  if(biome) {
+    $('hud-biome').textContent=`${biome.icon} ${biome.name}`;
+    document.querySelector('.hint').textContent=`${biome.icon} Walk to meet six new creatures · Rare: ${byId(biome.special).name} · ✨ Sparkles = Shiny · M: Explore`;
+  }
   renderPartyBar();
 }
+
+// ---------- Exploration guide ----------
+const canTravel = () => !underground&&!P.diving&&!P.boat;
+function openExplore() {
+  if(modal&&!['explore','dex','party'].includes(modal))return;
+  if(modal==='dex')closeDex();
+  if(modal==='party')closeParty();
+  fishing=null;keys.clear();modal='explore';
+  $('explore-help').textContent=canTravel()?'Walk through each habitat to meet its creatures. Golden sparkles guarantee a shiny. Choose Travel to start exploring!':'Return to land at the surface to travel. Your caves, diving areas, and catches are still waiting for you.';
+  const list=$('explore-list');list.innerHTML='';
+  for(const biome of NEW_BIOMES) {
+    const pool=SPECIES.filter(s=>s.habitat===biome.id),caught=pool.filter(s=>dex[s.id]?.count).length;
+    const card=document.createElement('article');card.className='explore-region';
+    card.innerHTML=`<h3>${biome.icon} ${biome.name}</h3><p>${biome.description}</p><div class="region-creatures"></div><p>${pool.map(s=>s.name).join(' · ')}</p><p>${biome.direction}<br><b>${caught}/6 discovered</b> · Rare: ${byId(biome.special).name}</p>`;
+    for(const s of pool)card.querySelector('.region-creatures').appendChild(monIcon({id:s.id,shiny:false},44,34));
+    const button=document.createElement('button');button.className='btn';button.textContent=`Travel to ${biome.name}`;
+    button.dataset.biome=biome.id;button.disabled=!canTravel();button.onclick=()=>travelToBiome(biome.id);
+    card.appendChild(button);list.appendChild(card);
+  }
+  $('btn-home').disabled=!canTravel();$('explore').classList.remove('hidden');
+}
+function closeExplore() {$('explore').classList.add('hidden');modal=null;keys.clear();$('btn-explore').focus();}
+function travelToBiome(id) {
+  if(modal!=='explore'||!canTravel())return;
+  const biome=newBiomeById(id);
+  if(id!=='home'&&!biome)return;
+  const destination=biome||{x:5,y:7};
+  P.x=P.fx=destination.x;P.y=P.fy=destination.y;P.prog=1;
+  fishing=null;ignoredTrainer=null;encounterGrace=4;
+  closeExplore();hud();updateSpots(0);persist();
+  toast(biome?`${biome.icon} Welcome to ${biome.name}! Six new creatures live here.`:'🏡 Back in the starting meadow!');
+}
+$('btn-explore').onclick=openExplore;
+$('btn-explore-close').onclick=closeExplore;
+$('btn-home').onclick=()=>travelToBiome('home');
 
 // ---------- Movement ----------
 function tryMove(dx, dy) {
@@ -1383,7 +1437,7 @@ function tryMove(dx, dy) {
   if (underground) ok = t === CF || t === CP;
   else if (P.diving) ok = isDiveWater(nx, ny);
   else if (P.boat) ok = t === WA || t === DK;
-  else ok = t === G || t === TG || t === SA || t === DK || t === MT || t === SN || t === HF || (t === WA && cur === DK);
+  else ok = t === G || t === TG || t === SA || t === DK || t === MT || t === SN || t === HF || !!newBiomeByTile(t) || (t === WA && cur === DK);
   if (!ok) return;
   P.fx = P.x; P.fy = P.y; P.x = nx; P.y = ny; P.prog = 0;
 }
@@ -1400,8 +1454,16 @@ function arrive() {
     checkDiveEncounter(); hud(); return;
   }
   if (challengeTrainer()) { hud(); return; }
-  const forestSparkle = t === HF && spotAt(P.x, P.y);
-  if (encounterGrace > 0 && t !== WA && t !== DK && !forestSparkle) { hud(); return; }
+  const biome=newBiomeByTile(t), forestSparkle = t === HF && spotAt(P.x, P.y);
+  const biomeSparkle=biome&&spotAt(P.x,P.y);
+  if (encounterGrace > 0 && t !== WA && t !== DK && !forestSparkle && !biomeSparkle) { hud(); return; }
+  if(biome) {
+    if(biomeSparkle||Math.random()<.1) {
+      if(biomeSparkle) {removeSpot(P.x,P.y);toast(`✨ A shiny creature appeared in ${biome.name}!`);}
+      startEncounter(pickBiomeAnimal(biome.id),!!biomeSparkle||Math.random()<1/8);
+    }
+    hud();return;
+  }
   if(t===HF) {
     if(forestSparkle || Math.random()<.08) {
       const sp=pickHalloweenAnimal();
@@ -1449,6 +1511,13 @@ function arrive() {
 function pickAnimal() {
   const land = SPECIES.filter(s => !s.water && s.id !== 'bouldersaur' && !s.habitat), tot = land.reduce((a, s) => a + s.weight, 0);
   let r = Math.random() * tot; for (const s of land) if ((r -= s.weight) < 0) return s; return land[0];
+}
+
+function pickBiomeAnimal(habitat) {
+  const pool=SPECIES.filter(s=>s.habitat===habitat&&newBiomeById(habitat));
+  let roll=Math.random()*pool.reduce((sum,s)=>sum+s.weight,0);
+  for(const s of pool)if((roll-=s.weight)<0)return s;
+  return pool[0];
 }
 
 // ---------- Trainer battles ----------
@@ -1640,8 +1709,25 @@ function updateSpots(dt) {
     const x = P.x + Math.round((Math.random() - 0.5) * 26);
     const y = P.y + Math.round((Math.random() - 0.5) * 20);
     const t = tile(x, y);
-    if ((t === TG || t === WA || t === MT || t === SN || t === HF) && !spotAt(x, y) && Math.hypot(x - P.x, y - P.y) > 1.5) {
+    if ((t === TG || t === WA || t === MT || t === SN || t === HF || newBiomeByTile(t)) && !spotAt(x, y) && Math.hypot(x - P.x, y - P.y) > 1.5) {
       spots.push({ x, y, life: 45 + Math.random() * 45 });
+    }
+  }
+  // Keep sparkles discoverable in the habitat being explored, even after travel.
+  const biome=!underground&&!P.diving&&newBiomeByTile(tile(P.x,P.y));
+  if(biome) {
+    let local=spots.filter(s=>map[s.y]?.[s.x]===biome.tile&&Math.hypot(s.x-P.x,s.y-P.y)<9).length;
+    const candidates=[];
+    for(let y=P.y-6;y<=P.y+6;y++)for(let x=P.x-6;x<=P.x+6;x++)
+      if(map[y]?.[x]===biome.tile&&Math.hypot(x-P.x,y-P.y)>1.5&&!spotAt(x,y))candidates.push({x,y});
+    while(local<2&&candidates.length) {
+      const [s]=candidates.splice(Math.floor(Math.random()*candidates.length),1);
+      if(spots.length>=10) {
+        const distant=spots.findIndex(p=>Math.hypot(p.x-P.x,p.y-P.y)>=9||map[p.y]?.[p.x]!==biome.tile);
+        if(distant<0)break;
+        spots.splice(distant,1);
+      }
+      spots.push({...s,life:60+Math.random()*30});local++;
     }
   }
 }
@@ -1710,6 +1796,11 @@ function startEncounter(sp, shiny, inWater = false, inMountain = false, inWinter
   $('enc-scene').className = 'enc-scene ' + (abyssDiving?'abyss':deepDiving?'deep-sea':halloweenCavern?'halloween-cavern':sp.habitat==='halloween'?'halloween':underground ? 'cave' : inWater ? 'water' : inWinter ? 'winter' : (inMountain ? 'mountain' : 'land'));
   ec.classList.remove('gone'); $('ball').className = 'ball hidden';
   setText(`${abyssDiving ? 'In the Abyss, you swam into' : deepDiving ? 'In the deep sea, you swam into' : halloweenCavern ? 'In Halloween Cavern, a wild' : sp.habitat==='halloween' ? 'In Halloween Forest, a wild' : underground ? 'Deep underground, a wild' : inWater ? (P.diving ? 'You swam into' : 'You fished up') : inWinter ? 'In the snow, a wild' : (inMountain ? 'From the crags appeared' : 'A wild')} ${enc.shiny ? '✨SHINY✨ ' : ''}${sp.name} (Lv ${enc.lv})${inWater ? '!' : ' appeared!'}`);
+  const biome=newBiomeById(sp.habitat);
+  if(biome) {
+    $('enc-scene').className=`enc-scene ${biome.id}`;
+    setText(`In ${biome.name}, ${sp.special?'a rare':'a wild'} ${enc.shiny?'✨SHINY✨ ':''}${sp.name} (Lv ${enc.lv}) appeared!`);
+  }
   setBtns(true);
 }
 const setText = s => $('enc-text').textContent = s;
@@ -1811,9 +1902,15 @@ $('btn-run').onclick = () => { if (enc && !enc.busy) { closeEnc(); toast('Got aw
 let previewShinies = false;
 function openDex() {
   if (modal === 'enc' || modal === 'battle' || modal === 'generator') return;
+  if(modal==='explore')closeExplore();
   modal = 'dex'; keys.clear();
   const list = $('dex-list'); list.innerHTML = '';
+  const filter=$('dex-filter').value;
+  const found=SPECIES.filter(s=>dex[s.id]?.count).length;
+  $('dex-progress').textContent=`${found}/${SPECIES.length} species discovered · ${SPECIES.filter(s=>dex[s.id]?.shiny).length} shiny forms caught`;
   for (const s of SPECIES) {
+    if(filter==='new'&&!newBiomeById(s.habitat))continue;
+    if(filter!=='all'&&filter!=='new'&&s.habitat!==filter)continue;
     const d = dex[s.id], el = document.createElement('div'), visible = d || previewShinies;
     const shiny = previewShinies || d?.shiny > 0;
     el.className = 'dex-item' + (visible ? '' : ' unseen');
@@ -1823,11 +1920,19 @@ function openDex() {
     else if (visible) icon.appendChild(emojiEl(s.emoji, 40, shiny)); else icon.textContent = '❔';
     el.appendChild(icon);
     el.insertAdjacentHTML('beforeend', `<b>${visible ? s.name : '???'}</b><br><small>${previewShinies ? `✨ Shiny preview · ${d?.shiny ? 'caught' : 'not caught'}` : d ? `×${d.count}${d.shiny ? ` · ✨${d.shiny}` : ''}` : (s.abyssOnly ? '🌌 Abyss · third diving level' : s.habitat === 'deep-generator' ? '⚡ Deep sea generator' : s.deepOnly ? '🌊 Deep sea only' : s.habitat === 'halloween' ? (s.id==='ghost'?'🎃 October 31 only · Rare':'🎃 Halloween Forest · October only') : s.habitat === 'generator' ? '⚡ Generator · ✨ October cavern' : s.habitat === 'cave' ? '🕳️ Tunnel in the starting meadow' : s.diveOnly ? '🤿 Diving only' : s.habitat === 'winter' ? '❄ Winter Area · South' : s.id === 'bouldersaur' ? '🏔️ East Mountains' : s.water ? 'Fish in rivers' : s.id === 'frog' ? 'Grass or rivers' : 'Tall grass')}</small>`);
+    const biome=newBiomeById(s.habitat);
+    if(biome) {
+      const habitat=document.createElement('p');habitat.className='dex-habitat';habitat.textContent=`${biome.icon} ${biome.name}${s.special?' · Rare':''}`;
+      el.appendChild(habitat);
+      if(!visible)el.querySelector('small').textContent='Explore this area to discover me';
+    }
     list.appendChild(el);
   }
   $('dex').classList.remove('hidden');
 }
 const closeDex = () => { $('dex').classList.add('hidden'); modal = null; };
+for(const b of NEW_BIOMES){const option=document.createElement('option');option.value=b.id;option.textContent=`${b.icon} ${b.name}`;$('dex-filter').appendChild(option);}
+$('dex-filter').onchange=openDex;
 $('btn-dex').onclick = openDex; $('btn-dex-close').onclick = closeDex;
 $('btn-shiny-preview').onclick = () => {
   previewShinies = !previewShinies;
@@ -1870,7 +1975,7 @@ function renderPartyBar() {
     if (party[i]) slot.appendChild(monIcon(party[i], 44, 30)); bar.appendChild(slot);
   }
 }
-function openParty() { if (modal === 'enc' || modal === 'battle' || modal === 'generator') return; if (modal === 'dex') closeDex(); modal = 'party'; keys.clear(); renderParty(); $('party').classList.remove('hidden'); }
+function openParty() { if (modal === 'enc' || modal === 'battle' || modal === 'generator') return; if (modal === 'dex') closeDex(); if(modal==='explore')closeExplore(); modal = 'party'; keys.clear(); renderParty(); $('party').classList.remove('hidden'); }
 const closeParty = () => { $('party').classList.add('hidden'); modal = null; };
 $('btn-party').onclick = openParty; $('btn-party-close').onclick = closeParty; $('party-bar').onclick = openParty;
 $('btn-party-store-all').onclick = () => {
@@ -1881,6 +1986,9 @@ $('btn-party-store-all').onclick = () => {
 // ---------- Input ----------
 const DIRS = { ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1], ArrowLeft: [-1, 0], KeyA: [-1, 0], ArrowRight: [1, 0], KeyD: [1, 0] };
 addEventListener('keydown', e => {
+  if(e.target.matches('select,input,textarea'))return;
+  if(modal==='explore') {if(e.code==='Escape'||e.code==='KeyM'){e.preventDefault();closeExplore();}return;}
+  if(e.code==='KeyM'&&!e.repeat){e.preventDefault();openExplore();return;}
   if(modal==='generator'){if(e.code==='Escape')closeGenerator();return;}
   if(modal==='enc'&&e.code==='KeyX'){e.preventDefault();if(!e.repeat)weakenEncounter();return;}
   if(e.code==='KeyB'&&!e.repeat&&P.diving){e.preventDefault();toggleDepth();return;}
@@ -1916,6 +2024,8 @@ const hash = (x, y) => ((x * 73856093) ^ (y * 19349663)) >>> 0;
 
 function drawTile(t, x, y, px, py) {
   const h = hash(x, y);
+  const biome=newBiomeByTile(t);
+  if(biome&&!underground&&!deepDiving){drawNewBiomeTile(ctx,biome,x,y,px,py,T,time);return;}
   const grass = () => { ctx.fillStyle = h & 1 ? '#63c25c' : '#5bb954'; ctx.fillRect(px, py, T, T); };
   if(deepDiving) {
     ctx.fillStyle=abyssDiving?(t===WA?(h&1?'#14243e':'#18213b'):'#0b1429'):t===WA?(h&1?'#16435b':'#193c55'):'#10263d';ctx.fillRect(px,py,T,T);
@@ -2112,6 +2222,14 @@ function render() {
     ctx.font='11px sans-serif';ctx.fillText(halloweenSeason.ghosts?'Oct 31: rare Ghosts today!':'October only · Ghosts Oct 31',sx,sy-13);
     drawTunnelMarker(halloweenCavernEntrance.x*T-camX,halloweenCavernEntrance.y*T-camY,false,true);
   }
+  if(!P.diving)for(const biome of NEW_BIOMES) {
+    const sx=(biome.x+.5)*T-camX,sy=(biome.y-1)*T-camY;
+    if(sx< -150||sx>cv.width+150||sy< -50||sy>cv.height+50)continue;
+    ctx.fillStyle='#182e40e8';ctx.fillRect(sx-88,sy-20,176,38);
+    ctx.strokeStyle=biome.colors[2];ctx.lineWidth=2;ctx.strokeRect(sx-88,sy-20,176,38);
+    ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(biome.name,sx,sy-4);
+    ctx.font='11px sans-serif';ctx.fillText('6 creatures · Sparkles = Shiny',sx,sy+10);
+  }
   drawPlayer(ppx - camX, ppy - camY);
   // A sign at the entrance helps players find the new biome.
   const signX = 5*T + T/2 - camX, signY = 27*T - camY;
@@ -2261,7 +2379,7 @@ function refreshHalloweenSeason() {
     fishing=null;keys.clear();encounterGrace=4;
     toast('🎃 Halloween Cavern has closed until next October. Your caught shinies are safe!');
   }
-  spots=spots.filter(s=>[TG,WA,MT,SN,HF].includes(map[s.y]?.[s.x]));
+  spots=spots.filter(s=>[TG,WA,MT,SN,HF].includes(map[s.y]?.[s.x])||newBiomeByTile(map[s.y]?.[s.x]));
   if(!underground&&!deepDiving&&halloweenPatch.some(c=>c.x===P.x&&c.y===P.y)&&[TR,HT].includes(tile(P.x,P.y))) {
     Object.assign(P,{x:7,y:5,fx:7,fy:5,prog:1});keys.clear();
   }
