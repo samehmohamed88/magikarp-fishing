@@ -73,7 +73,7 @@ catch, preserving shiny state and saved Party/Box entries.
 The ten new woodland species share weight 20 each in the meadow encounter pool
 (16 total meadow species), including sparkling grass. They have no fishing weight
 and do not enter the separate winter or mountain pools. Verify distinct normal
-and shiny sprites for encounters, Party/Box, Collection (41 species), and battles,
+and shiny sprites for encounters, Party/Box, Collection (45 species), and battles,
 as well as catch/save/reload compatibility with existing saves.
 Fishing shiny probabilities: Alligator 75%; Shark, Catfish, Grunt, Spiny Dogfish,
 and Crocodile 50%; Magikarp and Frog retain 1/8. Sparkling casts guarantee a shiny
@@ -128,7 +128,7 @@ There are 18 cave creatures, three each of Mole, Ant, Spider, Cricket, Praying
 Mantis, and Cave Crawfish. They only encounter by contact underground. Crawfish
 stay in shallow pools; the others stay on dirt. All have distinct normal/shiny
 sprites. They never join surface, fishing, winter, mountain, or diving pools.
-Check movement and respawn boundaries, capture, Party/Box, Collection (41 species),
+Check movement and respawn boundaries, capture, Party/Box, Collection (45 species),
 preview sprites, and persistence. Cave encounters use a separate cave background.
 Old saves without underground default to the surface; cave saves reload on the
 cave layer, with invalid cave positions recovered at the ladder. Surface wildlife
@@ -161,3 +161,26 @@ Check missing-pile and duplicate-claim guards, collecting without awarding,
 reloads between collecting and generating, all six reward orders, full-party Box
 routing, Collection/Party rendering, and keyboard/touch controls. The generator
 modal pauses encounters/movement and blocks opening other menus; Escape exits.
+
+## Seasonal Halloween validation
+
+Halloween Forest replaces meadow tiles x=8..16, y=2..17 northeast of spawn during
+October only. Its entrance path is at (8,5). Trainer clearings and the cave tunnel
+are preserved. Outside October, the exact original terrain returns. Seasonal map
+updates run every second and on tab visibility changes; underground activeMap
+must remain caveMap during these updates. A displaced player or saved position
+on a returning tree is recovered to (7,5). Old meadow sparkles are removed when
+their tile no longer supports them.
+
+halloweenCalendar uses the browser's local year/month/day, never a hardcoded year
+or the server timezone. Test Sep 30 → Oct 1, Oct 30 → Oct 31, Oct 31 → Nov 1,
+and the following October with a browser clock and America/New_York timezone.
+Skeleton, Crow, and Zombie are forest-only encounters; Ghost is available on
+Oct 31 only with 5% probability per forest encounter (strictly below .05).
+Forest step encounters remain 8% with the existing four-second cooldown. None of
+the four species enters meadow, fishing, cave, or swimmer pools. Encounter entry
+also checks the calendar to prevent stale seasonal availability.
+
+Test all four normal/shiny sprite pairs, catching, and save/reload into November.
+Party, Box, and Collection (45 species) must keep seasonal catches after the event.
+An in-progress encounter may finish after midnight; only new spawns are gated.

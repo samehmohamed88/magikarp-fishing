@@ -123,7 +123,7 @@ Catching is forgiving: every species has at least a 92% chance on the first ball
 and the second ball always succeeds. Creatures won't run away after breaking free.
 You have four seconds to reel in after a bite.
 
-Discover forty-one species, including Magikarp, Frog, Fox, Bouldersaur, Snowy,
+Discover forty-five species, including Magikarp, Frog, Fox, Bouldersaur, Snowy,
 and the six new water creatures.
 Every species has a shiny form, including pink Bunny, blue Duck, purple
 Squirrel, blue Fox, and mint Hedgehog. Magikarp, Frog, and Bouldersaur keep their
@@ -133,7 +133,7 @@ You can move even the last creature into the Box, or choose **Move all to Box**
 to empty your party at once. Your creatures and Collection progress stay saved.
 Click any creature in the Box to add it back. Put at least one in your party
 before approaching a trainer to battle.
-In Collection, choose **✨ Preview shiny forms** to see all forty-one shiny designs
+In Collection, choose **✨ Preview shiny forms** to see all forty-five shiny designs
 without changing your catches or saved progress. Bunny, Duck, Squirrel, Fox,
 and Hedgehog use drawn sprites so their colors are consistent across devices.
 
@@ -201,6 +201,24 @@ party, or your Box if your party is full. Collected piles and claimed rewards sa
 immediately, so you can leave, reload, and finish later.
 
 ![The three generator rewards: Tyrannosaurus rex, Spinosaurus, and Giganotosaurus](docs/screenshots/generator-dinosaurs.png)
+
+## Halloween Forest — October event
+
+During **October**, walk east/northeast from the starting clearing to the
+pumpkin sign for **Halloween Forest**. Skeletons, Crows, and Zombies appear only
+in this seasonal forest. On **October 31 only**, a **Ghost** has a rare 5% chance
+among forest encounters. Ghosts cannot spawn on other dates or in other habitats.
+The forest uses the same 8% per-step encounter rate and four-second cooldown.
+
+![Halloween Forest with purple trees, pumpkins, and its seasonal entrance sign](docs/screenshots/halloween-forest.png)
+
+![Normal and shiny Skeleton, Crow, Zombie, and Halloween-only Ghost](docs/screenshots/halloween-creatures.png)
+
+The event follows **your device's local date** and returns each October. The
+forest appears/disappears as the date changes, even with the game open. Catches,
+including Ghosts, remain in Party, Box, and Collection all year. If the forest
+closes while you are standing where a normal tree returns, you move safely to
+the starting clearing. An encounter already underway can still be completed.
 
 ## Saved progress
 

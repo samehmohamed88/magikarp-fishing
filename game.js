@@ -1,6 +1,6 @@
 // ===== Magikarp River Quest =====
 const T = 40, W = 60, H = 45;
-const G = 0, TG = 1, WA = 2, DK = 3, TR = 4, SA = 5, MT = 6, MP = 7, SN = 8, CF = 9, CW = 10, CP = 11;
+const G = 0, TG = 1, WA = 2, DK = 3, TR = 4, SA = 5, MT = 6, MP = 7, SN = 8, CF = 9, CW = 10, CP = 11, HF = 12, HT = 13;
 const $ = id => document.getElementById(id);
 const cv = $('world'), ctx = cv.getContext('2d');
 
@@ -42,8 +42,64 @@ const SPECIES = [
   ...[['tyrannosaurus-rex','Tyrannosaurus rex'],['spinosaurus','Spinosaurus'],['giganotosaurus','Giganotosaurus']].map(([id,name]) => ({
     id, name, habitat: 'generator', rate: 1, draw: (...a) => drawDinosaur(id, ...a),
   })),
+  ...['skeleton','crow','zombie','ghost'].map(id=>({
+    id,name:id[0].toUpperCase()+id.slice(1),habitat:'halloween',rate:.96,
+    draw:(...a)=>drawHalloweenCreature(id,...a),
+  })),
 ];
 const byId = id => SPECIES.find(s => s.id === id);
+
+// Seasonal events follow the player's device calendar and recur each year.
+function halloweenCalendar(date = new Date()) {
+  return { open:date.getMonth()===9, ghosts:date.getMonth()===9&&date.getDate()===31,
+    key:`${date.getFullYear()}-${date.getMonth()}-${date.getDate()}` };
+}
+function pickHalloweenAnimal(date = new Date()) {
+  const season=halloweenCalendar(date);
+  if(!season.open)return null;
+  if(season.ghosts&&Math.random()<.05)return byId('ghost');
+  return byId(['skeleton','crow','zombie'][Math.floor(Math.random()*3)]);
+}
+function drawHalloweenCreature(id,c,x,y,s,shiny=false,t=0) {
+  c.save();c.translate(x,y+Math.sin(t*3)*s*.03);c.scale(s,s);c.lineJoin='round';c.lineCap='round';c.strokeStyle='#263046';c.lineWidth=.05;
+  const oval=(x,y,rx,ry,color,angle=0)=>{c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,angle,0,Math.PI*2);c.fill();c.stroke();};
+  const line=(points,color,width=.08)=>{c.strokeStyle=color;c.lineWidth=width;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();c.strokeStyle='#263046';c.lineWidth=.05;};
+  const shape=(points,color)=>{c.fillStyle=color;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();c.stroke();};
+  if(id==='crow') {
+    const body=shiny?'#9971d0':'#38445f',light=shiny?'#dec0fa':'#697c99';
+    for(const side of[-1,1]){line([[side*.22,.45],[side*.25,.83]],'#e9b66b');line([[side*.25,.83],[side*.47,.9]],'#e9b66b');}
+    shape([[.18,.32],[1,.64],[.8,.1]],body);oval(0,.15,.6,.54,body);oval(.2,.16,.3,.43,light,-.5);
+    oval(-.24,-.45,.4,.4,body);shape([[-.55,-.42],[-1,-.26],[-.5,-.15]],'#e9b66b');
+    oval(-.35,-.51,.1,.12,'#fff');oval(-.38,-.5,.045,.07,'#22273b');
+  } else if(id==='ghost') {
+    const body=shiny?'#f4b5de':'#e9f3ff';
+    c.fillStyle=body;c.beginPath();c.moveTo(-.7,.9);c.lineTo(-.7,-.15);c.bezierCurveTo(-.7,-1.2,.7,-1.2,.7,-.15);c.lineTo(.7,.9);
+    for(let i=0;i<5;i++)c.lineTo(.7-i*.35,.9+(i%2?-.25:0));c.closePath();c.fill();c.stroke();
+    oval(-.22,-.2,.12,.2,'#43516d');oval(.22,-.2,.12,.2,'#43516d');oval(0,.24,.12,.16,shiny?'#b35e9e':'#a0b9dd');
+    for(const side of[-1,1])oval(side*.75,.1,.2,.13,body,side*.6);
+  } else if(id==='skeleton') {
+    const bone=shiny?'#a7e8ed':'#f1e3c7';
+    for(const side of[-1,1]){
+      line([[side*.18,.35],[side*.28,.7],[side*.27,1]],bone,.13);line([[side*.27,1],[side*.49,1]],bone,.13);
+      line([[side*.27,-.21],[side*.63,.03],[side*.79,-.2]],bone,.12);
+    }
+    line([[0,-.22],[0,.5]],bone,.11);oval(0,.38,.31,.13,bone);
+    for(let i=0;i<3;i++){c.strokeStyle=bone;c.lineWidth=.08;c.beginPath();c.ellipse(0,-.14+i*.16,.3-i*.04,.1,0,0,Math.PI*2);c.stroke();}
+    c.strokeStyle='#263046';c.lineWidth=.05;oval(0,-.67,.43,.37,bone);
+    oval(-.18,-.72,.105,.13,'#39445b');oval(.18,-.72,.105,.13,'#39445b');
+    line([[-.2,-.43],[.2,-.43]],'#776b80',.04);
+    for(let i=0;i<4;i++)line([[-.15+i*.1,-.49],[-.15+i*.1,-.37]],'#776b80',.025);
+  } else {
+    const skin=shiny?'#9bc8f0':'#9cc58d',shirt=shiny?'#866abb':'#8b6c87';
+    for(const side of[-1,1]){line([[side*.23,.32],[side*.26,.9]],'#4c556e',.22);oval(side*.3,.93,.24,.12,'#364153');
+      line([[side*.3,-.18],[side*.64,-.05],[side*.85,-.35]],shirt,.2);oval(side*.84,-.35,.14,.15,skin);}
+    shape([[-.38,-.35],[.38,-.35],[.35,.54],[.1,.45],[-.1,.55],[-.35,.45]],shirt);
+    oval(0,-.64,.42,.4,skin);shape([[-.38,-.9],[-.18,-1.07],[.03,-.94],[.3,-1],[.39,-.78]],'#46534a');
+    for(const side of[-1,1]){oval(side*.18,-.69,.11,.12,'#fff0c8');oval(side*.18,-.67,.045,.06,'#263046');}
+    line([[-.2,-.43],[.2,-.47]],'#4e675a',.04);
+  }
+  c.restore();
+}
 
 function drawDinosaur(id, c, x, y, s, shiny = false, t = 0) {
   const palettes = {
@@ -633,6 +689,22 @@ for (const trainer of TRAINERS) {
     if (inb(x, y) && ![WA, DK].includes(tile(x, y))) map[y][x] = ground;
 }
 
+// The forest replaces a small meadow northeast of spawn only during October.
+const halloweenPatch=[];
+for(let y=2;y<=17;y++)for(let x=8;x<=16;x++) {
+  if(TRAINERS.some(t=>Math.abs(t.x-x)+Math.abs(t.y-y)<=1))continue;
+  halloweenPatch.push({x,y,original:map[y][x]});
+}
+let halloweenSeason=halloweenCalendar();
+function applyHalloweenMap() {
+  for(const cell of halloweenPatch) {
+    const path=cell.y===5||cell.x===12||cell.y===14;
+    const trees=cell.original===TR||cell.x===8||cell.x===16||cell.y===2||cell.y===17||(cell.x*7+cell.y*11)%19===0;
+    map[cell.y][cell.x]=halloweenSeason.open?(trees&&!path?HT:HF):cell.original;
+  }
+}
+applyHalloweenMap();
+
 // Separate cave layer: connected chambers under the starting clearing.
 const tunnelEntrance = { x: 5, y: 5 }, caveExit = { x: 8, y: 8 };
 const caveGenerator = { x: 11, y: 10 };
@@ -753,6 +825,7 @@ if(underground && ![CF,CP].includes(tile(P.x,P.y))) {P.x=caveExit.x;P.y=caveExit
 P.diving = !!save.diving && isDiveWater(P.x, P.y);
 if (P.diving) P.boat = false;
 if (underground) { P.diving=false; P.boat=false; }
+if(!underground&&halloweenPatch.some(c=>c.x===P.x&&c.y===P.y)&&[TR,HT].includes(tile(P.x,P.y))) {P.x=7;P.y=5;}
 P.fx = P.x; P.fy = P.y;
 let fishing = null, modal = null, time = 0;
 const keys = new Set();
@@ -887,9 +960,10 @@ function hud() {
   $('cave-quest').textContent=caveTreasurePiles.map(p=>`${p.name}: ${caveTreasures.generated[p.id]?'✓ Dinosaur':caveTreasures.collected[p.id]?'✓ Collected':'Find pile'}`).join(' · ');
   $('btn-dive').textContent = P.diving ? '↑ Surface (V)' : '🤿 Dive (V)';
   $('btn-dive').hidden = !P.diving && !(P.boat && diveSites.some(site => site.x === P.x && site.y === P.y));
-  $('hud-biome').textContent = underground ? '💎 Crystal Caves' : P.diving ? '🫧 Underwater' : tile(P.x, P.y) === SN ? '❄ Winter Area' : P.x >= 44 ? '🏔️ Mountains' : '🌿 Meadows';
+  $('hud-biome').textContent = underground ? '💎 Crystal Caves' : P.diving ? '🫧 Underwater' : tile(P.x,P.y)===HF ? '🎃 Halloween Forest' : tile(P.x, P.y) === SN ? '❄ Winter Area' : P.x >= 44 ? '🏔️ Mountains' : '🌿 Meadows';
   document.querySelector('.hint').textContent = underground
     ? 'Space: collect piles / use generator · Generator: beside the entrance ladder · Return to the ladder to exit'
+    : tile(P.x,P.y)===HF ? `🎃 October forest · ${halloweenSeason.ghosts?'Halloween today: rare Ghosts can appear!':'Rare Ghosts appear on October 31 only'}`
     : 'Arrows/WASD: move · Space: fish / use tunnel · V at DIVE buoys: scuba · ✨ Sparkles = Shiny!';
   renderPartyBar();
 }
@@ -904,7 +978,7 @@ function tryMove(dx, dy) {
   if (underground) ok = t === CF || t === CP;
   else if (P.diving) ok = isDiveWater(nx, ny);
   else if (P.boat) ok = t === WA || t === DK;
-  else ok = t === G || t === TG || t === SA || t === DK || t === MT || t === SN || (t === WA && cur === DK);
+  else ok = t === G || t === TG || t === SA || t === DK || t === MT || t === SN || t === HF || (t === WA && cur === DK);
   if (!ok) return;
   P.fx = P.x; P.fy = P.y; P.x = nx; P.y = ny; P.prog = 0;
 }
@@ -918,6 +992,10 @@ function arrive() {
   if (P.diving) { checkDiveEncounter(); hud(); return; }
   if (challengeTrainer()) { hud(); return; }
   if (encounterGrace > 0 && t !== WA && t !== DK) { hud(); return; }
+  if(t===HF) {
+    if(Math.random()<.08){const sp=pickHalloweenAnimal();if(sp)startEncounter(sp,Math.random()<1/8);}
+    hud();return;
+  }
   if (t === WA && !P.boat) { P.boat = true; toast('⛵ You hopped into a boat!'); }
   else if (t === DK && P.boat) { P.boat = false; toast('🟫 You docked the boat.'); }
   else if (t === SN && spotAt(P.x, P.y)) {
@@ -1189,13 +1267,17 @@ function updateFishing(dt) {
 const ec = $('enc-canvas'), ectx = ec.getContext('2d');
 let enc = null;
 function startEncounter(sp, shiny, inWater = false, inMountain = false, inWinter = false) {
+  if(sp.habitat==='halloween') {
+    const season=halloweenCalendar();
+    if(!season.open||(sp.id==='ghost'&&!season.ghosts))return;
+  }
   encounterGrace = 4;
   enc = { sp, shiny: !!shiny, busy: false, attempts: 0, lv: 2 + Math.floor(Math.random() * 8) };
   modal = 'enc'; keys.clear();
   $('encounter').classList.remove('hidden');
-  $('enc-scene').className = 'enc-scene ' + (underground ? 'cave' : inWater ? 'water' : inWinter ? 'winter' : (inMountain ? 'mountain' : 'land'));
+  $('enc-scene').className = 'enc-scene ' + (sp.habitat==='halloween'?'halloween':underground ? 'cave' : inWater ? 'water' : inWinter ? 'winter' : (inMountain ? 'mountain' : 'land'));
   ec.classList.remove('gone'); $('ball').className = 'ball hidden';
-  setText(`${underground ? 'Deep underground, a wild' : inWater ? (P.diving ? 'You swam into' : 'You fished up') : inWinter ? 'In the snow, a wild' : (inMountain ? 'From the crags appeared' : 'A wild')} ${enc.shiny ? '✨SHINY✨ ' : ''}${sp.name} (Lv ${enc.lv})${inWater ? '!' : ' appeared!'}`);
+  setText(`${sp.habitat==='halloween' ? 'In Halloween Forest, a wild' : underground ? 'Deep underground, a wild' : inWater ? (P.diving ? 'You swam into' : 'You fished up') : inWinter ? 'In the snow, a wild' : (inMountain ? 'From the crags appeared' : 'A wild')} ${enc.shiny ? '✨SHINY✨ ' : ''}${sp.name} (Lv ${enc.lv})${inWater ? '!' : ' appeared!'}`);
   setBtns(true);
 }
 const setText = s => $('enc-text').textContent = s;
@@ -1259,7 +1341,7 @@ function openDex() {
     else if (visible && s.draw) { const c = document.createElement('canvas'); c.width = 90; c.height = 60; s.draw(c.getContext('2d'), 45, 30, 22, shiny); icon.appendChild(c); }
     else if (visible) icon.appendChild(emojiEl(s.emoji, 40, shiny)); else icon.textContent = '❔';
     el.appendChild(icon);
-    el.insertAdjacentHTML('beforeend', `<b>${visible ? s.name : '???'}</b><br><small>${previewShinies ? `✨ Shiny preview · ${d?.shiny ? 'caught' : 'not caught'}` : d ? `×${d.count}${d.shiny ? ` · ✨${d.shiny}` : ''}` : (s.habitat === 'generator' ? '⚡ Stones → Cave generator' : s.habitat === 'cave' ? '🕳️ Tunnel in the starting meadow' : s.diveOnly ? '🤿 Diving only' : s.habitat === 'winter' ? '❄ Winter Area · South' : s.id === 'bouldersaur' ? '🏔️ East Mountains' : s.water ? 'Fish in rivers' : s.id === 'frog' ? 'Grass or rivers' : 'Tall grass')}</small>`);
+    el.insertAdjacentHTML('beforeend', `<b>${visible ? s.name : '???'}</b><br><small>${previewShinies ? `✨ Shiny preview · ${d?.shiny ? 'caught' : 'not caught'}` : d ? `×${d.count}${d.shiny ? ` · ✨${d.shiny}` : ''}` : (s.habitat === 'halloween' ? (s.id==='ghost'?'🎃 October 31 only · Rare':'🎃 Halloween Forest · October only') : s.habitat === 'generator' ? '⚡ Stones → Cave generator' : s.habitat === 'cave' ? '🕳️ Tunnel in the starting meadow' : s.diveOnly ? '🤿 Diving only' : s.habitat === 'winter' ? '❄ Winter Area · South' : s.id === 'bouldersaur' ? '🏔️ East Mountains' : s.water ? 'Fish in rivers' : s.id === 'frog' ? 'Grass or rivers' : 'Tall grass')}</small>`);
     list.appendChild(el);
   }
   $('dex').classList.remove('hidden');
@@ -1350,7 +1432,16 @@ const hash = (x, y) => ((x * 73856093) ^ (y * 19349663)) >>> 0;
 function drawTile(t, x, y, px, py) {
   const h = hash(x, y);
   const grass = () => { ctx.fillStyle = h & 1 ? '#63c25c' : '#5bb954'; ctx.fillRect(px, py, T, T); };
-  if (t === CF || t === CW || t === CP) {
+  if(t===HF||t===HT) {
+    ctx.fillStyle=h&1?'#54405e':'#493954';ctx.fillRect(px,py,T,T);
+    if(t===HT) {
+      ctx.strokeStyle='#242238';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(px+20,py+36);ctx.lineTo(px+18,py+6);ctx.moveTo(px+18,py+17);ctx.lineTo(px+5,py+8);ctx.moveTo(px+18,py+23);ctx.lineTo(px+33,py+10);ctx.stroke();
+      ctx.fillStyle='#765276';for(const [dx,dy]of [[8,10],[20,5],[32,10]]){ctx.beginPath();ctx.arc(px+dx,py+dy,8,0,Math.PI*2);ctx.fill();}
+    } else if((h&7)===0) {
+      ctx.fillStyle='#ed943b';ctx.beginPath();ctx.ellipse(px+21,py+23,11,9,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#7b984a';ctx.fillRect(px+19,py+10,4,5);
+      ctx.fillStyle='#fff2a5';ctx.fillRect(px+15,py+20,3,3);ctx.fillRect(px+24,py+20,3,3);ctx.fillRect(px+18,py+27,7,2);
+    } else {ctx.fillStyle='#bd805b';ctx.fillRect(px+((h>>2)%27)+4,py+((h>>7)%27)+4,6,3);}
+  } else if (t === CF || t === CW || t === CP) {
     ctx.fillStyle=t===CW?'#282735':t===CP?'#286875':(h&1?'#68565a':'#604e55');ctx.fillRect(px,py,T,T);
     if(t===CW) {
       ctx.fillStyle='#3c394a';ctx.beginPath();ctx.moveTo(px+3,py+29);ctx.lineTo(px+10,py+5);ctx.lineTo(px+30,py+3);ctx.lineTo(px+38,py+25);ctx.lineTo(px+24,py+36);ctx.closePath();ctx.fill();
@@ -1507,6 +1598,13 @@ function render() {
   drawWaterWildlife(camX, camY);
   if (!P.diving) drawTrainers(camX, camY);
   if (!P.diving) drawTunnelMarker(tunnelEntrance.x*T-camX,tunnelEntrance.y*T-camY,false);
+  if(halloweenSeason.open) {
+    const sx=8*T+T/2-camX,sy=5*T-camY;
+    ctx.fillStyle='#302239';ctx.fillRect(sx-84,sy-44,168,38);
+    ctx.strokeStyle='#efaf53';ctx.lineWidth=2;ctx.strokeRect(sx-84,sy-44,168,38);
+    ctx.fillStyle='#ffe8b2';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText('HALLOWEEN FOREST',sx,sy-28);
+    ctx.font='11px sans-serif';ctx.fillText(halloweenSeason.ghosts?'Oct 31: rare Ghosts today!':'October only · Ghosts Oct 31',sx,sy-13);
+  }
   drawPlayer(ppx - camX, ppy - camY);
   // A sign at the entrance helps players find the new biome.
   const signX = 5*T + T/2 - camX, signY = 27*T - camY;
@@ -1580,10 +1678,24 @@ function drawCaveTreasures(camX,camY) {
   }
 }
 
+function refreshHalloweenSeason() {
+  const next=halloweenCalendar();
+  if(next.key===halloweenSeason.key)return;
+  halloweenSeason=next;applyHalloweenMap();
+  spots=spots.filter(s=>[TG,WA,MT,SN].includes(map[s.y]?.[s.x]));
+  if(!underground&&halloweenPatch.some(c=>c.x===P.x&&c.y===P.y)&&[TR,HT].includes(tile(P.x,P.y))) {
+    Object.assign(P,{x:7,y:5,fx:7,fy:5,prog:1});keys.clear();
+  }
+  hud();persist();
+}
+addEventListener('visibilitychange',()=>{if(!document.hidden)refreshHalloweenSeason();});
+
 // ---------- Loop ----------
 let last = performance.now(), saveT = 0;
+let seasonT=0;
 function loop(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now; time += dt;
+  if((seasonT+=dt)>=1){seasonT=0;refreshHalloweenSeason();}
   if (!modal) {
     encounterGrace = Math.max(0, encounterGrace - dt);
     if (P.prog < 1) { P.prog += dt / (P.boat ? 0.2 : 0.16); if (P.prog >= 1) { P.prog = 1; arrive(); } }

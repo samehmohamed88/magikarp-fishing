@@ -10,6 +10,7 @@
 .generator-option .btn { font-size: 13px; }
 @media (max-width: 600px) { #generator-list { grid-template-columns: 1fr; } }
 .enc-scene.cave { background: radial-gradient(ellipse at 50% 25%, #80709b, #323248 65%, #50414c 66%); }
+.enc-scene.halloween { background: radial-gradient(circle at 75% 20%, #ffe7ac 0 9%, transparent 10%), linear-gradient(#352e56, #655078 60%, #463447 60%); }
 .modal { z-index: 3; }
 html, body { height: 100%; overflow: hidden; background: #0b1d2e; font-family: 'Outfit', sans-serif; color: #fff; }
 canvas#world { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }
