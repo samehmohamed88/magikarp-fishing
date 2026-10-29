@@ -155,6 +155,10 @@ canvas#world { display: block; width: 100vw; height: 100vh; image-rendering: pix
 #btn-perfect-ball { background: #7046a1; }
 #btn-defeat-coins { background: #816126; border-color: #f5d179; }
 .enc-scene.fire-cave { background: radial-gradient(ellipse at 50% 85%, #ec934c55, transparent 70%), linear-gradient(#39243e, #684453 65%, #3c293b 65%); }
+.enc-scene.sky { background: radial-gradient(ellipse at 20% 70%, #fff 0 12%, transparent 25%), radial-gradient(ellipse at 90% 85%, #eefbff 0 15%, transparent 30%), linear-gradient(#679ce0,#b8e6ff); }
+#btn-flight { position: fixed; right: 16px; bottom: 295px; z-index: 2; background: #466f9c; }
+.flight-help { font-size: 13px; line-height: 1.5; margin: 10px 0; padding: 10px; background: #a7d9ff20; border-radius: 10px; }
+[data-ride-dragon]:hover { outline: 2px solid #a8d9ff; outline-offset: 2px; }
 #btn-dragon { position: fixed; right: 16px; bottom: 145px; z-index: 2; background: #9c4b40; }
 #dragon-quest { position: fixed; top: 122px; left: 50%; transform: translateX(-50%); width: min(520px, calc(100vw - 24px)); padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; text-align: center; pointer-events: none; }
 @media (pointer: coarse) { #dragon-quest { top: 215px; font-size: 11px; } #btn-dragon { bottom: 145px; font-size: 12px; } }

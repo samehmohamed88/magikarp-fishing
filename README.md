@@ -105,7 +105,7 @@ also get access, and the cave stays open during rematches.
 Your **first entry awards 20 balls with a 100% catch chance**, once per save.
 Follow the signs through the winding cave to meet a **level-70 Fire Dragon** at
 the far end. Approach it, or use the nearby **Meet Fire Dragon** button. It has
-its own sprite and is exclusive to this cave.
+its own sprite; shiny Fire Dragons also roam the sky (see below).
 
 During any wild encounter, choose **💎 100% Ball (Z)** to spend one guaranteed-catch
 ball. Regular balls remain available separately. You can keep the remaining balls
@@ -114,9 +114,42 @@ Party, or your Box if the party is full. Once caught, it disappears from its lai
 If you run away or choose the coin reward after defeating it, you can meet it again.
 Return to the entrance ladder and press **Space** to leave the cave.
 
+**Defeat or catch the cave dragon** to permanently unlock **level-100 Squirt
+Turtles, Bulb Toads, and Fire Lizards** throughout the cave. Two of each roam
+the chambers, with their own sprites and shiny forms. Walk into them to encounter
+and catch them; they respawn over time and keep level 100 when caught. Choosing
+coins after defeating the dragon still unlocks them. If you already caught the
+cave dragon, they appear as soon as you load the update.
+
+![Level-100 Squirt Turtle, Bulb Toad, and Fire Lizard, with normal and shiny forms](docs/screenshots/dragon-champions.png)
+
 ![A level-70 Fire Dragon waiting at the end of its ember-lit cave](docs/screenshots/fire-dragon-cave.png)
 
 ![The Fire Dragon encounter with a separate guaranteed-catch ball button](docs/screenshots/fire-dragon.png)
+
+## ☁️ Ride a Fire Dragon
+
+**Level-70 shiny Fire Dragons** roam the sky across the whole surface map,
+including above rivers and mountains. They have blue shiny sprites and sparkle
+labels. Catch the cave dragon first so you have a dragon to ride up to them.
+
+On surface land, open **Party (P)**, hover your cursor over your **Fire Dragon**
+in Party or Box, and press **3** to take flight. Hovering its icon in the party
+bar works too. Use **arrows or WASD** to fly; fly into a sky dragon to encounter
+it. Your mount uses that creature's normal or shiny colors.
+
+Press **3 again over clear ground** to land. Water, trees, peaks, trainers, and
+buildings are not landing spots. On a touch screen, use **Ride dragon / Land
+dragon** and the direction pad. Riding is available on the surface, and your
+flight position saves when you close the game.
+
+Sky dragons are always shiny and level 70, including after capture. They
+respawn, so you can catch more than one. Catching them does not remove the cave
+dragon. Defeating one and choosing coins gives **1,000 coins**.
+
+![Riding a shiny Fire Dragon over the map among roaming sky dragons](docs/screenshots/dragon-flight.png)
+
+![A shiny level-70 Fire Dragon encounter in the clouds](docs/screenshots/shiny-sky-dragon.png)
 
 ## 🧭 Five new biomes, 30 new creatures
 
@@ -147,7 +180,7 @@ caught with the same balls as other creatures.
 
 ![A shiny Moon Unicorn encounter in the Moonlit Grove](docs/screenshots/moon-unicorn.png)
 
-Collection now has **96 species**, a discovery counter, and filters for the new
+Collection now has **99 species**, a discovery counter, and filters for the new
 areas. Your existing catches, shiny forms, trainer wins, and generator rewards
 stay saved. The limited-edition Ghost still appears **only on October 31**.
 Return to land before using fast travel; it is unavailable during encounters.
@@ -260,6 +293,8 @@ Build a party of up to six creatures, with extra catches stored in your Box.
 | Action | Controls |
 | --- | --- |
 | Move | Arrow keys or WASD |
+| Ride your Fire Dragon | Hover its Party, Box, or party-bar icon and press **3**, or tap **Ride dragon** |
+| Land your Fire Dragon | **3** or **Land dragon** over clear ground |
 | Cast or reel in | Space while facing water |
 | Dive at a buoy / ascend one depth | V or the Dive / Shallows / Surface button |
 | Descend one diving level | B or **Dive deeper / Dive to Abyss** |
@@ -277,12 +312,13 @@ Touch devices also have an on-screen direction pad and fishing button.
 Step from a dock into the water to board a boat; return to a dock to get out.
 When fishing, wait for the bite message, then press Space again to reel it in.
 
-Catching starts with at least a 92% chance on the first ball. Weakening increases
-that chance, and a second ball always succeeds if your party is still in the fight.
+Catching usually starts with at least a 92% chance on the first ball; Fire Dragons
+start at 15%. Weakening increases that chance, and a second ball always succeeds
+if your party is still in the fight.
 Creatures won't run away after breaking free, but they may knock out your party.
 You have four seconds to reel in after a bite.
 
-Discover 96 species across the five new biomes, meadows, rivers, caves, seasonal forest, and three
+Discover 99 species across the five new biomes, meadows, rivers, caves, seasonal forest, and three
 diving levels, including Magikarp, Bouldersaur, Orca, and Anglerfish.
 Every species has a shiny form, including pink Bunny, blue Duck, purple
 Squirrel, blue Fox, and mint Hedgehog. Magikarp, Frog, and Bouldersaur keep their
@@ -292,7 +328,7 @@ You can move even the last creature into the Box, or choose **Move all to Box**
 to empty your party at once. Your creatures and Collection progress stay saved.
 Click any creature in the Box to add it back. Put at least one in your party
 before approaching a trainer to battle.
-In Collection, choose **✨ Preview shiny forms** to see all 95 shiny designs
+In Collection, choose **✨ Preview shiny forms** to see all 99 shiny designs
 without changing your catches or saved progress. Bunny, Duck, Squirrel, Fox,
 and Hedgehog use drawn sprites so their colors are consistent across devices.
 

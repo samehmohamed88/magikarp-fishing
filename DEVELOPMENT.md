@@ -1,5 +1,35 @@
 # Running and updating River Quest
 
+## Dragon flight and level-100 cave wildlife
+
+`sky.js` loads after `dragon-cave.js` and before `game.js`. It maintains 18
+shiny Fire Dragons spread across the surface map. Sky wildlife is visible from
+the ground, but collision encounters require riding an owned Fire Dragon.
+Hover targets retain references to actual Party/Box creatures; preview sprites
+cannot start flight. Digit3/Numpad3 mounts or lands; the Ride/Land button supports
+touch. Flights cross surface terrain, with clear-ground landing checks and
+guards against ground encounters, trainers, buildings, fishing, diving, and travel.
+Encounters and battle dialogs cannot be escaped by mounting or landing.
+
+`flying` and `flightShiny` save with the position and collection. Restoring a
+flight requires an owned dragon and a valid surface position. The same sprite
+draws normal/shiny wild dragons, encounters, collection icons, and the mount.
+Sky encounters explicitly carry `inSky`, always have level 70 and shiny status,
+and never update the cave boss's capture or defeat flags.
+
+Defeating or catching the cave boss sets `journey.fireDragonDefeated` permanently.
+Old saves with `fireDragonCaught` migrate to this unlock. Six cave creatures
+(two each of Squirt Turtle, Bulb Toad, and Fire Lizard) then roam, collide, and
+respawn using the cave wildlife system. They have level 100 and 524 HP; their
+sprites and shiny palettes are shared with all collection and battle views.
+Spawn and movement tiles exclude the entrance and boss interaction zones.
+They cannot appear in ordinary land/fishing pools or Elite Four starter parties.
+
+Run `tests/dragon-flight-smoke.cjs` with the Playwright environment below for
+boss unlock/migration, reachable wildlife, captures and level cap, keyboard and
+touch riding, flight persistence and terrain restrictions, sky captures and
+shiny rewards, and independence from cave progression. Screenshots go to `/tmp`.
+
 ## Fire Dragon Cave and defeated-creature rewards
 
 `dragon-cave.js` loads after `league.js` and before `game.js`. It contains the
@@ -18,7 +48,7 @@ when thrown, and guarantees success without a random roll. Busy/lost encounters
 and empty inventories cannot spend balls. Regular throws do not use this supply.
 
 The Fire Dragon is level 70 with 374 HP. It is excluded from ordinary wildlife
-and Elite Four starter parties. Capture marks `journey.fireDragonCaught`, adds
+and Elite Four starter parties. Cave capture marks `journey.fireDragonCaught`, adds
 the level-70 creature to Party/Box and Collection, and removes its map sprite.
 Running away or choosing coins leaves the dragon available for another encounter.
 All new fields default safely for old saves; ball inventory and cave progress
@@ -145,7 +175,7 @@ Cloud onboarding does not provide a browser preview link.
 For a hosting environment that requires a listener on all interfaces, set
 `BIND_ADDRESS=0.0.0.0` only when needed.
 
-Edit the three game files and refresh the browser. The server serves changes
+Edit the game files and refresh the browser. The server serves changes
 immediately. Progress is stored in browser localStorage under `mkrq` and belongs
 to that browser and origin (including its port). Keep the same port to retain it.
 The optional Google Font uses fonts.googleapis.com and fonts.gstatic.com;
@@ -193,7 +223,7 @@ catch, preserving shiny state and saved Party/Box entries.
 The ten new woodland species share weight 20 each in the meadow encounter pool
 (16 total meadow species), including sparkling grass. They have no fishing weight
 and do not enter the separate winter or mountain pools. Verify distinct normal
-and shiny sprites for encounters, Party/Box, Collection (96 species), and battles,
+and shiny sprites for encounters, Party/Box, Collection (99 species), and battles,
 as well as catch/save/reload compatibility with existing saves.
 Fishing shiny probabilities: Alligator 75%; Shark, Catfish, Grunt, Spiny Dogfish,
 and Crocodile 50%; Magikarp and Frog retain 1/8. Sparkling casts guarantee a shiny
@@ -248,7 +278,7 @@ There are 18 cave creatures, three each of Mole, Ant, Spider, Cricket, Praying
 Mantis, and Cave Crawfish. They only encounter by contact underground. Crawfish
 stay in shallow pools; the others stay on dirt. All have distinct normal/shiny
 sprites. They never join surface, fishing, winter, mountain, or diving pools.
-Check movement and respawn boundaries, capture, Party/Box, Collection (96 species),
+Check movement and respawn boundaries, capture, Party/Box, Collection (99 species),
 preview sprites, and persistence. Cave encounters use a separate cave background.
 Old saves without underground default to the surface; cave saves reload on the
 cave layer, with invalid cave positions recovered at the ladder. Surface wildlife
@@ -311,7 +341,7 @@ the four species enters meadow, fishing, normal cave, or swimmer pools. Encounte
 also checks the calendar to prevent stale seasonal availability.
 
 Test all four normal/shiny sprite pairs, catching, and save/reload into November.
-Party, Box, and Collection (96 species) must keep seasonal catches after the event.
+Party, Box, and Collection (99 species) must keep seasonal catches after the event.
 An in-progress encounter may finish after midnight; only new spawns are gated.
 
 ## Deep Sea validation
@@ -361,7 +391,7 @@ collision capture; saved shiny catches; and exclusion from other wildlife pools.
 Load a pre-expansion Abyss save to verify old catches, generator rewards, trainer
 wins, and both return points survive while all new species become available.
 Catch new species into both Party and a full-party Box, reload, and use one in a
-diver battle. Collection must list 96 species and preview every shiny form.
+diver battle. Collection must list 99 species and preview every shiny form.
 No stone piles, generator interactions, or level-2 trainers appear in the Abyss.
 
 Level-2 diver trainers have separate IDs in trainerWins. Their tiles block movement

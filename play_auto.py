@@ -72,7 +72,7 @@ def main():
         parser.error("port must be 1–65535 and interval must be at least 1 second")
     if not shutil.which("git"):
         parser.error("Git must be installed and available on PATH")
-    for name in ("index.html", "biomes.js", "league.js", "dragon-cave.js", "game.js", "style.css"):
+    for name in ("index.html", "biomes.js", "league.js", "dragon-cave.js", "sky.js", "game.js", "style.css"):
         if not (ROOT / name).is_file():
             parser.error(f"missing game file: {name}")
 

@@ -7,7 +7,7 @@
   <meta name="description" content="Explore rivers by boat, fish for Magikarp and catch wild animals in the tall grass." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=shiny-coins-1" />
+  <link rel="stylesheet" href="style.css?v=dragon-flight-1" />
 </head>
 <body>
   <main>
@@ -27,6 +27,7 @@
     <div id="journey-status" class="glass" role="status"></div>
     <button id="btn-site" class="btn" hidden></button>
     <button id="btn-dragon" class="btn" hidden>🐉 Meet Fire Dragon (Space)</button>
+    <button id="btn-flight" class="btn" hidden>🐉 Ride dragon</button>
     <div id="dragon-quest" class="glass" hidden role="status"></div>
     <button id="btn-dive" class="btn" hidden>🤿 Dive (V)</button>
     <button id="btn-depth" class="btn" hidden>🌊 Dive deeper (B)</button>
@@ -130,6 +131,7 @@
     <section id="party" class="modal hidden">
       <div class="dex-card party-card glass">
         <div class="dex-head"><h2>🎒 Your Party</h2><button id="btn-party-close" class="btn">✕</button></div>
+        <p id="flight-help" class="flight-help" hidden></p>
         <section class="candy-bag" aria-label="Level candies">
           <div class="candy-bag-head"><strong>🍬 Candies: <span id="candy-count">0</span></strong><button id="btn-party-candy" class="btn" aria-pressed="false">🍬 Give candy</button></div>
           <p id="candy-help"></p>
@@ -152,9 +154,10 @@
       <button id="btn-a" class="abtn">🎣</button>
     </div>
   </main>
-  <script src="biomes.js?v=shiny-coins-1"></script>
-  <script src="league.js?v=shiny-coins-1"></script>
-  <script src="dragon-cave.js?v=shiny-coins-1"></script>
-  <script src="game.js?v=shiny-coins-1"></script>
+  <script src="biomes.js?v=dragon-flight-1"></script>
+  <script src="league.js?v=dragon-flight-1"></script>
+  <script src="dragon-cave.js?v=dragon-flight-1"></script>
+  <script src="sky.js?v=dragon-flight-1"></script>
+  <script src="game.js?v=dragon-flight-1"></script>
 </body>
 </html>

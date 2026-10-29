@@ -11,6 +11,7 @@ if command -v node >/dev/null; then
   node --check biomes.js
   node --check league.js
   node --check dragon-cave.js
+  node --check sky.js
   node --check game.js
 fi
 echo 'Update complete. Refresh the browser; no build or dependency install is needed.'

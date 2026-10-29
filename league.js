@@ -45,6 +45,7 @@ function loadJourney(saved) {
     perfectBalls:Number.isSafeInteger(data.perfectBalls)&&data.perfectBalls>=0&&data.perfectBalls<=Number.MAX_SAFE_INTEGER-20?data.perfectBalls:0,
     fireCaveGift:data.fireCaveGift===true,
     fireDragonCaught:data.fireDragonCaught===true,
+    fireDragonDefeated:data.fireDragonDefeated===true||data.fireDragonCaught===true,
   };
 }
 const badgeCount = () => GYMS.filter(g=>journey.gymWins[g.id]).length;
@@ -69,7 +70,7 @@ function prepareLeagueMap() {
 }
 function surfaceSites() {return [...MARKETS,...GYMS,...(championDoorOpen()?[CHAMPION_DOOR]:[]),...(fireCaveUnlocked()?[FIRE_CAVE_SITE]:[])];}
 function nearLeagueSite() {
-  if(underground||P.diving||P.boat)return null;
+  if(underground||P.diving||P.boat||P.flying)return null;
   return surfaceSites().find(site=>Math.abs(site.x-P.x)+Math.abs(site.y-P.y)<=1)||null;
 }
 function leagueSafeTile(x,y) {
@@ -114,6 +115,7 @@ function openLeagueGuide() {
     const heading=document.createElement('h3');heading.textContent=`${site.icon||(site===CHAMPION_DOOR?'🚪':'🛒')} ${site.name}${won?' ✓':''}`;
     const detail=document.createElement('p');detail.textContent=site.gym?`${site.badge} Badge · ${site.leader} · Lv ${site.team[0].lv}–${site.team.at(-1).lv}`:site===CHAMPION_DOOR?(eliteFourUnlocked()?`Elite Four: ${journey.eliteRound}/4 defeated. Walk into the door to battle!`:'Your Champion Hall is open!'):'Buy lures for rare creatures and candies to level up your team.';
     if(site===FIRE_CAVE_SITE)detail.textContent=`${journey.fireDragonCaught?'Fire Dragon caught!':'A level-70 Fire Dragon awaits at the end.'} First visit: 20 balls with a 100% catch chance.`;
+    if(site===FIRE_CAVE_SITE&&dragonChampionsUnlocked())detail.textContent=dragonChampionMessage;
     card.append(heading,detail,leagueButton('Travel here',()=>travelToLeagueSite(site.id),!canTravel()));list.append(card);
   }
   if(!canTravel()){$('league-intro').textContent+=' Return to surface land to travel.';}

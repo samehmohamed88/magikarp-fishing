@@ -60,7 +60,7 @@ const SPECIES = [
     id,name,water:true,abyssOnly:true,rate:.95,draw:(...a)=>drawAbyssCreature(id,...a),
   })),
 ];
-SPECIES.push(...BIOME_SPECIES,FIRE_DRAGON);
+SPECIES.push(...BIOME_SPECIES,FIRE_DRAGON,...DRAGON_CHAMPIONS);
 const byId = id => SPECIES.find(s => s.id === id);
 
 // Seasonal events follow the player's device calendar and recur each year.
@@ -928,6 +928,10 @@ for(const [x1,y1,x2,y2] of [[21,8,24,8],[21,36,24,36],[43,12,48,12],[48,8,48,12]
 
 prepareLeagueMap();
 const fireCaveMap=buildFireCaveMap(W,H,CW,CF);
+const fireCaveTiles=[],fireCaveWildlife=[],fireCaveRandom=rng(1700);
+for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(fireCaveMap[y][x]===CF&&
+  Math.hypot(x-FIRE_CAVE_EXIT.x,y-FIRE_CAVE_EXIT.y)>2&&Math.hypot(x-FIRE_DRAGON_NEST.x,y-FIRE_DRAGON_NEST.y)>2)
+  fireCaveTiles.push({x,y});
 
 // Separate cave layer: connected chambers under the starting clearing.
 const tunnelEntrance = { x: 5, y: 5 }, caveExit = { x: 8, y: 8 };
@@ -1001,7 +1005,7 @@ function syncHalloweenCavernWildlife() {
 }
 syncHalloweenCavernWildlife();
 function currentCave() {
-  if(dragonCave)return {wildlife:[],dryTiles:[],pools:[],random:caveRandom,exit:FIRE_CAVE_EXIT};
+  if(dragonCave)return {wildlife:dragonChampionsUnlocked()?fireCaveWildlife:[],dryTiles:fireCaveTiles,pools:[],random:fireCaveRandom,exit:FIRE_CAVE_EXIT};
   return halloweenCavern
     ? {wildlife:halloweenCavernWildlife,dryTiles:halloweenCavernDryTiles,pools:halloweenCavernPools,random:halloweenCavernRandom,exit:halloweenCavernExit}
     : {wildlife:caveWildlife,dryTiles:caveDryTiles,pools:cavePools,random:caveRandom,exit:caveExit};
@@ -1175,11 +1179,12 @@ if(deepDiving&&(!isDiveWater(P.x,P.y)||currentDiveLayer().obstacles.some(o=>o.x=
 P.diving = deepDiving || (!!save.diving && isDiveWater(P.x, P.y));
 if (P.diving) P.boat = false;
 if (underground) { P.diving=false; P.boat=false; }
-if(!underground&&!deepDiving&&halloweenPatch.some(c=>c.x===P.x&&c.y===P.y)&&[TR,HT].includes(tile(P.x,P.y))) {P.x=7;P.y=5;}
+if(!save.flying&&!underground&&!deepDiving&&halloweenPatch.some(c=>c.x===P.x&&c.y===P.y)&&[TR,HT].includes(tile(P.x,P.y))) {P.x=7;P.y=5;}
 P.fx = P.x; P.fy = P.y;
 let fishing = null, modal = null, time = 0;
 const keys = new Set();
 const party = save.party || [], box = save.box || [];
+restoreDragonFlight(save);
 const trainerWins = save.trainerWins || {};
 const caveTreasures = { collected: {}, generated: {} };
 for(const pile of caveTreasurePiles) {
@@ -1191,7 +1196,7 @@ for(const pile of deepStonePiles) {
   deepTreasures.generated[pile.id]=save.deepTreasures?.generated?.[pile.id]===true;
   deepTreasures.collected[pile.id]=deepTreasures.generated[pile.id]||save.deepTreasures?.collected?.[pile.id]===true;
 }
-const persist = () => localStorage.setItem('mkrq', JSON.stringify({ dex, party, box, trainerWins, journey, caveTreasures, deepTreasures, x: P.x, y: P.y, boat: P.boat, diving: P.diving, underground, halloweenCavern, dragonCave, deepDiving, shallowReturn, abyssDiving, deepReturn }));
+const persist = () => localStorage.setItem('mkrq', JSON.stringify({ dex, party, box, trainerWins, journey, caveTreasures, deepTreasures, x: P.x, y: P.y, boat: P.boat, flying:P.flying, flightShiny:P.flightShiny, diving: P.diving, underground, halloweenCavern, dragonCave, deepDiving, shallowReturn, abyssDiving, deepReturn }));
 
 const nearCaveObject = object => underground && !halloweenCavern && !dragonCave && Math.abs(P.x-object.x)+Math.abs(P.y-object.y)<=1;
 const nearDeepObject=object=>deepDiving&&!abyssDiving&&Math.abs(P.x-object.x)+Math.abs(P.y-object.y)<=1;
@@ -1256,12 +1261,12 @@ function deepAction() {
 
 let caveGrace = underground ? 4 : 0, encounterGrace = 4;
 function nearHalloweenCavern() {
-  return !underground&&!P.boat&&!P.diving&&halloweenCalendar().open&&
+  return !underground&&!P.boat&&!P.diving&&!P.flying&&halloweenCalendar().open&&
     Math.abs(P.x-halloweenCavernEntrance.x)+Math.abs(P.y-halloweenCavernEntrance.y)<=1;
 }
 function nearTunnel() {
   const exit=underground?currentCave().exit:tunnelEntrance;
-  return nearHalloweenCavern()||(!P.boat && !P.diving && Math.abs(P.x-exit.x)+Math.abs(P.y-exit.y)<=1);
+  return nearHalloweenCavern()||(!P.boat && !P.diving && !P.flying && Math.abs(P.x-exit.x)+Math.abs(P.y-exit.y)<=1);
 }
 function useTunnel() {
   if(modal||P.prog<1||!nearTunnel())return;
@@ -1292,7 +1297,8 @@ function updateCaveWildlife(dt) {
       const [dx,dy]=[[1,0],[-1,0],[0,1],[0,-1]][Math.floor(random()*4)];
       const nx=mon.x+dx,ny=mon.y+dy;
       const valid=mon.id==='cave-crawfish'?tile(nx,ny)===CP:tile(nx,ny)===CF;
-      if(valid&&!wildlife.some(m=>m!==mon&&m.x===nx&&m.y===ny)) {
+      const safe= !dragonCave || fireCaveTiles.some(p=>p.x===nx&&p.y===ny);
+      if(valid&&safe&&!wildlife.some(m=>m!==mon&&m.x===nx&&m.y===ny)) {
         mon.fx=mon.x;mon.fy=mon.y;mon.x=nx;mon.y=ny;mon.progress=0;
       }
       mon.moveIn=2+random()*2;
@@ -1302,6 +1308,7 @@ function updateCaveWildlife(dt) {
 }
 function checkCaveEncounter() {
   const {wildlife,exit}=currentCave();
+  if(dragonCave&&Math.hypot(P.x-FIRE_DRAGON_NEST.x,P.y-FIRE_DRAGON_NEST.y)<=2)return;
   if(!underground||modal||P.prog<1||caveGrace>0||encounterGrace>0||Math.hypot(P.x-exit.x,P.y-exit.y)<=1||nearCaveObject(caveGenerator)||nearbyTreasure())return;
   const mon=wildlife.find(m=>Math.hypot(m.fx+(m.x-m.fx)*m.progress-P.x,m.fy+(m.y-m.fy)*m.progress-P.y)<.65);
   if(!mon)return;
@@ -1324,7 +1331,7 @@ function toggleDepth() {
   hud();persist();
 }
 function toggleDive() {
-  if (modal || P.prog < 1 || underground) return;
+  if (modal || P.prog < 1 || underground || P.flying) return;
   if(deepDiving) {
     const destination=abyssDiving?deepReturn:shallowReturn;
     if(abyssDiving)abyssDiving=false;else deepDiving=false;
@@ -1393,17 +1400,17 @@ function hud() {
     : P.diving ? 'Swim into creatures · B / Dive deeper: explore the deep sea · V: surface'
     : tile(P.x,P.y)===HF ? `🎃 October forest · ✨ Sparkles = Shiny! · ${halloweenSeason.ghosts?'Halloween today: rare Ghosts can appear!':'Rare Ghosts appear on October 31 only'}`
     : 'Arrows/WASD: move · Space: fish / use tunnel · V at DIVE buoys: scuba · ✨ Sparkles = Shiny!';
-  const biome=!underground&&!P.diving&&newBiomeByTile(tile(P.x,P.y));
+  const biome=!underground&&!P.diving&&!P.flying&&newBiomeByTile(tile(P.x,P.y));
   if(dragonCave){$('hud-biome').textContent='🔥 Fire Dragon Cave';document.querySelector('.hint').textContent='Follow the ember path to the dragon · Space: meet dragon / exit at ladder · 💎 100% balls work on any wild creature';}
   if(biome) {
     $('hud-biome').textContent=`${biome.icon} ${biome.name}`;
     document.querySelector('.hint').textContent=`${biome.icon} Walk to meet six new creatures · Rare: ${byId(biome.special).name} · ✨ Sparkles = Shiny · M: Explore`;
   }
-  renderPartyBar();
+  flightHud();renderPartyBar();
 }
 
 // ---------- Exploration guide ----------
-const canTravel = () => !underground&&!P.diving&&!P.boat;
+const canTravel = () => !underground&&!P.diving&&!P.boat&&!P.flying;
 function openExplore() {
   if(modal&&!['explore','dex','party'].includes(modal))return;
   if(modal==='dex')closeDex();
@@ -1441,6 +1448,10 @@ $('btn-home').onclick=()=>travelToBiome('home');
 function tryMove(dx, dy) {
   P.dir = [dx, dy];
   const nx = P.x + dx, ny = P.y + dy, t = tile(nx, ny), cur = tile(P.x, P.y);
+  if(P.flying){
+    if(nx<1||ny<1||nx>=W-1||ny>=H-1)return;
+    P.fx=P.x;P.fy=P.y;P.x=nx;P.y=ny;P.prog=0;return;
+  }
   if(underground&&!halloweenCavern&&!dragonCave&&nx===caveGenerator.x&&ny===caveGenerator.y)return;
   if(deepDiving&&!abyssDiving&&nx===deepGenerator.x&&ny===deepGenerator.y)return;
   if (activeTrainers().some(trainer => trainer.x === nx && trainer.y === ny)) return;
@@ -1455,8 +1466,9 @@ function tryMove(dx, dy) {
 }
 function arrive() {
   const t = tile(P.x, P.y);
+  if(P.flying){checkSkyEncounter();hud();return;}
   if (underground) {
-    if(dragonCave){meetFireDragon();hud();return;}
+    if(dragonCave){meetFireDragon();if(!modal)checkCaveEncounter();hud();return;}
     const pile=!halloweenCavern&&caveTreasurePiles.find(p=>p.x===P.x&&p.y===P.y);
     if(pile)collectCaveTreasure(pile);
     checkCaveEncounter();hud();return;
@@ -1539,7 +1551,7 @@ function pickBiomeAnimal(habitat) {
 let battle = null, ignoredTrainer = null;
 const maxHP = mon => 24 + mon.lv * 5;
 function challengeTrainer() {
-  if (underground || P.boat || modal) return false;
+  if (underground || P.boat || P.flying || modal) return false;
   const trainers=activeTrainers();
   if (ignoredTrainer && !trainers.some(t => t.id === ignoredTrainer && Math.abs(t.x - P.x) + Math.abs(t.y - P.y) <= 1)) ignoredTrainer = null;
   const trainer = trainers.find(t => !trainerWins[t.id] && t.id !== ignoredTrainer && Math.abs(t.x - P.x) + Math.abs(t.y - P.y) === 1);
@@ -1718,6 +1730,7 @@ $('battle-next').onclick=continueEliteFour;
 // ---------- Fishing ----------
 function action() {
   if (modal) return;
+  if(P.flying){toast('☁️ Fly into shiny dragons to encounter them. Press 3 or Land dragon over clear ground to land.');return;}
   if(nearLeagueSite()){openLeagueSite();return;}
   if(deepDiving&&(nearbyDeepStone()||nearDeepObject(deepGenerator))){deepAction();return;}
   if (nearTunnel()) { useTunnel(); return; }
@@ -1822,9 +1835,13 @@ function updateFishing(dt) {
 // ---------- Encounter ----------
 const ec = $('enc-canvas'), ectx = ec.getContext('2d');
 let enc = null;
-function startEncounter(sp, shiny, inWater = false, inMountain = false, inWinter = false) {
+function startEncounter(sp, shiny, inWater = false, inMountain = false, inWinter = false, source = null) {
   if(modal)return;
-  if(sp.id==='fire-dragon'&&(!nearFireDragon()||!fireCaveUnlocked()))return;
+  const inSky=sp.id==='fire-dragon'&&source==='sky';
+  if(inSky&&!P.flying||P.flying&&!inSky)return;
+  if(inSky)shiny=true;
+  if(sp.id==='fire-dragon'&&!inSky&&(!nearFireDragon()||!fireCaveUnlocked()))return;
+  if(sp.championWild&&(!dragonCave||!dragonChampionsUnlocked()))return;
   if(halloweenCavern) {
     const season=halloweenCalendar();
     if(!season.open||(!halloweenCavernSpecies.includes(sp.id)&&!(sp.id==='ghost'&&season.ghosts)))return;
@@ -1835,8 +1852,8 @@ function startEncounter(sp, shiny, inWater = false, inMountain = false, inWinter
     if(!season.open||(sp.id==='ghost'&&!season.ghosts))return;
   }
   encounterGrace = 4;
-  const lv=sp.id==='fire-dragon'?70:2+Math.floor(Math.random()*8),health=24+lv*5;
-  enc = { sp, shiny: !!shiny, busy: false, attempts: 0, lv, hp:health, maxHp:health, lureBonus:useEncounterLure(),
+  const lv=sp.championWild?100:sp.id==='fire-dragon'?70:2+Math.floor(Math.random()*8),health=24+lv*5;
+  enc = { sp, inSky, shiny: !!shiny, busy: false, attempts: 0, lv, hp:health, maxHp:health, lureBonus:useEncounterLure(),
     allies:party.map(mon=>({...mon,hp:maxHP(mon)})),ally:0,lost:false };
   modal = 'enc'; keys.clear();
   $('encounter').classList.remove('hidden');
@@ -1845,6 +1862,8 @@ function startEncounter(sp, shiny, inWater = false, inMountain = false, inWinter
   setText(`${abyssDiving ? 'In the Abyss, you swam into' : deepDiving ? 'In the deep sea, you swam into' : halloweenCavern ? 'In Halloween Cavern, a wild' : sp.habitat==='halloween' ? 'In Halloween Forest, a wild' : underground ? 'Deep underground, a wild' : inWater ? (P.diving ? 'You swam into' : 'You fished up') : inWinter ? 'In the snow, a wild' : (inMountain ? 'From the crags appeared' : 'A wild')} ${enc.shiny ? '✨SHINY✨ ' : ''}${sp.name} (Lv ${enc.lv})${inWater ? '!' : ' appeared!'}`);
   const biome=newBiomeById(sp.habitat);
   if(sp.id==='fire-dragon'){$('enc-scene').className='enc-scene fire-cave';setText('🔥 At the end of the cave, a Fire Dragon (Lv 70) spreads its wings!');}
+  if(inSky){$('enc-scene').className='enc-scene sky';setText('☁️ Among the clouds, a ✨SHINY✨ Fire Dragon (Lv 70) appeared!');}
+  if(sp.championWild){$('enc-scene').className='enc-scene fire-cave';setText(`In Fire Dragon Cave, a wild ${enc.shiny?'✨SHINY✨ ':''}${sp.name} (Lv 100) appeared!`);}
   if(biome) {
     $('enc-scene').className=`enc-scene ${biome.id}`;
     setText(`In ${biome.name}, ${sp.special?'a rare':'a wild'} ${enc.shiny?'✨SHINY✨ ':''}${sp.name} (Lv ${enc.lv}) appeared!`);
@@ -1883,7 +1902,11 @@ function weakenEncounter() {
   const ally=enc.allies[enc.ally];
   const damage=Math.min(enc.hp,7+ally.lv*2+Math.floor(Math.random()*4));
   enc.hp-=damage;
-  if(enc.hp===0){setText(`You defeated ${enc.sp.name}! Catch it or take ${defeatCoinReward()} coins instead.`);setBtns(true);return;}
+  if(enc.hp===0){
+    const unlocked=enc.sp.id==='fire-dragon'&&!enc.inSky&&unlockDragonChampions();
+    setText(`You defeated ${enc.sp.name}! Catch it or take ${defeatCoinReward()} coins instead.${unlocked?' '+dragonChampionMessage:''}`);
+    setBtns(true);if(unlocked){persist();hud();}return;
+  }
   wildRetaliation(`${byId(ally.id).name} dealt ${damage} damage! ${enc.sp.name} ${enc.hp===1?'is fully weakened.':'is easier to catch now.'} `);
 }
 function defeatCoinReward() { return enc?.shiny ? 1000 : 100; }
@@ -1948,9 +1971,10 @@ async function throwBall(perfect=false) {
     const d = dex[enc.sp.id] ||= { count: 0, shiny: 0 }; d.count++; if (enc.shiny) d.shiny++;
     const mon = { id: enc.sp.id, shiny: enc.shiny, lv: enc.lv };
     const toParty = party.length < 6; (toParty ? party : box).push(mon);
-    if(enc.sp.id==='fire-dragon')journey.fireDragonCaught=true;
+    let unlocked=false;
+    if(enc.sp.id==='fire-dragon'&&!enc.inSky){journey.fireDragonCaught=true;unlocked=unlockDragonChampions();}
     const coins=awardCatchCoins(enc.sp,enc.shiny);
-    setText(`Gotcha! ${enc.sp.name} was caught! 🎉 +${coins} coins! ${toParty ? 'Added to your party.' : 'Party full: sent to the Box.'}`); persist(); hud();
+    setText(`Gotcha! ${enc.sp.name} was caught! 🎉 +${coins} coins! ${toParty ? 'Added to your party.' : 'Party full: sent to the Box.'}${unlocked?' '+dragonChampionMessage:''}`); persist(); hud();
     await wait(1400);if(enc===currentEncounter)closeEnc();
   } else {
     ball.className = 'ball hidden'; ec.classList.remove('gone');
@@ -1990,7 +2014,8 @@ function openDex() {
     el.appendChild(icon);
     el.insertAdjacentHTML('beforeend', `<b>${visible ? s.name : '???'}</b><br><small>${previewShinies ? `✨ Shiny preview · ${d?.shiny ? 'caught' : 'not caught'}` : d ? `×${d.count}${d.shiny ? ` · ✨${d.shiny}` : ''}` : (s.abyssOnly ? '🌌 Abyss · third diving level' : s.habitat === 'deep-generator' ? '⚡ Deep sea generator' : s.deepOnly ? '🌊 Deep sea only' : s.habitat === 'halloween' ? (s.id==='ghost'?'🎃 October 31 only · Rare':'🎃 Halloween Forest · October only') : s.habitat === 'generator' ? '⚡ Generator · ✨ October cavern' : s.habitat === 'cave' ? '🕳️ Tunnel in the starting meadow' : s.diveOnly ? '🤿 Diving only' : s.habitat === 'winter' ? '❄ Winter Area · South' : s.id === 'bouldersaur' ? '🏔️ East Mountains' : s.water ? 'Fish in rivers' : s.id === 'frog' ? 'Grass or rivers' : 'Tall grass')}</small>`);
     const biome=newBiomeById(s.habitat);
-    if(s.id==='fire-dragon'&&!visible)el.querySelector('small').textContent='🔥 Beat the Elite Four · Fire Dragon Cave · Lv 70';
+    if(s.id==='fire-dragon'&&!visible)el.querySelector('small').textContent='🔥 Cave after Elite Four · ✨ Sky while riding · Lv 70';
+    if(s.championWild&&!visible)el.querySelector('small').textContent='🐉 Defeat or catch the Fire Dragon · Cave · Lv 100';
     if(biome) {
       const habitat=document.createElement('p');habitat.className='dex-habitat';habitat.textContent=`${biome.icon} ${biome.name}${s.special?' · Rare':''}`;
       el.appendChild(habitat);
@@ -2038,6 +2063,7 @@ function monIcon(m, w = 70, h = 46) {
 }
 function monCard(m, onClick, label) {
   const el = document.createElement('button'); el.className = 'mon' + (m.shiny ? ' shiny' : ''); el.title = label;
+  markDragonRideTarget(el,m);
   el.appendChild(monIcon(m));
   el.insertAdjacentHTML('beforeend', `<b>${m.shiny ? '✨' : ''}${byId(m.id).name}</b><small>Lv ${m.lv}</small>`);
   el.onclick = onClick; return el;
@@ -2077,10 +2103,10 @@ function renderPartyBar() {
   const bar = $('party-bar'); bar.innerHTML = '';
   for (let i = 0; i < 6; i++) {
     const slot = document.createElement('div'); slot.className = 'pslot' + (party[i]?.shiny ? ' shiny' : '');
-    if (party[i]) slot.appendChild(monIcon(party[i], 44, 30)); bar.appendChild(slot);
+    if (party[i]) {slot.appendChild(monIcon(party[i], 44, 30));markDragonRideTarget(slot,party[i]);} bar.appendChild(slot);
   }
 }
-function openParty() { if (modal && !['dex','party','explore'].includes(modal)) return; if (modal === 'dex') closeDex(); if(modal==='explore')closeExplore(); if(modal!=='party'){partyCandyMode=false;$('candy-message').textContent='';} modal = 'party'; keys.clear(); renderParty(); $('party').classList.remove('hidden'); }
+function openParty() { if (modal && !['dex','party','explore'].includes(modal)) return; if (modal === 'dex') closeDex(); if(modal==='explore')closeExplore(); if(modal!=='party'){partyCandyMode=false;$('candy-message').textContent='';} modal = 'party'; keys.clear(); flightHud();renderParty(); $('party').classList.remove('hidden'); }
 const closeParty = () => { $('party').classList.add('hidden'); partyCandyMode=false; modal = null; };
 $('btn-party').onclick = openParty; $('btn-party-close').onclick = closeParty; $('party-bar').onclick = openParty;
 $('btn-party-candy').onclick = toggleCandyMode;
@@ -2093,6 +2119,7 @@ $('btn-party-store-all').onclick = () => {
 const DIRS = { ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1], ArrowLeft: [-1, 0], KeyA: [-1, 0], ArrowRight: [1, 0], KeyD: [1, 0] };
 addEventListener('keydown', e => {
   if(e.target.matches('select,input,textarea'))return;
+  if((e.code==='Digit3'||e.code==='Numpad3')&&!e.repeat){e.preventDefault();if(P.flying)landFireDragon();else mountFireDragon(hoveredFireDragon());return;}
   if(['league','market','gym','champion'].includes(modal)) {if(e.code==='Escape'||e.code==='KeyG'){e.preventDefault();closeLeague();}return;}
   if(e.code==='KeyG'&&!e.repeat){e.preventDefault();openLeagueGuide();return;}
   if(modal==='explore') {if(e.code==='Escape'||e.code==='KeyM'){e.preventDefault();closeExplore();}return;}
@@ -2132,6 +2159,7 @@ $('btn-league').onclick=openLeagueGuide;
 $('btn-league-close').onclick=closeLeague;
 $('btn-site').onclick=openLeagueSite;
 $('btn-dragon').onclick=meetFireDragon;
+$('btn-flight').onclick=()=>P.flying?landFireDragon():mountFireDragon(ownedFireDragons()[0]);
 
 // ---------- Render ----------
 function resize() { cv.width = innerWidth; cv.height = innerHeight; }
@@ -2225,6 +2253,7 @@ function drawTile(t, x, y, px, py) {
 }
 
 function drawPlayer(px, py) {
+  if(P.flying){drawDragonRider(px,py);return;}
   const cx = px + T / 2, cy = py + T / 2;
   if (P.diving) {
     const bob = Math.sin(time * 4) * 2;
@@ -2348,6 +2377,7 @@ function render() {
     ctx.font='11px sans-serif';ctx.fillText('6 creatures · Sparkles = Shiny',sx,sy+10);
   }
   drawLeagueSites(camX,camY);
+  drawSkyWildlife(camX,camY);
   drawPlayer(ppx - camX, ppy - camY);
   // A sign at the entrance helps players find the new biome.
   const signX = 5*T + T/2 - camX, signY = 27*T - camY;
@@ -2499,7 +2529,7 @@ function refreshHalloweenSeason() {
     toast('🎃 Halloween Cavern has closed until next October. Your caught shinies are safe!');
   }
   spots=spots.filter(s=>[TG,WA,MT,SN,HF].includes(map[s.y]?.[s.x])||newBiomeByTile(map[s.y]?.[s.x]));
-  if(!underground&&!deepDiving&&halloweenPatch.some(c=>c.x===P.x&&c.y===P.y)&&[TR,HT].includes(tile(P.x,P.y))) {
+  if(!P.flying&&!underground&&!deepDiving&&halloweenPatch.some(c=>c.x===P.x&&c.y===P.y)&&[TR,HT].includes(tile(P.x,P.y))) {
     Object.assign(P,{x:7,y:5,fx:7,fy:5,prog:1});keys.clear();
   }
   hud();persist();
@@ -2523,13 +2553,15 @@ function loop(now) {
   }
   if (!modal) {
     if(underground)updateCaveWildlife(dt);
-    else {updateWaterWildlife(dt);diveGrace=Math.max(0,diveGrace-dt);checkDiveEncounter();}
+    else {updateWaterWildlife(dt);diveGrace=Math.max(0,diveGrace-dt);checkDiveEncounter();if(!P.diving&&!modal)updateSkyWildlife(dt);}
   }
   updateSpots(dt);
   render(); if (modal === 'enc') drawEnc();
   if ((saveT += dt) > 3) { saveT = 0; persist(); }
   requestAnimationFrame(loop);
 }
+syncDragonChampions();
+initializeSky();
 hud();
-toast(dragonCave?'🔥 Welcome back to Fire Dragon Cave! Follow the signs to the lair.':abyssDiving?'🌌 Welcome back to the Abyss! V returns to the Deep Sea.':deepDiving?'🌊 B explores the Abyss. V returns to the shallows.':halloweenCavern?'✨ Halloween Cavern: every creature is shiny! Return to the ladder to leave.':underground?'🕯️ Explore the caves; return to the ladder to leave.':P.diving ? '🤿 B dives deeper. V returns to your boat.' : 'Welcome! Space at the starting tunnel: explore underground 🕳️');
+toast(P.flying?'☁️ Welcome back to the sky! Fly into shiny dragons; press 3 over clear ground to land.':dragonCave?(dragonChampionsUnlocked()?dragonChampionMessage:'🔥 Welcome back to Fire Dragon Cave! Follow the signs to the lair.'):abyssDiving?'🌌 Welcome back to the Abyss! V returns to the Deep Sea.':deepDiving?'🌊 B explores the Abyss. V returns to the shallows.':halloweenCavern?'✨ Halloween Cavern: every creature is shiny! Return to the ladder to leave.':underground?'🕯️ Explore the caves; return to the ladder to leave.':P.diving ? '🤿 B dives deeper. V returns to your boat.' : 'Welcome! Space at the starting tunnel: explore underground 🕳️');
 requestAnimationFrame(loop);
