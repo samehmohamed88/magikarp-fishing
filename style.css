@@ -1,6 +1,8 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 [hidden] { display: none !important; }
 #btn-dive { position: fixed; right: 16px; bottom: 145px; z-index: 2; background: #17627d; }
+#btn-tunnel { position: fixed; right: 16px; bottom: 195px; z-index: 2; background: #5b435e; }
+.enc-scene.cave { background: radial-gradient(ellipse at 50% 25%, #80709b, #323248 65%, #50414c 66%); }
 .modal { z-index: 3; }
 html, body { height: 100%; overflow: hidden; background: #0b1d2e; font-family: 'Outfit', sans-serif; color: #fff; }
 canvas#world { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }

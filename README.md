@@ -123,7 +123,7 @@ Catching is forgiving: every species has at least a 92% chance on the first ball
 and the second ball always succeeds. Creatures won't run away after breaking free.
 You have four seconds to reel in after a bite.
 
-Discover thirty-two species, including Magikarp, Frog, Fox, Bouldersaur, Snowy,
+Discover thirty-eight species, including Magikarp, Frog, Fox, Bouldersaur, Snowy,
 and the six new water creatures.
 Every species has a shiny form, including pink Bunny, blue Duck, purple
 Squirrel, blue Fox, and mint Hedgehog. Magikarp, Frog, and Bouldersaur keep their
@@ -133,7 +133,7 @@ You can move even the last creature into the Box, or choose **Move all to Box**
 to empty your party at once. Your creatures and Collection progress stay saved.
 Click any creature in the Box to add it back. Put at least one in your party
 before approaching a trainer to battle.
-In Collection, choose **✨ Preview shiny forms** to see all thirty-two shiny designs
+In Collection, choose **✨ Preview shiny forms** to see all thirty-eight shiny designs
 without changing your catches or saved progress. Bunny, Duck, Squirrel, Fox,
 and Hedgehog use drawn sprites so their colors are consistent across devices.
 
@@ -156,6 +156,26 @@ have their alternate colors and a small star; their shiny form stays with them
 when encountered and caught. Press **V** or tap **Surface** anywhere underwater
 to return to your boat. There is no air timer. Normal fishing still works above
 water, and your diving position saves automatically.
+
+## Underground caves
+
+A tunnel sits in the **middle of the starting clearing**. Stand on or beside it
+and press **Space**, or tap **Enter tunnel**, to explore the Crystal Caves.
+Walk into **Moles, Ants, Spiders, Crickets, Praying Mantises, and Cave Crawfish**
+to encounter and catch them. These six species are exclusive to the caves, and
+all have shiny forms. Cave crawfish live in shallow pools you can walk through.
+
+![The Crystal Caves with an exit ladder, creatures, crystals, and shallow pools](docs/screenshots/caves.png)
+
+![Normal and shiny Mole, Ant, Spider, Cricket, Praying Mantis, and Cave Crawfish](docs/screenshots/cave-creatures.png)
+
+Return to the **EXIT TO MEADOW** ladder and press **Space** or tap **Exit cave**
+to return outside. Your cave location and catches save automatically.
+
+Wild encounters are less frequent: grass and mountains have an 8% chance per
+step, and snow has a 10% chance. After a wild encounter ends, you get four seconds
+without another random or collision encounter. The same protection applies after
+loading your save. Fishing remains under your control.
 
 ## Saved progress
 

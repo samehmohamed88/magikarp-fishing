@@ -73,7 +73,7 @@ catch, preserving shiny state and saved Party/Box entries.
 The ten new woodland species share weight 20 each in the meadow encounter pool
 (16 total meadow species), including sparkling grass. They have no fishing weight
 and do not enter the separate winter or mountain pools. Verify distinct normal
-and shiny sprites for encounters, Party/Box, Collection (32 species), and battles,
+and shiny sprites for encounters, Party/Box, Collection (38 species), and battles,
 as well as catch/save/reload compatibility with existing saves.
 Fishing shiny probabilities: Alligator 75%; Shark, Catfish, Grunt, Spiny Dogfish,
 and Crocodile 50%; Magikarp and Frog retain 1/8. Sparkling casts guarantee a shiny
@@ -115,3 +115,27 @@ They are hidden above water, stay in dive regions when moving or respawning,
 and keep their species and shiny flag through collision/capture/save/reload.
 Check all seven normal/shiny drawings in Collection, encounters, Party/Box, and
 battles. Collection gives a Diving only hint for undiscovered exclusive species.
+
+## Cave and encounter-frequency validation
+
+The tunnel is at surface tile (5,5), centered in the starting clearing. Space or
+Enter tunnel works on that tile or an adjacent tile. The cave has a separate map
+layer with connected chambers and an exit ladder at (8,8); Space or Exit cave
+returns to surface tile (5,6). Cave walls block movement, while dirt and shallow
+pools are walkable. Entering/exiting clears held movement keys and fishing.
+
+There are 18 cave creatures, three each of Mole, Ant, Spider, Cricket, Praying
+Mantis, and Cave Crawfish. They only encounter by contact underground. Crawfish
+stay in shallow pools; the others stay on dirt. All have distinct normal/shiny
+sprites. They never join surface, fishing, winter, mountain, or diving pools.
+Check movement and respawn boundaries, capture, Party/Box, Collection (38 species),
+preview sprites, and persistence. Cave encounters use a separate cave background.
+Old saves without underground default to the surface; cave saves reload on the
+cave layer, with invalid cave positions recovered at the ladder. Surface wildlife
+and rivals must stay on their layer and remain usable after exiting. Check touch
+entry/exit and that the ladder is always reachable from each chamber.
+
+Random grass/mountain encounters have an 8% per-step chance; snow has 10%.
+Verify exact thresholds, four seconds of cooldown after a wild encounter ends,
+and suppression of automatic cave/dive contact encounters during that cooldown.
+Intentional fishing is still available, and trainers retain their existing rules.

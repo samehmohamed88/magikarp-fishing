@@ -1,6 +1,6 @@
 // ===== Magikarp River Quest =====
 const T = 40, W = 60, H = 45;
-const G = 0, TG = 1, WA = 2, DK = 3, TR = 4, SA = 5, MT = 6, MP = 7, SN = 8;
+const G = 0, TG = 1, WA = 2, DK = 3, TR = 4, SA = 5, MT = 6, MP = 7, SN = 8, CF = 9, CW = 10, CP = 11;
 const $ = id => document.getElementById(id);
 const cv = $('world'), ctx = cv.getContext('2d');
 
@@ -35,10 +35,69 @@ const SPECIES = [
     id, name: id[0].toUpperCase() + id.slice(1), water: true, diveOnly: true,
     rate: 0.96, draw: (...a) => drawSeaCreature(id, ...a),
   })),
+  ...[['mole','Mole'],['ant','Ant'],['spider','Spider'],['cricket','Cricket'],
+    ['praying-mantis','Praying Mantis'],['cave-crawfish','Cave Crawfish']].map(([id,name]) => ({
+    id, name, habitat: 'cave', rate: .96, draw: (...a) => drawCaveCreature(id, ...a),
+  })),
 ];
 const byId = id => SPECIES.find(s => s.id === id);
 
-function drawSeaCreature(id, c, x, y, s, shiny = false, t = 0) {
+function drawCaveCreature(id, c, x, y, s, shiny = false, t = 0) {
+  if (id === 'cave-crawfish') {
+    drawSeaCreature('lobster', c, x, y, s * .85, shiny, t, ['#d6bdb1','#fff1df','#83d8ba','#d7fff3']); return;
+  }
+  const palettes = {
+    mole: ['#92715e','#d6b59a','#a58be3','#e8d8ff'],
+    ant: ['#9d5348','#df9480','#65bac5','#b8f1ee'],
+    spider: ['#76618e','#c1a2dc','#ecaf5d','#ffe2a3'],
+    cricket: ['#a88e4d','#dec788','#78bfdc','#d0f4ff'],
+    'praying-mantis': ['#80b35a','#d1ed99','#eb97c3','#ffe1f0'],
+  };
+  const p = palettes[id], body = p[shiny ? 2 : 0], light = p[shiny ? 3 : 1];
+  c.save(); c.translate(x, y); c.scale(s, s); c.lineCap = 'round'; c.lineJoin = 'round';
+  c.strokeStyle = '#2c2937'; c.lineWidth = .05;
+  const oval = (x,y,rx,ry,color,angle=0) => {c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,angle,0,Math.PI*2);c.fill();c.stroke();};
+  const line = (points,color=body,width=.08) => {c.strokeStyle=color;c.lineWidth=width;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();c.strokeStyle='#2c2937';c.lineWidth=.05;};
+  const sway = Math.sin(t*4)*.07;
+  if (id === 'mole') {
+    oval(0,.17,.7,.64,body);oval(0,-.25,.58,.47,body);
+    for(const side of [-1,1]) {
+      oval(side*.65,.28,.34,.25,light,side*.4);
+      for(let i=0;i<3;i++)line([[side*(.55+i*.12),.35],[side*(.61+i*.13),.62]],'#fff0d9',.07);
+      oval(side*.25,-.3,.055,.06,'#171c2a');oval(side*.3,.7,.25,.14,body);
+    }
+    oval(0,-.1,.23,.14,'#ef9ea9');
+    for(const side of [-1,1])line([[side*.15,-.02],[side*.48,-.04]],light,.035);
+  } else {
+    const mantis=id==='praying-mantis', spider=id==='spider', cricket=id==='cricket';
+    for(const side of [-1,1])for(let i=0;i<(spider?4:3);i++) {
+      const y=-.25+i*.27;
+      line([[side*.25,y],[side*(.8+(cricket&&i===2?.35:0)),y-.2+sway],[side*(1.02+(cricket&&i===2?.2:0)),y+.36]],body,cricket&&i===2?.13:.075);
+    }
+    if (mantis) {
+      oval(0,.42,.27,.5,body);oval(0,-.08,.16,.42,body);
+      for(const side of [-1,1]) {
+        line([[side*.1,-.2],[side*.66,-.7],[side*.32,-.95],[side*.4,-.55]],light,.1);
+        for(let i=0;i<3;i++)line([[side*(.35+i*.08),-.77+i*.06],[side*(.3+i*.08),-.65+i*.06]],body,.03);
+      }
+      c.fillStyle=body;c.beginPath();c.moveTo(-.48,-.65);c.lineTo(.48,-.65);c.lineTo(0,-.24);c.closePath();c.fill();c.stroke();
+    } else {
+      oval(0,.38,spider?.55:.35,spider?.52:.4,body);
+      if(id==='ant')oval(0,-.1,.26,.27,body);
+      if(cricket){oval(-.13,.23,.21,.48,light,-.2);oval(.13,.23,.21,.48,body,.2);}
+      oval(0,-.48,spider?.33:.36,.32,body);
+    }
+    for(const side of [-1,1]) {
+      if(!spider)line([[side*.15,-.65],[side*.3,-1.05],[side*.58,-1.22+sway]],light,.035);
+      oval(side*(mantis?.3:.15),mantis?-.57:-.5,.1,.11,light);
+      oval(side*(mantis?.3:.15),mantis?-.57:-.5,.045,.065,'#192033');
+    }
+    if(spider)for(const side of [-1,1])oval(side*.07,-.68,.035,.04,light);
+  }
+  c.restore();
+}
+
+function drawSeaCreature(id, c, x, y, s, shiny = false, t = 0, palette = null) {
   const palettes = {
     narwhal: ['#73aecb', '#d6eff7', '#ee97c4', '#ffe1f1'],
     crab: ['#ef7646', '#ffcc89', '#5ad3d0', '#c9fff3'],
@@ -48,7 +107,7 @@ function drawSeaCreature(id, c, x, y, s, shiny = false, t = 0) {
     octopus: ['#da7aa9', '#ffc1d9', '#e8b33c', '#fff0a7'],
     squid: ['#a688d8', '#dfccf6', '#69c38a', '#d8ffb6'],
   };
-  const p = palettes[id], body = p[shiny ? 2 : 0], light = p[shiny ? 3 : 1];
+  const p = palette || palettes[id], body = p[shiny ? 2 : 0], light = p[shiny ? 3 : 1];
   c.save(); c.translate(x, y); c.scale(s, s);
   c.strokeStyle = '#23394b'; c.lineWidth = .05; c.lineJoin = 'round'; c.lineCap = 'round';
   const oval = (px, py, rx, ry, color, angle = 0) => {
@@ -470,8 +529,9 @@ function drawCarp(c, x, y, s, shiny = false, t = 0) {
 function rng(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 const R = rng(7);
 const map = Array.from({ length: H }, () => Array(W).fill(G));
+let activeMap = map, underground = false;
 const inb = (x, y) => x >= 0 && y >= 0 && x < W && y < H;
-const tile = (x, y) => inb(x, y) ? map[y][x] : TR;
+const tile = (x, y) => inb(x, y) ? activeMap[y][x] : TR;
 for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
   if (x < 1 || y < 1 || x >= W - 1 || y >= H - 1) map[y][x] = TR;
   if ((x >= 18 && x <= 20) || (x >= 40 && x <= 42)) map[y][x] = WA;
@@ -535,6 +595,32 @@ for (const trainer of TRAINERS) {
   const ground = trainer.x >= 44 ? MT : trainer.y >= 28 && trainer.x <= 15 ? SN : G;
   for (let y = trainer.y - 1; y <= trainer.y + 1; y++) for (let x = trainer.x - 1; x <= trainer.x + 1; x++)
     if (inb(x, y) && ![WA, DK].includes(tile(x, y))) map[y][x] = ground;
+}
+
+// Separate cave layer: connected chambers under the starting clearing.
+const tunnelEntrance = { x: 5, y: 5 }, caveExit = { x: 8, y: 8 };
+const caveMap = Array.from({ length: H }, () => Array(W).fill(CW));
+const carve = (x1,y1,x2,y2) => {for(let y=y1;y<=y2;y++)for(let x=x1;x<=x2;x++)caveMap[y][x]=CF;};
+carve(3,3,20,17); carve(26,5,42,20); carve(8,25,28,39); carve(40,27,55,40);
+carve(18,11,28,13); carve(14,15,16,28); carve(26,30,43,32); carve(34,18,36,32);
+for(const [cx,cy] of [[16,13],[34,14],[20,33],[48,35]])
+  for(let y=cy-1;y<=cy+1;y++)for(let x=cx-1;x<=cx+1;x++)caveMap[y][x]=CP;
+const caveTiles = [], cavePools = [], caveDryTiles = [];
+for(let y=0;y<H;y++)for(let x=0;x<W;x++) {
+  if(caveMap[y][x]===CF||caveMap[y][x]===CP) {
+    const spot={x,y};caveTiles.push(spot);(caveMap[y][x]===CP?cavePools:caveDryTiles).push(spot);
+  }
+}
+const caveRandom = rng(91), caveWildlife = [];
+const caveFirstSpawns = {
+  mole:{x:10,y:9},ant:{x:12,y:6},spider:{x:7,y:12},cricket:{x:15,y:7},
+  'praying-mantis':{x:18,y:10},'cave-crawfish':{x:16,y:13},
+};
+for(const sp of SPECIES.filter(sp=>sp.habitat==='cave'))for(let i=0;i<3;i++) {
+  const habitat=sp.id==='cave-crawfish'?cavePools:caveDryTiles;
+  const free=habitat.filter(spot=>Math.hypot(spot.x-caveExit.x,spot.y-caveExit.y)>2 && !Object.values(caveFirstSpawns).some(pos=>pos.x===spot.x&&pos.y===spot.y) && !caveWildlife.some(m=>m.x===spot.x&&m.y===spot.y));
+  const spot=i===0?caveFirstSpawns[sp.id]:free[Math.floor(caveRandom()*free.length)];
+  caveWildlife.push({id:sp.id,...spot,fx:spot.x,fy:spot.y,progress:1,shiny:caveRandom()<1/8,moveIn:2+caveRandom()*2,life:60+caveRandom()*40});
 }
 
 const waterTiles = [];
@@ -619,18 +705,66 @@ function drawWaterWildlife(camX, camY) {
 const save = JSON.parse(localStorage.getItem('mkrq') || '{}');
 const dex = save.dex || {};
 const P = { x: save.x ?? 5, y: save.y ?? 5, fx: 0, fy: 0, prog: 1, dir: [0, 1], boat: !!save.boat };
+underground = !!save.underground;
+activeMap = underground ? caveMap : map;
+if(underground && ![CF,CP].includes(tile(P.x,P.y))) {P.x=caveExit.x;P.y=caveExit.y;}
 P.diving = !!save.diving && isDiveWater(P.x, P.y);
 if (P.diving) P.boat = false;
+if (underground) { P.diving=false; P.boat=false; }
 P.fx = P.x; P.fy = P.y;
 let fishing = null, modal = null, time = 0;
 const keys = new Set();
 const party = save.party || [], box = save.box || [];
 const trainerWins = save.trainerWins || {};
-const persist = () => localStorage.setItem('mkrq', JSON.stringify({ dex, party, box, trainerWins, x: P.x, y: P.y, boat: P.boat, diving: P.diving }));
+const persist = () => localStorage.setItem('mkrq', JSON.stringify({ dex, party, box, trainerWins, x: P.x, y: P.y, boat: P.boat, diving: P.diving, underground }));
 
-let diveGrace = 0;
+let caveGrace = underground ? 4 : 0, encounterGrace = 4;
+function nearTunnel() {
+  const exit=underground?caveExit:tunnelEntrance;
+  return !P.boat && !P.diving && Math.abs(P.x-exit.x)+Math.abs(P.y-exit.y)<=1;
+}
+function useTunnel() {
+  if(modal||P.prog<1||!nearTunnel())return;
+  underground=!underground; activeMap=underground?caveMap:map;
+  const destination=underground?caveExit:{x:tunnelEntrance.x,y:tunnelEntrance.y+1};
+  Object.assign(P,{...destination,fx:destination.x,fy:destination.y,prog:1,boat:false,diving:false});
+  fishing=null;keys.clear();caveGrace=1.5;
+  toast(underground?'🕯️ Explore the cave! Touch creatures to encounter them. Return to the ladder to leave.':'☀️ Back in the starting meadow!');
+  hud();persist();
+}
+function updateCaveWildlife(dt) {
+  for(const mon of caveWildlife) {
+    mon.progress=Math.min(1,mon.progress+dt/.7);mon.moveIn-=dt;mon.life-=dt;
+    const habitat=mon.id==='cave-crawfish'?cavePools:caveDryTiles;
+    if(mon.life<=0) {
+      const free=habitat.filter(spot=>Math.hypot(spot.x-P.x,spot.y-P.y)>2 && !caveWildlife.some(m=>m!==mon&&m.x===spot.x&&m.y===spot.y));
+      const spot=free[Math.floor(caveRandom()*free.length)];
+      Object.assign(mon,spot,{fx:spot.x,fy:spot.y,progress:1,shiny:caveRandom()<1/8,life:60+caveRandom()*40});
+    }
+    if(mon.moveIn<=0) {
+      const [dx,dy]=[[1,0],[-1,0],[0,1],[0,-1]][Math.floor(caveRandom()*4)];
+      const nx=mon.x+dx,ny=mon.y+dy;
+      const valid=mon.id==='cave-crawfish'?tile(nx,ny)===CP:tile(nx,ny)===CF;
+      if(valid&&!caveWildlife.some(m=>m!==mon&&m.x===nx&&m.y===ny)) {
+        mon.fx=mon.x;mon.fy=mon.y;mon.x=nx;mon.y=ny;mon.progress=0;
+      }
+      mon.moveIn=2+caveRandom()*2;
+    }
+  }
+  caveGrace=Math.max(0,caveGrace-dt);checkCaveEncounter();
+}
+function checkCaveEncounter() {
+  if(!underground||modal||P.prog<1||caveGrace>0||encounterGrace>0||Math.hypot(P.x-caveExit.x,P.y-caveExit.y)<=1)return;
+  const mon=caveWildlife.find(m=>Math.hypot(m.fx+(m.x-m.fx)*m.progress-P.x,m.fy+(m.y-m.fy)*m.progress-P.y)<.65);
+  if(!mon)return;
+  const sp=byId(mon.id),shiny=mon.shiny;
+  mon.x=mon.y=mon.fx=mon.fy=-100;mon.life=0;caveGrace=1.5;
+  startEncounter(sp,shiny);
+}
+
+let diveGrace = P.diving ? 4 : 0;
 function toggleDive() {
-  if (modal || P.prog < 1) return;
+  if (modal || P.prog < 1 || underground) return;
   if (!P.diving && (!P.boat || !diveSites.some(site => site.x === P.x && site.y === P.y))) {
     toast('🤿 Sail to a marked dive buoy, then press V or Dive!'); return;
   }
@@ -639,7 +773,7 @@ function toggleDive() {
   hud(); persist();
 }
 function checkDiveEncounter() {
-  if (!P.diving || modal || P.prog < 1 || diveGrace > 0) return;
+  if (!P.diving || modal || P.prog < 1 || diveGrace > 0 || encounterGrace > 0) return;
   const mon = waterWildlife.find(m => Math.hypot(
     m.fx + (m.x - m.fx) * m.progress - P.x,
     m.fy + (m.y - m.fy) * m.progress - P.y) < .65);
@@ -656,10 +790,15 @@ let toastT;
 function toast(msg) { const el = $('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2200); }
 function hud() {
   $('hud-caught').textContent = 'Caught: ' + Object.values(dex).reduce((a, d) => a + d.count, 0);
-  $('hud-mode').textContent = P.diving ? '🤿 Diving' : P.boat ? '⛵ Boating' : '🚶 On foot';
+  $('hud-mode').textContent = underground ? '🕯️ Underground' : P.diving ? '🤿 Diving' : P.boat ? '⛵ Boating' : '🚶 On foot';
+  $('btn-tunnel').hidden = !nearTunnel();
+  $('btn-tunnel').textContent = underground ? '☀️ Exit cave (Space)' : '🕳️ Enter tunnel (Space)';
   $('btn-dive').textContent = P.diving ? '↑ Surface (V)' : '🤿 Dive (V)';
   $('btn-dive').hidden = !P.diving && !(P.boat && diveSites.some(site => site.x === P.x && site.y === P.y));
-  $('hud-biome').textContent = P.diving ? '🫧 Underwater' : tile(P.x, P.y) === SN ? '❄ Winter Area' : P.x >= 44 ? '🏔️ Mountains' : '🌿 Meadows';
+  $('hud-biome').textContent = underground ? '💎 Crystal Caves' : P.diving ? '🫧 Underwater' : tile(P.x, P.y) === SN ? '❄ Winter Area' : P.x >= 44 ? '🏔️ Mountains' : '🌿 Meadows';
+  document.querySelector('.hint').textContent = underground
+    ? 'Arrows/WASD: explore · Touch creatures to encounter · Return to the ladder and press Space to exit'
+    : 'Arrows/WASD: move · Space: fish / use tunnel · V at DIVE buoys: scuba · ✨ Sparkles = Shiny!';
   renderPartyBar();
 }
 
@@ -667,9 +806,10 @@ function hud() {
 function tryMove(dx, dy) {
   P.dir = [dx, dy];
   const nx = P.x + dx, ny = P.y + dy, t = tile(nx, ny), cur = tile(P.x, P.y);
-  if (TRAINERS.some(trainer => trainer.x === nx && trainer.y === ny)) return;
+  if (!underground && TRAINERS.some(trainer => trainer.x === nx && trainer.y === ny)) return;
   let ok;
-  if (P.diving) ok = isDiveWater(nx, ny);
+  if (underground) ok = t === CF || t === CP;
+  else if (P.diving) ok = isDiveWater(nx, ny);
   else if (P.boat) ok = t === WA || t === DK;
   else ok = t === G || t === TG || t === SA || t === DK || t === MT || t === SN || (t === WA && cur === DK);
   if (!ok) return;
@@ -677,8 +817,10 @@ function tryMove(dx, dy) {
 }
 function arrive() {
   const t = tile(P.x, P.y);
+  if (underground) { checkCaveEncounter(); hud(); return; }
   if (P.diving) { checkDiveEncounter(); hud(); return; }
   if (challengeTrainer()) { hud(); return; }
+  if (encounterGrace > 0 && t !== WA && t !== DK) { hud(); return; }
   if (t === WA && !P.boat) { P.boat = true; toast('⛵ You hopped into a boat!'); }
   else if (t === DK && P.boat) { P.boat = false; toast('🟫 You docked the boat.'); }
   else if (t === SN && spotAt(P.x, P.y)) {
@@ -686,7 +828,7 @@ function arrive() {
     toast('✨ A shiny Snowy appeared in the sparkling snow!');
     startEncounter(byId('snowy'), true, false, false, true);
   }
-  else if (t === SN && Math.random() < 0.3) {
+  else if (t === SN && Math.random() < 0.1) {
     const sp = byId(Math.random() < 0.85 ? 'snowy' : 'bunny');
     startEncounter(sp, Math.random() < 1 / 8, false, false, true);
   }
@@ -695,7 +837,7 @@ function arrive() {
     toast('✨ A shiny Bouldersaur emerged from the mountain crags!');
     startEncounter(byId('bouldersaur'), true, false, true);
   }
-  else if (t === MT && Math.random() < 0.22) {
+  else if (t === MT && Math.random() < 0.08) {
     const r = Math.random();
     const sp = r < 0.75 ? byId('bouldersaur') : (r < 0.9 ? byId('fox') : byId('hedgehog'));
     startEncounter(sp, Math.random() < 1 / 8, false, true);
@@ -705,7 +847,7 @@ function arrive() {
     toast('✨ A shiny creature appeared in the sparkling grass!');
     startEncounter(pickAnimal(), true, false, false);
   }
-  else if (t === TG && Math.random() < 0.22) {
+  else if (t === TG && Math.random() < 0.08) {
     startEncounter(pickAnimal(), Math.random() < 1 / 8, false, false);
   }
   hud();
@@ -719,7 +861,7 @@ function pickAnimal() {
 let battle = null, ignoredTrainer = null;
 const maxHP = mon => 24 + mon.lv * 5;
 function challengeTrainer() {
-  if (P.boat || modal) return false;
+  if (underground || P.boat || modal) return false;
   if (ignoredTrainer && TRAINERS.some(t => t.id === ignoredTrainer && Math.abs(t.x - P.x) + Math.abs(t.y - P.y) > 1)) ignoredTrainer = null;
   const trainer = TRAINERS.find(t => !trainerWins[t.id] && t.id !== ignoredTrainer && Math.abs(t.x - P.x) + Math.abs(t.y - P.y) === 1);
   if (!trainer) return false;
@@ -866,6 +1008,8 @@ $('battle-run').onclick = closeBattle;
 // ---------- Fishing ----------
 function action() {
   if (modal) return;
+  if (nearTunnel()) { useTunnel(); return; }
+  if (underground) { toast('🕯️ Touch cave creatures to encounter them. Use the ladder to return outside.'); return; }
   if (P.diving) { toast('🤿 Swim into a creature to encounter it. Press V or Surface to go up.'); return; }
   if (fishing) {
     if (fishing.bite) {
@@ -947,12 +1091,13 @@ function updateFishing(dt) {
 const ec = $('enc-canvas'), ectx = ec.getContext('2d');
 let enc = null;
 function startEncounter(sp, shiny, inWater = false, inMountain = false, inWinter = false) {
+  encounterGrace = 4;
   enc = { sp, shiny: !!shiny, busy: false, attempts: 0, lv: 2 + Math.floor(Math.random() * 8) };
   modal = 'enc'; keys.clear();
   $('encounter').classList.remove('hidden');
-  $('enc-scene').className = 'enc-scene ' + (inWater ? 'water' : inWinter ? 'winter' : (inMountain ? 'mountain' : 'land'));
+  $('enc-scene').className = 'enc-scene ' + (underground ? 'cave' : inWater ? 'water' : inWinter ? 'winter' : (inMountain ? 'mountain' : 'land'));
   ec.classList.remove('gone'); $('ball').className = 'ball hidden';
-  setText(`${inWater ? (P.diving ? 'You swam into' : 'You fished up') : inWinter ? 'In the snow, a wild' : (inMountain ? 'From the crags appeared' : 'A wild')} ${enc.shiny ? '✨SHINY✨ ' : ''}${sp.name} (Lv ${enc.lv})${inWater ? '!' : ' appeared!'}`);
+  setText(`${underground ? 'Deep underground, a wild' : inWater ? (P.diving ? 'You swam into' : 'You fished up') : inWinter ? 'In the snow, a wild' : (inMountain ? 'From the crags appeared' : 'A wild')} ${enc.shiny ? '✨SHINY✨ ' : ''}${sp.name} (Lv ${enc.lv})${inWater ? '!' : ' appeared!'}`);
   setBtns(true);
 }
 const setText = s => $('enc-text').textContent = s;
@@ -1016,7 +1161,7 @@ function openDex() {
     else if (visible && s.draw) { const c = document.createElement('canvas'); c.width = 90; c.height = 60; s.draw(c.getContext('2d'), 45, 30, 22, shiny); icon.appendChild(c); }
     else if (visible) icon.appendChild(emojiEl(s.emoji, 40, shiny)); else icon.textContent = '❔';
     el.appendChild(icon);
-    el.insertAdjacentHTML('beforeend', `<b>${visible ? s.name : '???'}</b><br><small>${previewShinies ? `✨ Shiny preview · ${d?.shiny ? 'caught' : 'not caught'}` : d ? `×${d.count}${d.shiny ? ` · ✨${d.shiny}` : ''}` : (s.diveOnly ? '🤿 Diving only' : s.habitat === 'winter' ? '❄ Winter Area · South' : s.id === 'bouldersaur' ? '🏔️ East Mountains' : s.water ? 'Fish in rivers' : s.id === 'frog' ? 'Grass or rivers' : 'Tall grass')}</small>`);
+    el.insertAdjacentHTML('beforeend', `<b>${visible ? s.name : '???'}</b><br><small>${previewShinies ? `✨ Shiny preview · ${d?.shiny ? 'caught' : 'not caught'}` : d ? `×${d.count}${d.shiny ? ` · ✨${d.shiny}` : ''}` : (s.habitat === 'cave' ? '🕳️ Tunnel in the starting meadow' : s.diveOnly ? '🤿 Diving only' : s.habitat === 'winter' ? '❄ Winter Area · South' : s.id === 'bouldersaur' ? '🏔️ East Mountains' : s.water ? 'Fish in rivers' : s.id === 'frog' ? 'Grass or rivers' : 'Tall grass')}</small>`);
     list.appendChild(el);
   }
   $('dex').classList.remove('hidden');
@@ -1094,6 +1239,7 @@ document.querySelectorAll('.dpad button').forEach(b => {
 });
 $('btn-a').onclick = () => modal === 'battle' ? battleTurn() : action();
 $('btn-dive').onclick = toggleDive;
+$('btn-tunnel').onclick = useTunnel;
 
 // ---------- Render ----------
 function resize() { cv.width = innerWidth; cv.height = innerHeight; }
@@ -1103,7 +1249,18 @@ const hash = (x, y) => ((x * 73856093) ^ (y * 19349663)) >>> 0;
 function drawTile(t, x, y, px, py) {
   const h = hash(x, y);
   const grass = () => { ctx.fillStyle = h & 1 ? '#63c25c' : '#5bb954'; ctx.fillRect(px, py, T, T); };
-  if (t === WA) {
+  if (t === CF || t === CW || t === CP) {
+    ctx.fillStyle=t===CW?'#282735':t===CP?'#286875':(h&1?'#68565a':'#604e55');ctx.fillRect(px,py,T,T);
+    if(t===CW) {
+      ctx.fillStyle='#3c394a';ctx.beginPath();ctx.moveTo(px+3,py+29);ctx.lineTo(px+10,py+5);ctx.lineTo(px+30,py+3);ctx.lineTo(px+38,py+25);ctx.lineTo(px+24,py+36);ctx.closePath();ctx.fill();
+      if((h&7)===0){ctx.fillStyle='#87d7ee';ctx.beginPath();ctx.moveTo(px+12,py+27);ctx.lineTo(px+17,py+8);ctx.lineTo(px+24,py+23);ctx.lineTo(px+29,py+12);ctx.lineTo(px+31,py+30);ctx.closePath();ctx.fill();}
+    } else if(t===CP) {
+      ctx.strokeStyle='#87d4df';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(px+6,py+19);ctx.quadraticCurveTo(px+20,py+12+Math.sin(time*2+x)*3,px+34,py+19);ctx.stroke();
+    } else {
+      ctx.fillStyle='#88717b';ctx.fillRect(px+((h>>2)%28)+3,py+((h>>6)%28)+3,5,3);
+      if((h&31)===0){ctx.fillStyle='#e7bea0';ctx.fillRect(px+18,py+20,3,12);ctx.fillStyle='#cda1ed';ctx.beginPath();ctx.ellipse(px+19,py+20,9,5,0,Math.PI,0);ctx.fill();}
+    }
+  } else if (t === WA) {
     ctx.fillStyle = '#2f86d6'; ctx.fillRect(px, py, T, T);
     ctx.strokeStyle = '#7cc4ff88'; ctx.lineWidth = 2; ctx.beginPath();
     const o = Math.sin(time * 2 + x * 0.7 + y) * 4;
@@ -1198,7 +1355,8 @@ function render() {
   ctx.fillStyle = '#1d4d2a'; ctx.fillRect(0, 0, cv.width, cv.height);
   const x0 = Math.floor(camX / T), y0 = Math.floor(camY / T);
   for (let y = y0; y <= y0 + cv.height / T + 1; y++) for (let x = x0; x <= x0 + cv.width / T + 1; x++)
-    if (inb(x, y)) drawTile(map[y][x], x, y, Math.round(x * T - camX), Math.round(y * T - camY));
+    if (inb(x, y)) drawTile(tile(x,y), x, y, Math.round(x * T - camX), Math.round(y * T - camY));
+  if (underground) { drawCaveScene(camX,camY,ppx,ppy); return; }
   // Surface ambience is separate from the creatures that divers can encounter.
   if (!P.diving) {
   // frog heads popping out of the water
@@ -1247,6 +1405,7 @@ function render() {
   }
   drawWaterWildlife(camX, camY);
   if (!P.diving) drawTrainers(camX, camY);
+  if (!P.diving) drawTunnelMarker(tunnelEntrance.x*T-camX,tunnelEntrance.y*T-camY,false);
   drawPlayer(ppx - camX, ppy - camY);
   // A sign at the entrance helps players find the new biome.
   const signX = 5*T + T/2 - camX, signY = 27*T - camY;
@@ -1266,11 +1425,35 @@ function render() {
   if (fishing?.bite) { ctx.fillStyle = '#ffd166'; ctx.font = 'bold 28px Outfit'; ctx.textAlign = 'center'; ctx.fillText('!', ppx - camX + T / 2, ppy - camY - 18); }
 }
 
+function drawTunnelMarker(px,py,exit) {
+  const x=px+T/2,y=py+T/2;
+  ctx.fillStyle='#b39b78';ctx.beginPath();ctx.ellipse(x,y,22,17,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#171e30';ctx.beginPath();ctx.ellipse(x,y+2,17,12,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#e5c88d';ctx.lineWidth=3;
+  for(const dx of [-7,7]){ctx.beginPath();ctx.moveTo(x+dx,y-7);ctx.lineTo(x+dx,y+13);ctx.stroke();}
+  for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(x-7,y-5+i*5);ctx.lineTo(x+7,y-5+i*5);ctx.stroke();}
+  ctx.fillStyle='#fce0a4';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(exit?'↑ EXIT TO MEADOW':'↓ UNDERGROUND',x,y-23);
+}
+function drawCaveScene(camX,camY,ppx,ppy) {
+  drawTunnelMarker(caveExit.x*T-camX,caveExit.y*T-camY,true);
+  for(const mon of caveWildlife) {
+    const x=(mon.fx+(mon.x-mon.fx)*mon.progress+.5)*T-camX,y=(mon.fy+(mon.y-mon.fy)*mon.progress+.5)*T-camY;
+    if(x < -T || y < -T || x > cv.width+T || y > cv.height+T)continue;
+    byId(mon.id).draw(ctx,x,y,15,mon.shiny,time);
+    if(mon.shiny){ctx.fillStyle='#fff09a';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.fillText('✦',x+15,y-15);}
+  }
+  drawPlayer(ppx-camX,ppy-camY);
+  const x=ppx-camX+T/2,y=ppy-camY+T/2;
+  const light=ctx.createRadialGradient(x,y,100,x,y,Math.max(cv.width,cv.height));
+  light.addColorStop(0,'#090d2000');light.addColorStop(1,'#090d2099');ctx.fillStyle=light;ctx.fillRect(0,0,cv.width,cv.height);
+}
+
 // ---------- Loop ----------
 let last = performance.now(), saveT = 0;
 function loop(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now; time += dt;
   if (!modal) {
+    encounterGrace = Math.max(0, encounterGrace - dt);
     if (P.prog < 1) { P.prog += dt / (P.boat ? 0.2 : 0.16); if (P.prog >= 1) { P.prog = 1; arrive(); } }
     if (P.prog >= 1 && !modal) {
       const k = [...keys].reverse().find(c => DIRS[c]);
@@ -1278,12 +1461,15 @@ function loop(now) {
     }
     updateFishing(dt);
   }
-  if (!modal) { updateWaterWildlife(dt); diveGrace = Math.max(0, diveGrace - dt); checkDiveEncounter(); }
+  if (!modal) {
+    if(underground)updateCaveWildlife(dt);
+    else {updateWaterWildlife(dt);diveGrace=Math.max(0,diveGrace-dt);checkDiveEncounter();}
+  }
   updateSpots(dt);
   render(); if (modal === 'enc') drawEnc();
   if ((saveT += dt) > 3) { saveT = 0; persist(); }
   requestAnimationFrame(loop);
 }
 hud();
-toast(P.diving ? '🤿 Swim into creatures to encounter them. V or Surface returns to your boat.' : 'Welcome! Space: fish · V at glowing DIVE buoys: scuba 🤿');
+toast(underground?'🕯️ Explore the caves; return to the ladder to leave.':P.diving ? '🤿 Swim into creatures to encounter them. V or Surface returns to your boat.' : 'Welcome! Space at the starting tunnel: explore underground 🕳️');
 requestAnimationFrame(loop);
