@@ -15,12 +15,12 @@ const SPECIES = [
   { id: 'hedgehog', name: 'Hedgehog', weight: 2, rate: 0.925, draw: (...a) => drawAnimal('hedgehog', ...a) },
   { id: 'bouldersaur', name: 'Bouldersaur', weight: 4, rate: 0.92, draw: (...a) => drawBoulder(...a) },
   { id: 'snowy', name: 'Snowy', habitat: 'winter', rate: 0.955, draw: (...a) => drawSnowy(...a) },
-  { id: 'shark', name: 'Shark', water: true, fishingWeight: 14, rate: 0.935, draw: (...a) => drawWaterAnimal('shark', ...a) },
-  { id: 'catfish', name: 'Catfish', water: true, fishingWeight: 20, rate: 0.965, draw: (...a) => drawWaterAnimal('catfish', ...a) },
-  { id: 'grunt', name: 'Grunt', water: true, fishingWeight: 14, rate: 0.97, draw: (...a) => drawWaterAnimal('grunt', ...a) },
-  { id: 'spiny-dogfish', name: 'Spiny Dogfish', water: true, fishingWeight: 14, rate: 0.945, draw: (...a) => drawWaterAnimal('spiny-dogfish', ...a) },
-  { id: 'crocodile', name: 'Crocodile', water: true, fishingWeight: 14, rate: 0.93, draw: (...a) => drawWaterAnimal('crocodile', ...a) },
-  { id: 'alligator', name: 'Alligator', water: true, fishingWeight: 14, rate: 0.93, draw: (...a) => drawWaterAnimal('alligator', ...a) },
+  { id: 'shark', name: 'Shark', water: true, fishingShinyRate: 0.5, fishingWeight: 14, rate: 0.935, draw: (...a) => drawWaterAnimal('shark', ...a) },
+  { id: 'catfish', name: 'Catfish', water: true, fishingShinyRate: 0.5, fishingWeight: 20, rate: 0.965, draw: (...a) => drawWaterAnimal('catfish', ...a) },
+  { id: 'grunt', name: 'Grunt', water: true, fishingShinyRate: 0.5, fishingWeight: 14, rate: 0.97, draw: (...a) => drawWaterAnimal('grunt', ...a) },
+  { id: 'spiny-dogfish', name: 'Spiny Dogfish', water: true, fishingShinyRate: 0.5, fishingWeight: 14, rate: 0.945, draw: (...a) => drawWaterAnimal('spiny-dogfish', ...a) },
+  { id: 'crocodile', name: 'Crocodile', water: true, fishingShinyRate: 0.5, fishingWeight: 14, rate: 0.93, draw: (...a) => drawWaterAnimal('crocodile', ...a) },
+  { id: 'alligator', name: 'Alligator', water: true, fishingShinyRate: 0.75, fishingWeight: 14, rate: 0.93, draw: (...a) => drawWaterAnimal('alligator', ...a) },
   { id: 'deer', name: 'Deer', weight: 20, rate: 0.96, draw: (...a) => drawLandAnimal('deer', ...a) },
   { id: 'bear', name: 'Bear', weight: 20, rate: 0.94, draw: (...a) => drawLandAnimal('bear', ...a) },
   { id: 'raccoon', name: 'Raccoon', weight: 20, rate: 0.96, draw: (...a) => drawLandAnimal('raccoon', ...a) },
@@ -706,7 +706,7 @@ function action() {
       if (sh) removeSpot(fishing.x, fishing.y);
       fishing = null;
       const sp = byId(fishingSpecies);
-      startEncounter(sp, sh || Math.random() < 1 / 8, true, false);
+      startEncounter(sp, sh || Math.random() < (sp.fishingShinyRate ?? 1 / 8), true, false);
     }
     else { fishing = null; toast('Too early... the fish swam off.'); }
     return;

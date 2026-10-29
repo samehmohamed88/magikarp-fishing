@@ -56,6 +56,10 @@ a visible swimmer's tile still targets that creature.
 
 Each has its own drawn sprite and shiny colors, and can join your Party, Box,
 Collection, and trainer battles. Sparkling fishing spots still guarantee shinies.
+To help build a full shiny water team, regular fishing encounters have a **75%
+shiny chance for Alligator** and a **50% shiny chance for Shark, Catfish, Grunt,
+Spiny Dogfish, and Crocodile**. These chances also apply when targeting visible swimmers.
+Magikarp and Frog keep their usual shiny odds.
 
 ![A shark fishing encounter](docs/screenshots/shark.png)
 
@@ -119,7 +123,7 @@ You have four seconds to reel in after a bite.
 
 Discover twenty-five species, including Magikarp, Frog, Fox, Bouldersaur, Snowy,
 and the six new water creatures.
-Every species has a rare shiny form, including pink Bunny, blue Duck, purple
+Every species has a shiny form, including pink Bunny, blue Duck, purple
 Squirrel, blue Fox, and mint Hedgehog. Magikarp, Frog, and Bouldersaur keep their
 existing shiny colors. Check Collection to track your catches,
 and use Party to move creatures between your party and Box.

@@ -74,6 +74,10 @@ The ten new woodland species share weight 20 each in the meadow encounter pool
 and do not enter the separate winter or mountain pools. Verify distinct normal
 and shiny sprites for encounters, Party/Box, Collection (25 species), and battles,
 as well as catch/save/reload compatibility with existing saves.
+Fishing shiny probabilities: Alligator 75%; Shark, Catfish, Grunt, Spiny Dogfish,
+and Crocodile 50%; Magikarp and Frog retain 1/8. Sparkling casts guarantee a shiny
+of any fishing species. Verify threshold boundaries and a shiny Alligator's
+capture/save/reload. Land shiny probabilities remain unchanged.
 
 Cloud tasks already have isolated checkouts. Use this checkout directly;
 do not create a Git worktree unless explicitly requested.
