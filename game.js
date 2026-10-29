@@ -6,21 +6,21 @@ const cv = $('world'), ctx = cv.getContext('2d');
 
 // ---------- Creatures ----------
 const SPECIES = [
-  { id: 'magikarp', name: 'Magikarp', water: true, fishingWeight: 30, rate: 0.98 },
+  { id: 'magikarp', name: 'Magikarp', water: true, fishingWeight: 5, rate: 0.98 },
   { id: 'bunny', name: 'Bunny', weight: 40, rate: 0.97, draw: (...a) => drawAnimal('bunny', ...a) },
   { id: 'duck', name: 'Duck', weight: 25, rate: 0.96, draw: (...a) => drawAnimal('duck', ...a) },
-  { id: 'frog', name: 'Frog', emoji: '🐸', weight: 45, fishingWeight: 20, rate: 0.955 },
+  { id: 'frog', name: 'Frog', emoji: '🐸', weight: 45, fishingWeight: 5, rate: 0.955 },
   { id: 'squirrel', name: 'Squirrel', weight: 12, rate: 0.95, draw: (...a) => drawAnimal('squirrel', ...a) },
   { id: 'fox', name: 'Fox', weight: 6, rate: 0.935, draw: (...a) => drawAnimal('fox', ...a) },
   { id: 'hedgehog', name: 'Hedgehog', weight: 2, rate: 0.925, draw: (...a) => drawAnimal('hedgehog', ...a) },
   { id: 'bouldersaur', name: 'Bouldersaur', weight: 4, rate: 0.92, draw: (...a) => drawBoulder(...a) },
   { id: 'snowy', name: 'Snowy', habitat: 'winter', rate: 0.955, draw: (...a) => drawSnowy(...a) },
-  { id: 'shark', name: 'Shark', water: true, fishingWeight: 8, rate: 0.935, draw: (...a) => drawWaterAnimal('shark', ...a) },
-  { id: 'catfish', name: 'Catfish', water: true, fishingWeight: 12, rate: 0.965, draw: (...a) => drawWaterAnimal('catfish', ...a) },
-  { id: 'grunt', name: 'Grunt', water: true, fishingWeight: 12, rate: 0.97, draw: (...a) => drawWaterAnimal('grunt', ...a) },
-  { id: 'spiny-dogfish', name: 'Spiny Dogfish', water: true, fishingWeight: 8, rate: 0.945, draw: (...a) => drawWaterAnimal('spiny-dogfish', ...a) },
-  { id: 'crocodile', name: 'Crocodile', water: true, fishingWeight: 5, rate: 0.93, draw: (...a) => drawWaterAnimal('crocodile', ...a) },
-  { id: 'alligator', name: 'Alligator', water: true, fishingWeight: 5, rate: 0.93, draw: (...a) => drawWaterAnimal('alligator', ...a) },
+  { id: 'shark', name: 'Shark', water: true, fishingWeight: 14, rate: 0.935, draw: (...a) => drawWaterAnimal('shark', ...a) },
+  { id: 'catfish', name: 'Catfish', water: true, fishingWeight: 20, rate: 0.965, draw: (...a) => drawWaterAnimal('catfish', ...a) },
+  { id: 'grunt', name: 'Grunt', water: true, fishingWeight: 14, rate: 0.97, draw: (...a) => drawWaterAnimal('grunt', ...a) },
+  { id: 'spiny-dogfish', name: 'Spiny Dogfish', water: true, fishingWeight: 14, rate: 0.945, draw: (...a) => drawWaterAnimal('spiny-dogfish', ...a) },
+  { id: 'crocodile', name: 'Crocodile', water: true, fishingWeight: 14, rate: 0.93, draw: (...a) => drawWaterAnimal('crocodile', ...a) },
+  { id: 'alligator', name: 'Alligator', water: true, fishingWeight: 14, rate: 0.93, draw: (...a) => drawWaterAnimal('alligator', ...a) },
 ];
 const byId = id => SPECIES.find(s => s.id === id);
 
@@ -351,10 +351,15 @@ for (const trainer of TRAINERS) {
 
 const waterTiles = [];
 for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) if (tile(x, y) === WA) waterTiles.push({ x, y });
-const waterWildlife = ['shark', 'catfish', 'grunt', 'spiny-dogfish', 'crocodile', 'alligator'].map((id, i) => ({
-  id, ...[{ x: 19, y: 9 }, { x: 19, y: 16 }, { x: 19, y: 30 }, { x: 41, y: 10 }, { x: 41, y: 27 }, { x: 30, y: 23 }][i],
-  moveIn: 2 + i * .3, life: 45 + i * 5,
-}));
+const waterSpecies = ['shark', 'catfish', 'grunt', 'spiny-dogfish', 'crocodile', 'alligator'];
+const waterWildlife = [];
+for (let i = 0; i < 24; i++) {
+  const start = i < 6 ? [{ x: 19, y: 9 }, { x: 19, y: 16 }, { x: 19, y: 30 }, { x: 41, y: 10 }, { x: 41, y: 27 }, { x: 30, y: 23 }][i]
+    : waterTiles[Math.floor((i - 6 + .5) * waterTiles.length / 18)];
+  const occupied = spot => waterWildlife.some(mon => mon.x === spot.x && mon.y === spot.y);
+  const spot = occupied(start) ? waterTiles.find(candidate => !occupied(candidate)) : start;
+  waterWildlife.push({ id: waterSpecies[i % waterSpecies.length], ...spot, moveIn: 2 + i * .1, life: 45 + i });
+}
 function pickWaterAnimal() {
   const pool = SPECIES.filter(sp => sp.fishingWeight), total = pool.reduce((sum, sp) => sum + sp.fishingWeight, 0);
   let roll = Math.random() * total;
@@ -364,7 +369,8 @@ function updateWaterWildlife(dt) {
   for (const mon of waterWildlife) {
     mon.life -= dt; mon.moveIn -= dt;
     if (mon.life <= 0) {
-      const spot = waterTiles[Math.floor(R() * waterTiles.length)];
+      const available = waterTiles.filter(spot => !waterWildlife.some(other => other !== mon && other.x === spot.x && other.y === spot.y));
+      const spot = available[Math.floor(R() * available.length)];
       Object.assign(mon, spot); mon.life = 45 + R() * 30;
     }
     if (mon.moveIn <= 0) {

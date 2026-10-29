@@ -48,7 +48,11 @@ Sharks, Catfish, Grunt, Spiny Dogfish, Crocodiles, and Alligators now swim in th
 rivers. Watch for their sprites from the bank or your boat. Face one and fish
 into its tile to encounter that species; casting elsewhere can find any of the
 six, along with Magikarp and Frog. Water creatures stay in the rivers and respawn
-over time. Crocodiles and Alligators are rarer catches.
+over time, with 24 swimmers spread across the waterways (four of each species).
+In open-water fishing, the six new creatures make up 90% of encounters: Catfish
+has a 20% chance, and Shark, Grunt, Spiny Dogfish, Crocodile, and Alligator each
+have a 14% chance. Magikarp and Frog each have a 5% chance. Fishing directly into
+a visible swimmer's tile still targets that creature.
 
 Each has its own drawn sprite and shiny colors, and can join your Party, Box,
 Collection, and trainer battles. Sparkling fishing spots still guarantee shinies.

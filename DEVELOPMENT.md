@@ -62,6 +62,9 @@ tile to target it; open-water fishing should include all eight fishing species.
 Verify each new aquatic creature has a distinct normal/shiny sprite in encounters,
 Collection, Party/Box, and battles, and survives save/reload. They must not appear
 in grass or winter encounter pools.
+There should be 24 visible swimmers, four per new species, with no shared tiles.
+Open-water weights total 100: Catfish 20, each other new water creature 14,
+Magikarp 5, and Frog 5. Visible-swimmer targeting overrides these weights.
 Catch difficulty: every species has a first-ball rate of at least 92%, second
 throws always succeed, and failed catches cannot make creatures flee. The fishing
 bite window is four seconds. Verify a forced first failure followed by a second
