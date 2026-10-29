@@ -46,6 +46,13 @@ const SPECIES = [
     id,name:id[0].toUpperCase()+id.slice(1),habitat:'halloween',rate:.96,
     draw:(...a)=>drawHalloweenCreature(id,...a),
   })),
+  ...[['giant-squid','Giant Squid'],['colossal-squid','Colossal Squid'],
+    ['great-white-shark','Great White Shark'],['tiger-shark','Tiger Shark'],['orca','Orca']].map(([id,name])=>({
+    id,name,water:true,deepOnly:true,rate:.95,draw:(...a)=>drawDeepCreature(id,...a),
+  })),
+  ...[['mosasaurus','Mosasaurus'],['megalodon','Megalodon'],['elasmosaurus','Elasmosaurus']].map(([id,name])=>({
+    id,name,water:true,habitat:'deep-generator',rate:1,draw:(...a)=>drawDeepCreature(id,...a),
+  })),
 ];
 const byId = id => SPECIES.find(s => s.id === id);
 
@@ -186,6 +193,71 @@ function drawCaveCreature(id, c, x, y, s, shiny = false, t = 0) {
     }
     if(spider)for(const side of [-1,1])oval(side*.07,-.68,.035,.04,light);
   }
+  c.restore();
+}
+
+function drawDeepCreature(id,c,x,y,s,shiny=false,t=0) {
+  const palettes={
+    'giant-squid':['#c66c75','#f7b3b4','#529de0','#c9efff'],
+    'colossal-squid':['#99485c','#e88e91','#9565df','#ead1ff'],
+    'great-white-shark':['#7894aa','#f3f6e9','#d6a54d','#fff0ae'],
+    'tiger-shark':['#788e72','#dce5bb','#be7bd2','#f3d7ff'],
+    orca:['#25374c','#f4f8ef','#9067c4','#f6d8ff'],
+    mosasaurus:['#467d82','#b2dacc','#bf8e3f','#ffe4a8'],
+    megalodon:['#4a5e7c','#b6cbd6','#a35579','#f8c2db'],
+    elasmosaurus:['#6c91b7','#d1ebf1','#65b388','#d4ffd4'],
+  };
+  const p=palettes[id],body=p[shiny?2:0],belly=p[shiny?3:1],sway=Math.sin(t*4)*.1;
+  c.save();c.translate(x,y);c.scale(s,s);c.strokeStyle='#1d2b42';c.lineWidth=.045;c.lineJoin='round';c.lineCap='round';
+  const oval=(x,y,rx,ry,color,angle=0)=>{c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,angle,0,Math.PI*2);c.fill();c.stroke();};
+  const shape=(points,color)=>{c.fillStyle=color;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();c.stroke();};
+  const line=(points,color,width=.045)=>{c.strokeStyle=color;c.lineWidth=width;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();c.strokeStyle='#1d2b42';c.lineWidth=.045;};
+  const eye=(x,y,size=.1)=>{oval(x,y,size,size*1.15,'#fff');oval(x-.025,y,size*.43,size*.65,'#17293f');};
+  if(id==='giant-squid'||id==='colossal-squid') {
+    const colossal=id==='colossal-squid';
+    for(let i=0;i<8;i++) {
+      const start=-.35+i*.1,end=(i-3.5)*.2;
+      c.strokeStyle='#1d2b42';c.lineWidth=colossal?.17:.12;c.beginPath();c.moveTo(start,.1);
+      c.bezierCurveTo(start,.7,end+sway,1.15,end+(i%2?.12:-.12),.95+Math.sin(t*3+i)*.08);c.stroke();
+      c.strokeStyle=body;c.lineWidth=colossal?.11:.07;c.stroke();
+    }
+    for(const side of[-1,1]) {
+      line([[side*.3,.1],[side*.85,.6+sway],[side*1.15,colossal?.65:1.1]],body,colossal?.14:.07);
+      oval(side*1.15,colossal?.65:1.1,.16,.1,belly,side*.4);
+    }
+    shape([[0,-1.12],[-.85,colossal?-.35:-.55],[.85,colossal?-.35:-.55]],belly);
+    oval(0,-.4,colossal?.65:.37,colossal?.65:.8,body);oval(.2,-.65,.12,.22,belly,-.35);
+    eye(-.22,-.02,colossal?.18:.12);eye(.22,-.02,colossal?.18:.12);
+  } else if(id==='elasmosaurus') {
+    for(const px of[-.35,.45])for(const side of[-1,1])
+      shape([[px,side*.12],[px+.42,side*(.8+sway)],[px+.55,side*.2]],body);
+    shape([[.55,-.13],[1.4,.14+sway],[.5,.25]],body);
+    oval(.1,.1,.72,.36,body);oval(.05,.24,.53,.15,belly);
+    c.strokeStyle='#1d2b42';c.lineWidth=.29;c.beginPath();c.moveTo(-.35,.02);c.bezierCurveTo(-1,.05,-.45,-.85,-1.05,-.88);c.stroke();
+    c.strokeStyle=body;c.lineWidth=.2;c.stroke();c.strokeStyle='#1d2b42';c.lineWidth=.045;
+    oval(-1.1,-.88,.3,.16,body);eye(-1.16,-.92,.055);line([[-1.36,-.83],[-1.13,-.8]],'#1d2b42',.025);
+  } else if(id==='mosasaurus') {
+    shape([[.5,-.2],[1.4,-.65+sway],[1.1,.04],[1.4,.42+sway],[.5,.2]],body);
+    for(const px of[-.5,.35])for(const side of[-1,1])shape([[px,side*.12],[px+.4,side*(.65+sway)],[px+.55,side*.2]],body);
+    oval(0,0,.85,.33,body);oval(-.1,.14,.6,.14,belly);
+    shape([[-.5,-.26],[-1.42,-.12],[-1.48,.1],[-.55,.24]],body);
+    line([[-1.4,.06],[-.65,.12]],'#1d2b42');
+    for(let i=0;i<5;i++)shape([[-1.35+i*.13,.06],[-1.28+i*.13,.18],[-1.22+i*.13,.08]],'#fff9d6');
+    eye(-.65,-.16,.08);
+  } else {
+    const orca=id==='orca',mega=id==='megalodon',tiger=id==='tiger-shark';
+    shape([[.65,-.13],[1.4,-.6+sway],[1.12,sway],[1.4,.5+sway],[.65,.2]],body);
+    shape([[-.2,-.22],[orca?-.05:.08,orca?-1.05:-.86],[.5,-.2]],body);
+    shape([[-.08,.1],[.35,.8],[.53,.19]],body);
+    oval(-.03,0,mega?1.08:1,orca?.43:mega?.46:.36,body);
+    oval(-.15,.19,.72,orca?.2:.15,belly);
+    if(orca){oval(-.46,-.17,.22,.1,belly,-.2);oval(.45,-.15,.19,.1,'#8eacc1');}
+    if(tiger)for(let i=0;i<6;i++)line([[-.4+i*.19,-.29],[-.5+i*.19,-.07]],'#425d54',.065);
+    if(!orca)for(let i=0;i<3;i++)line([[-.33+i*.12,-.12],[-.38+i*.12,.1]],'#31465d',.03);
+    eye(-.72,-.11,orca?.055:.085);line([[-.98,.08],[-.6,.15]],'#1d2b42',.035);
+    if(!orca)for(let i=0;i<(mega?5:3);i++)shape([[-1+i*.08,.09],[-.96+i*.08,mega?.24:.18],[-.92+i*.08,.11]],'#fff8da');
+  }
+  if(shiny){c.strokeStyle='#fff2a0';c.lineWidth=.04;for(const [px,py]of[[-1.2,-.6],[1.2,.75]]){c.beginPath();c.moveTo(px-.1,py);c.lineTo(px+.1,py);c.moveTo(px,py-.1);c.lineTo(px,py+.1);c.stroke();}}
   c.restore();
 }
 
@@ -621,7 +693,7 @@ function drawCarp(c, x, y, s, shiny = false, t = 0) {
 function rng(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 const R = rng(7);
 const map = Array.from({ length: H }, () => Array(W).fill(G));
-let activeMap = map, underground = false, halloweenCavern = false;
+let activeMap = map, underground = false, halloweenCavern = false, deepDiving = false;
 const inb = (x, y) => x >= 0 && y >= 0 && x < W && y < H;
 const tile = (x, y) => inb(x, y) ? activeMap[y][x] : TR;
 for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
@@ -782,14 +854,40 @@ function currentCave() {
     : {wildlife:caveWildlife,dryTiles:caveDryTiles,pools:cavePools,random:caveRandom,exit:caveExit};
 }
 
+// A separate deep-water basin, reached from any shallow scuba location.
+const deepEntrance={x:8,y:8},deepGenerator={x:9,y:8};
+const deepStonePiles=[
+  {id:'moonstone',name:'Moonstones',x:3,y:10,color:'#76d5e8',light:'#dcfbff',species:'mosasaurus',hint:'Left side'},
+  {id:'sunstone',name:'Sunstones',x:56,y:12,color:'#efa94f',light:'#fff0bd',species:'megalodon',hint:'Right side'},
+  {id:'abyss',name:'Abyss Crystals',x:3,y:34,color:'#a77bef',light:'#efddff',species:'elasmosaurus',hint:'Lower left side'},
+];
+const deepSeaMap=Array.from({length:H},()=>Array(W).fill(CW));
+for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++)deepSeaMap[y][x]=WA;
+for(const [cx,cy]of[[24,13],[38,10],[20,28],[41,30]])
+  for(let y=cy-2;y<=cy+2;y++)for(let x=cx-1;x<=cx+1;x++)deepSeaMap[y][x]=CW;
+const deepWaterTiles=[];
+for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(deepSeaMap[y][x]===WA)deepWaterTiles.push({x,y});
+const deepWildlife=[],deepRandom=rng(2048);
+const deepFirstSpawns={'giant-squid':{x:14,y:10},'colossal-squid':{x:18,y:14},
+  'great-white-shark':{x:15,y:5},'tiger-shark':{x:22,y:8},orca:{x:21,y:16}};
+for(const sp of SPECIES.filter(s=>s.fishingWeight||s.diveOnly||s.deepOnly))for(let i=0;i<3;i++) {
+  const free=deepWaterTiles.filter(p=>Math.hypot(p.x-deepEntrance.x,p.y-deepEntrance.y)>3 &&
+    !deepStonePiles.some(stone=>stone.x===p.x&&stone.y===p.y)&&
+    !deepWildlife.some(m=>m.x===p.x&&m.y===p.y));
+  const first=deepFirstSpawns[sp.id];
+  const spot=(i===0&&first&&free.find(p=>p.x===first.x&&p.y===first.y))||free[Math.floor(deepRandom()*free.length)];
+  deepWildlife.push({id:sp.id,...spot,fx:spot.x,fy:spot.y,progress:1,shiny:deepRandom()<1/8,moveIn:2+deepRandom()*2,life:60+deepRandom()*40});
+}
+
 const waterTiles = [];
 for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) if (tile(x, y) === WA) waterTiles.push({ x, y });
 const waterSpecies = SPECIES.filter(sp => sp.fishingWeight).map(sp => sp.id);
 const diveSites = [{ x: 19, y: 9 }, { x: 41, y: 13 }, { x: 30, y: 23 }];
-const isDiveWater = (x, y) => tile(x, y) === WA &&
+const isShallowDiveWater = (x, y) => map[y]?.[x] === WA &&
   ((x >= 18 && x <= 20 && y >= 6 && y <= 38) ||
    (x >= 40 && x <= 42 && y >= 8 && y <= 36) ||
    (x >= 21 && x <= 39 && y >= 22 && y <= 24));
+const isDiveWater=(x,y)=>deepDiving?deepSeaMap[y]?.[x]===WA:isShallowDiveWater(x,y);
 const diveWaterTiles = waterTiles.filter(spot => isDiveWater(spot.x, spot.y));
 const waterWildlife = [];
 for (let i = 0; i < 24; i++) {
@@ -819,41 +917,47 @@ function pickFishingAnimal(x, y) {
   return swimmer ? byId(swimmer.id) : pickWaterAnimal();
 }
 function updateWaterWildlife(dt) {
-  for (const mon of waterWildlife) {
+  const wildlife=deepDiving?deepWildlife:waterWildlife,random=deepDiving?deepRandom:R;
+  for (const mon of wildlife) {
     mon.progress = Math.min(1, mon.progress + dt / .7);
     mon.life -= dt; mon.moveIn -= dt;
     if (mon.life <= 0) {
-      const habitat = byId(mon.id).diveOnly ? diveWaterTiles : waterTiles;
-      const available = habitat.filter(spot => (spot.x !== P.x || spot.y !== P.y) && !waterWildlife.some(other => other !== mon && other.x === spot.x && other.y === spot.y));
-      const spot = available[Math.floor(R() * available.length)];
-      Object.assign(mon, spot, { fx: spot.x, fy: spot.y, progress: 1, shiny: R() < 1 / 8 }); mon.life = 45 + R() * 30;
+      const habitat = deepDiving?deepWaterTiles:byId(mon.id).diveOnly ? diveWaterTiles : waterTiles;
+      const available = habitat.filter(spot => (spot.x !== P.x || spot.y !== P.y) &&
+        (!deepDiving||Math.hypot(spot.x-deepEntrance.x,spot.y-deepEntrance.y)>3) &&
+        !wildlife.some(other => other !== mon && other.x === spot.x && other.y === spot.y));
+      if(!available.length)continue;
+      const spot = available[Math.floor(random() * available.length)];
+      Object.assign(mon, spot, { fx: spot.x, fy: spot.y, progress: 1, shiny: random() < 1 / 8 }); mon.life = 45 + random() * 30;
     }
     if (mon.moveIn <= 0) {
-      const [dx, dy] = [[0, 1], [0, -1], [1, 0], [-1, 0]][Math.floor(R() * 4)];
-      if (tile(mon.x + dx, mon.y + dy) === WA && (!byId(mon.id).diveOnly || isDiveWater(mon.x + dx, mon.y + dy)) && !waterWildlife.some(other => other !== mon && other.x === mon.x + dx && other.y === mon.y + dy)) {
+      const [dx, dy] = [[0, 1], [0, -1], [1, 0], [-1, 0]][Math.floor(random() * 4)];
+      if (tile(mon.x + dx, mon.y + dy) === WA && (!byId(mon.id).diveOnly || isDiveWater(mon.x + dx, mon.y + dy)) &&
+        (!deepDiving||!(mon.x+dx===deepGenerator.x&&mon.y+dy===deepGenerator.y)) &&
+        !wildlife.some(other => other !== mon && other.x === mon.x + dx && other.y === mon.y + dy)) {
         mon.fx = mon.x; mon.fy = mon.y; mon.progress = 0;
         mon.x += dx; mon.y += dy;
       }
-      mon.moveIn = 2 + R() * 2;
+      mon.moveIn = 2 + random() * 2;
     }
   }
 }
 function drawSwimmer(mon, c, x, y, scale) {
-  const sp = byId(mon.id), shiny = mon.shiny || !!spotAt(mon.x, mon.y);
+  const sp = byId(mon.id), shiny = mon.shiny || (!deepDiving&&!!spotAt(mon.x, mon.y));
   if (sp.id === 'magikarp') drawCarp(c, x, y, scale * .75, shiny, time);
   else if (sp.draw) sp.draw(c, x, y, scale, shiny, time);
   else { const img = emojiCanvas(sp.emoji, scale * 2, shiny); c.drawImage(img, x - img.width / 2, y - img.height / 2); }
 }
 function drawWaterWildlife(camX, camY) {
-  for (const mon of waterWildlife) {
+  for (const mon of deepDiving?deepWildlife:waterWildlife) {
     if (!P.diving && byId(mon.id).diveOnly) continue;
     if (P.diving && !isDiveWater(mon.x, mon.y)) continue;
     const x = (mon.fx + (mon.x - mon.fx) * mon.progress + .5) * T - camX;
     const y = (mon.fy + (mon.y - mon.fy) * mon.progress + .5) * T - camY;
     if (x < -T || y < -T || x > cv.width + T || y > cv.height + T) continue;
     ctx.save(); ctx.globalAlpha = .9;
-    drawSwimmer(mon, ctx, x, y + Math.sin(time * 2 + mon.x) * 2, P.diving ? 16 : 13);
-    if (mon.shiny || spotAt(mon.x, mon.y)) {
+    drawSwimmer(mon, ctx, x, y + Math.sin(time * 2 + mon.x) * 2, deepDiving&&byId(mon.id).deepOnly?23:P.diving ? 16 : 13);
+    if (mon.shiny || (!deepDiving&&spotAt(mon.x, mon.y))) {
       ctx.fillStyle = '#fff29b'; ctx.font = 'bold 17px sans-serif'; ctx.fillText('✦', x + 14, y - 12);
     }
     ctx.restore();
@@ -869,12 +973,16 @@ halloweenCavern = underground && save.halloweenCavern === true;
 if(halloweenCavern&&!halloweenSeason.open) {
   underground=false;halloweenCavern=false;P.x=7;P.y=5;P.boat=false;
 }
-activeMap = underground ? (halloweenCavern?halloweenCavernMap:caveMap) : map;
+deepDiving=!underground&&save.deepDiving===true;
+let shallowReturn=save.shallowReturn&&isShallowDiveWater(save.shallowReturn.x,save.shallowReturn.y)?
+  {x:save.shallowReturn.x,y:save.shallowReturn.y}:{...diveSites[0]};
+activeMap = underground ? (halloweenCavern?halloweenCavernMap:caveMap) : deepDiving?deepSeaMap:map;
 if(underground && ![CF,CP].includes(tile(P.x,P.y))) {P.x=currentCave().exit.x;P.y=currentCave().exit.y;}
-P.diving = !!save.diving && isDiveWater(P.x, P.y);
+if(deepDiving&&(!isDiveWater(P.x,P.y)||(P.x===deepGenerator.x&&P.y===deepGenerator.y))) {P.x=deepEntrance.x;P.y=deepEntrance.y;}
+P.diving = deepDiving || (!!save.diving && isDiveWater(P.x, P.y));
 if (P.diving) P.boat = false;
 if (underground) { P.diving=false; P.boat=false; }
-if(!underground&&halloweenPatch.some(c=>c.x===P.x&&c.y===P.y)&&[TR,HT].includes(tile(P.x,P.y))) {P.x=7;P.y=5;}
+if(!underground&&!deepDiving&&halloweenPatch.some(c=>c.x===P.x&&c.y===P.y)&&[TR,HT].includes(tile(P.x,P.y))) {P.x=7;P.y=5;}
 P.fx = P.x; P.fy = P.y;
 let fishing = null, modal = null, time = 0;
 const keys = new Set();
@@ -885,9 +993,25 @@ for(const pile of caveTreasurePiles) {
   caveTreasures.generated[pile.id]=save.caveTreasures?.generated?.[pile.id]===true;
   caveTreasures.collected[pile.id]=caveTreasures.generated[pile.id]||save.caveTreasures?.collected?.[pile.id]===true;
 }
-const persist = () => localStorage.setItem('mkrq', JSON.stringify({ dex, party, box, trainerWins, caveTreasures, x: P.x, y: P.y, boat: P.boat, diving: P.diving, underground, halloweenCavern }));
+const deepTreasures={collected:{},generated:{}};
+for(const pile of deepStonePiles) {
+  deepTreasures.generated[pile.id]=save.deepTreasures?.generated?.[pile.id]===true;
+  deepTreasures.collected[pile.id]=deepTreasures.generated[pile.id]||save.deepTreasures?.collected?.[pile.id]===true;
+}
+const persist = () => localStorage.setItem('mkrq', JSON.stringify({ dex, party, box, trainerWins, caveTreasures, deepTreasures, x: P.x, y: P.y, boat: P.boat, diving: P.diving, underground, halloweenCavern, deepDiving, shallowReturn }));
 
 const nearCaveObject = object => underground && !halloweenCavern && Math.abs(P.x-object.x)+Math.abs(P.y-object.y)<=1;
+const nearDeepObject=object=>deepDiving&&Math.abs(P.x-object.x)+Math.abs(P.y-object.y)<=1;
+function nearbyDeepStone(){return deepStonePiles.find(pile=>!deepTreasures.collected[pile.id]&&nearDeepObject(pile));}
+function collectDeepStone(pile) {
+  if(modal||P.prog<1||!nearDeepObject(pile)||deepTreasures.collected[pile.id])return;
+  deepTreasures.collected[pile.id]=true;encounterGrace=4;
+  hud();persist();toast(`💎 Collected ${pile.name}! Take them to the generator at the deep-water entrance.`);
+}
+function generatorContext() {
+  return deepDiving?{piles:deepStonePiles,treasures:deepTreasures,location:deepGenerator,near:nearDeepObject,title:'Deep Sea Generator',reward:'sea creature'}:
+    {piles:caveTreasurePiles,treasures:caveTreasures,location:caveGenerator,near:nearCaveObject,title:'Dinosaur Generator',reward:'dinosaur'};
+}
 function nearbyTreasure() { return caveTreasurePiles.find(pile=>!caveTreasures.collected[pile.id]&&nearCaveObject(pile)); }
 function collectCaveTreasure(pile) {
   if(modal||P.prog<1||!nearCaveObject(pile)||caveTreasures.collected[pile.id])return;
@@ -895,14 +1019,19 @@ function collectCaveTreasure(pile) {
   hud();persist();toast(`💎 Collected ${pile.name}! Bring them to the generator beside the entrance ladder.`);
 }
 function openGenerator() {
-  if(modal||P.prog<1||!nearCaveObject(caveGenerator))return;
+  const gen=generatorContext();
+  if(modal||P.prog<1||!gen.near(gen.location))return;
+  $('generator-title').textContent='⚡ '+gen.title;
+  $('generator-description').textContent=`Insert each collected stone pile to receive its ${gen.reward}. You can earn all three!`;
+  $('generator-message').textContent='Each pile gives one reward. A full party sends your creature to the Box.';
   modal='generator';keys.clear();renderGenerator();$('generator').classList.remove('hidden');
 }
 function closeGenerator() { $('generator').classList.add('hidden');modal=null;encounterGrace=4; }
 function renderGenerator() {
+  const {piles,treasures}=generatorContext();
   const list=$('generator-list');list.innerHTML='';
-  for(const pile of caveTreasurePiles) {
-    const done=caveTreasures.generated[pile.id],ready=caveTreasures.collected[pile.id],sp=byId(pile.species);
+  for(const pile of piles) {
+    const done=treasures.generated[pile.id],ready=treasures.collected[pile.id],sp=byId(pile.species);
     const card=document.createElement('div');card.className='generator-option';
     card.appendChild(monIcon({id:sp.id,shiny:false},104,70));
     const label=document.createElement('p');label.textContent=`${pile.name} → ${sp.name}`;card.appendChild(label);
@@ -912,19 +1041,24 @@ function renderGenerator() {
   }
 }
 function generateDinosaur(id) {
-  const pile=caveTreasurePiles.find(p=>p.id===id);
-  if(!pile||modal!=='generator'||!nearCaveObject(caveGenerator)||!caveTreasures.collected[id]||caveTreasures.generated[id])return;
-  caveTreasures.generated[id]=true;
+  const {piles,treasures,location,near}=generatorContext(),pile=piles.find(p=>p.id===id);
+  if(!pile||modal!=='generator'||!near(location)||!treasures.collected[id]||treasures.generated[id])return;
+  treasures.generated[id]=true;
   const mon={id:pile.species,shiny:false,lv:10},toParty=party.length<6;
   (toParty?party:box).push(mon);
   const entry=dex[mon.id]||={count:0,shiny:0};entry.count++;
   persist();hud();renderGenerator();
-  $('generator-message').textContent=`${byId(mon.id).name} joined your ${toParty?'party':'Box'}! ${Object.values(caveTreasures.generated).filter(Boolean).length}/3 dinosaurs collected.`;
+  $('generator-message').textContent=`${byId(mon.id).name} joined your ${toParty?'party':'Box'}! ${Object.values(treasures.generated).filter(Boolean).length}/3 rewards collected.`;
 }
 function caveAction() {
   if(modal||P.prog<1||!underground)return;
   const pile=nearbyTreasure();
   if(pile)collectCaveTreasure(pile);else if(nearCaveObject(caveGenerator))openGenerator();
+}
+function deepAction() {
+  if(modal||P.prog<1||!deepDiving)return;
+  const pile=nearbyDeepStone();
+  if(pile)collectDeepStone(pile);else if(nearDeepObject(deepGenerator))openGenerator();
 }
 
 let caveGrace = underground ? 4 : 0, encounterGrace = 4;
@@ -983,23 +1117,35 @@ function checkCaveEncounter() {
 }
 
 let diveGrace = P.diving ? 4 : 0;
+function toggleDepth() {
+  if(modal||P.prog<1||!P.diving||underground)return;
+  if(!deepDiving)shallowReturn={x:P.x,y:P.y};
+  deepDiving=!deepDiving;activeMap=deepDiving?deepSeaMap:map;
+  const destination=deepDiving?deepEntrance:shallowReturn;
+  Object.assign(P,{...destination,fx:destination.x,fy:destination.y,prog:1,diving:true,boat:false});
+  fishing=null;keys.clear();diveGrace=encounterGrace=4;
+  toast(deepDiving?'🌊 Deep sea! Find glowing stones at the sides for the entrance generator.':'🫧 Back in the shallows! V returns to your boat.');
+  hud();persist();
+}
 function toggleDive() {
   if (modal || P.prog < 1 || underground) return;
+  if(deepDiving){toggleDepth();return;}
   if (!P.diving && (!P.boat || !diveSites.some(site => site.x === P.x && site.y === P.y))) {
     toast('🤿 Sail to a marked dive buoy, then press V or Dive!'); return;
   }
   P.diving = !P.diving; P.boat = !P.diving; fishing = null; keys.clear(); diveGrace = 1.5;
-  toast(P.diving ? '🤿 Swim into creatures to encounter them! V or Surface returns to your boat.' : '⛵ Back in your boat!');
+  toast(P.diving ? '🤿 Swim into creatures! B or Dive deeper explores the deep sea. V returns to your boat.' : '⛵ Back in your boat!');
   hud(); persist();
 }
 function checkDiveEncounter() {
   if (!P.diving || modal || P.prog < 1 || diveGrace > 0 || encounterGrace > 0) return;
-  const mon = waterWildlife.find(m => Math.hypot(
+  if(deepDiving&&(Math.hypot(P.x-deepEntrance.x,P.y-deepEntrance.y)<=2||nearDeepObject(deepGenerator)||nearbyDeepStone()))return;
+  const mon = (deepDiving?deepWildlife:waterWildlife).find(m => Math.hypot(
     m.fx + (m.x - m.fx) * m.progress - P.x,
     m.fy + (m.y - m.fy) * m.progress - P.y) < .65);
   if (!mon) return;
-  const shiny = mon.shiny || !!spotAt(mon.x, mon.y);
-  removeSpot(mon.x, mon.y);
+  const shiny = mon.shiny || (!deepDiving&&!!spotAt(mon.x, mon.y));
+  if(!deepDiving)removeSpot(mon.x, mon.y);
   const sp = byId(mon.id);
   // Remove this swimmer immediately; it returns elsewhere on the next update.
   mon.x = mon.y = mon.fx = mon.fy = -100; mon.life = 0; diveGrace = 1.5;
@@ -1019,12 +1165,22 @@ function hud() {
   $('cave-quest').hidden=!underground||halloweenCavern;
   $('cave-quest').textContent=caveTreasurePiles.map(p=>`${p.name}: ${caveTreasures.generated[p.id]?'✓ Dinosaur':caveTreasures.collected[p.id]?'✓ Collected':'Find pile'}`).join(' · ');
   $('btn-dive').textContent = P.diving ? '↑ Surface (V)' : '🤿 Dive (V)';
+  if(deepDiving)$('btn-dive').textContent='↑ Shallows (V)';
+  $('btn-depth').hidden=!P.diving||deepDiving;
+  const deepStone=nearbyDeepStone();
+  $('btn-deep-action').hidden=!deepStone&&!nearDeepObject(deepGenerator);
+  $('btn-deep-action').textContent=deepStone?`💎 Collect ${deepStone.name} (Space)`:'⚡ Use deep sea generator (Space)';
+  $('deep-quest').hidden=!deepDiving;
+  $('deep-quest').textContent=deepStonePiles.map(p=>`${p.name}: ${deepTreasures.generated[p.id]?'✓ Reward':deepTreasures.collected[p.id]?'✓ Collected':p.hint}`).join(' · ');
   $('btn-dive').hidden = !P.diving && !(P.boat && diveSites.some(site => site.x === P.x && site.y === P.y));
-  $('hud-biome').textContent = halloweenCavern ? '✨ Halloween Cavern' : underground ? '💎 Crystal Caves' : P.diving ? '🫧 Underwater' : tile(P.x,P.y)===HF ? '🎃 Halloween Forest' : tile(P.x, P.y) === SN ? '❄ Winter Area' : P.x >= 44 ? '🏔️ Mountains' : '🌿 Meadows';
-  document.querySelector('.hint').textContent = halloweenCavern
+  $('hud-biome').textContent = deepDiving?'🌊 Deep Sea':halloweenCavern ? '✨ Halloween Cavern' : underground ? '💎 Crystal Caves' : P.diving ? '🫧 Underwater' : tile(P.x,P.y)===HF ? '🎃 Halloween Forest' : tile(P.x, P.y) === SN ? '❄ Winter Area' : P.x >= 44 ? '🏔️ Mountains' : '🌿 Meadows';
+  document.querySelector('.hint').textContent = deepDiving
+    ? 'Space: collect stones / use entrance generator · Swim into creatures · V: return to shallows'
+    : halloweenCavern
     ? `✨ Every creature is shiny! · Touch one to encounter it · Ladder: exit · ${halloweenSeason.ghosts?'Shiny Ghost is here today!':'Ghost: October 31 only'}`
     : underground
     ? 'Space: collect piles / use generator · Generator: beside the entrance ladder · Return to the ladder to exit'
+    : P.diving ? 'Swim into creatures · B / Dive deeper: explore the deep sea · V: surface'
     : tile(P.x,P.y)===HF ? `🎃 October forest · ✨ Sparkles = Shiny! · ${halloweenSeason.ghosts?'Halloween today: rare Ghosts can appear!':'Rare Ghosts appear on October 31 only'}`
     : 'Arrows/WASD: move · Space: fish / use tunnel · V at DIVE buoys: scuba · ✨ Sparkles = Shiny!';
   renderPartyBar();
@@ -1035,7 +1191,8 @@ function tryMove(dx, dy) {
   P.dir = [dx, dy];
   const nx = P.x + dx, ny = P.y + dy, t = tile(nx, ny), cur = tile(P.x, P.y);
   if(underground&&!halloweenCavern&&nx===caveGenerator.x&&ny===caveGenerator.y)return;
-  if (!underground && TRAINERS.some(trainer => trainer.x === nx && trainer.y === ny)) return;
+  if(deepDiving&&nx===deepGenerator.x&&ny===deepGenerator.y)return;
+  if (!underground && !deepDiving && TRAINERS.some(trainer => trainer.x === nx && trainer.y === ny)) return;
   let ok;
   if (underground) ok = t === CF || t === CP;
   else if (P.diving) ok = isDiveWater(nx, ny);
@@ -1051,7 +1208,10 @@ function arrive() {
     if(pile)collectCaveTreasure(pile);
     checkCaveEncounter();hud();return;
   }
-  if (P.diving) { checkDiveEncounter(); hud(); return; }
+  if (P.diving) {
+    if(deepDiving){const stone=deepStonePiles.find(p=>p.x===P.x&&p.y===P.y);if(stone)collectDeepStone(stone);}
+    checkDiveEncounter(); hud(); return;
+  }
   if (challengeTrainer()) { hud(); return; }
   const forestSparkle = t === HF && spotAt(P.x, P.y);
   if (encounterGrace > 0 && t !== WA && t !== DK && !forestSparkle) { hud(); return; }
@@ -1255,10 +1415,11 @@ $('battle-run').onclick = closeBattle;
 // ---------- Fishing ----------
 function action() {
   if (modal) return;
+  if(deepDiving&&(nearbyDeepStone()||nearDeepObject(deepGenerator))){deepAction();return;}
   if (nearTunnel()) { useTunnel(); return; }
   if(underground&&(nearbyTreasure()||nearCaveObject(caveGenerator))){caveAction();return;}
   if (underground) { toast('🕯️ Touch cave creatures to encounter them. Use the ladder to return outside.'); return; }
-  if (P.diving) { toast('🤿 Swim into a creature to encounter it. Press V or Surface to go up.'); return; }
+  if (P.diving) { toast(deepDiving?'🌊 Swim into creatures or find glowing stones. V returns to the shallows.':'🤿 Swim into creatures. B dives deeper; V returns to your boat.'); return; }
   if (fishing) {
     if (fishing.bite) {
       const sh = fishing.shiny, fishingSpecies = fishing.species;
@@ -1283,6 +1444,7 @@ const spotAt = (x, y) => spots.find(s => s.x === x && s.y === y);
 const removeSpot = (x, y) => { spots = spots.filter(s => !(s.x === x && s.y === y)); };
 function updateSpots(dt) {
   spots.forEach(s => s.life -= dt); spots = spots.filter(s => s.life > 0);
+  if(deepDiving)return;
   for (let tries = 0; spots.length < 8 && tries < 60; tries++) {
     const x = P.x + Math.round((Math.random() - 0.5) * 26);
     const y = P.y + Math.round((Math.random() - 0.5) * 20);
@@ -1352,9 +1514,9 @@ function startEncounter(sp, shiny, inWater = false, inMountain = false, inWinter
   enc = { sp, shiny: !!shiny, busy: false, attempts: 0, lv: 2 + Math.floor(Math.random() * 8) };
   modal = 'enc'; keys.clear();
   $('encounter').classList.remove('hidden');
-  $('enc-scene').className = 'enc-scene ' + (halloweenCavern?'halloween-cavern':sp.habitat==='halloween'?'halloween':underground ? 'cave' : inWater ? 'water' : inWinter ? 'winter' : (inMountain ? 'mountain' : 'land'));
+  $('enc-scene').className = 'enc-scene ' + (deepDiving?'deep-sea':halloweenCavern?'halloween-cavern':sp.habitat==='halloween'?'halloween':underground ? 'cave' : inWater ? 'water' : inWinter ? 'winter' : (inMountain ? 'mountain' : 'land'));
   ec.classList.remove('gone'); $('ball').className = 'ball hidden';
-  setText(`${halloweenCavern ? 'In Halloween Cavern, a wild' : sp.habitat==='halloween' ? 'In Halloween Forest, a wild' : underground ? 'Deep underground, a wild' : inWater ? (P.diving ? 'You swam into' : 'You fished up') : inWinter ? 'In the snow, a wild' : (inMountain ? 'From the crags appeared' : 'A wild')} ${enc.shiny ? '✨SHINY✨ ' : ''}${sp.name} (Lv ${enc.lv})${inWater ? '!' : ' appeared!'}`);
+  setText(`${deepDiving ? 'In the deep sea, you swam into' : halloweenCavern ? 'In Halloween Cavern, a wild' : sp.habitat==='halloween' ? 'In Halloween Forest, a wild' : underground ? 'Deep underground, a wild' : inWater ? (P.diving ? 'You swam into' : 'You fished up') : inWinter ? 'In the snow, a wild' : (inMountain ? 'From the crags appeared' : 'A wild')} ${enc.shiny ? '✨SHINY✨ ' : ''}${sp.name} (Lv ${enc.lv})${inWater ? '!' : ' appeared!'}`);
   setBtns(true);
 }
 const setText = s => $('enc-text').textContent = s;
@@ -1425,7 +1587,7 @@ function openDex() {
     else if (visible && s.draw) { const c = document.createElement('canvas'); c.width = 90; c.height = 60; s.draw(c.getContext('2d'), 45, 30, 22, shiny); icon.appendChild(c); }
     else if (visible) icon.appendChild(emojiEl(s.emoji, 40, shiny)); else icon.textContent = '❔';
     el.appendChild(icon);
-    el.insertAdjacentHTML('beforeend', `<b>${visible ? s.name : '???'}</b><br><small>${previewShinies ? `✨ Shiny preview · ${d?.shiny ? 'caught' : 'not caught'}` : d ? `×${d.count}${d.shiny ? ` · ✨${d.shiny}` : ''}` : (s.habitat === 'halloween' ? (s.id==='ghost'?'🎃 October 31 only · Rare':'🎃 Halloween Forest · October only') : s.habitat === 'generator' ? '⚡ Generator · ✨ October cavern' : s.habitat === 'cave' ? '🕳️ Tunnel in the starting meadow' : s.diveOnly ? '🤿 Diving only' : s.habitat === 'winter' ? '❄ Winter Area · South' : s.id === 'bouldersaur' ? '🏔️ East Mountains' : s.water ? 'Fish in rivers' : s.id === 'frog' ? 'Grass or rivers' : 'Tall grass')}</small>`);
+    el.insertAdjacentHTML('beforeend', `<b>${visible ? s.name : '???'}</b><br><small>${previewShinies ? `✨ Shiny preview · ${d?.shiny ? 'caught' : 'not caught'}` : d ? `×${d.count}${d.shiny ? ` · ✨${d.shiny}` : ''}` : (s.habitat === 'deep-generator' ? '⚡ Deep sea generator' : s.deepOnly ? '🌊 Deep sea only' : s.habitat === 'halloween' ? (s.id==='ghost'?'🎃 October 31 only · Rare':'🎃 Halloween Forest · October only') : s.habitat === 'generator' ? '⚡ Generator · ✨ October cavern' : s.habitat === 'cave' ? '🕳️ Tunnel in the starting meadow' : s.diveOnly ? '🤿 Diving only' : s.habitat === 'winter' ? '❄ Winter Area · South' : s.id === 'bouldersaur' ? '🏔️ East Mountains' : s.water ? 'Fish in rivers' : s.id === 'frog' ? 'Grass or rivers' : 'Tall grass')}</small>`);
     list.appendChild(el);
   }
   $('dex').classList.remove('hidden');
@@ -1485,6 +1647,7 @@ $('btn-party-store-all').onclick = () => {
 const DIRS = { ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1], ArrowLeft: [-1, 0], KeyA: [-1, 0], ArrowRight: [1, 0], KeyD: [1, 0] };
 addEventListener('keydown', e => {
   if(modal==='generator'){if(e.code==='Escape')closeGenerator();return;}
+  if(e.code==='KeyB'&&!e.repeat&&P.diving){e.preventDefault();toggleDepth();return;}
   if (e.code === 'KeyV' && !e.repeat && (P.diving || (P.boat && diveSites.some(site => site.x === P.x && site.y === P.y)))) { e.preventDefault(); toggleDive(); return; }
   if (modal === 'battle') {
     if (e.code === 'Space' && !e.target.closest('button')) { e.preventDefault(); if (!e.repeat) battleTurn(); }
@@ -1504,6 +1667,8 @@ document.querySelectorAll('.dpad button').forEach(b => {
 });
 $('btn-a').onclick = () => modal === 'battle' ? battleTurn() : action();
 $('btn-dive').onclick = toggleDive;
+$('btn-depth').onclick=toggleDepth;
+$('btn-deep-action').onclick=deepAction;
 $('btn-tunnel').onclick = useTunnel;
 $('btn-cave-action').onclick = caveAction;
 $('btn-generator-close').onclick = closeGenerator;
@@ -1516,7 +1681,20 @@ const hash = (x, y) => ((x * 73856093) ^ (y * 19349663)) >>> 0;
 function drawTile(t, x, y, px, py) {
   const h = hash(x, y);
   const grass = () => { ctx.fillStyle = h & 1 ? '#63c25c' : '#5bb954'; ctx.fillRect(px, py, T, T); };
-  if(t===HF||t===HT) {
+  if(deepDiving) {
+    ctx.fillStyle=t===WA?(h&1?'#16435b':'#193c55'):'#10263d';ctx.fillRect(px,py,T,T);
+    if(t===WA) {
+      ctx.strokeStyle='#42768d55';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(px+4,py+27);ctx.quadraticCurveTo(px+20,py+18,px+36,py+26);ctx.stroke();
+      if((h&15)===0) {
+        ctx.strokeStyle=(h&16)?'#b686ce':'#6ac6be';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(px+20,py+36);ctx.lineTo(px+20,py+17);
+        ctx.moveTo(px+20,py+26);ctx.lineTo(px+10,py+18);ctx.moveTo(px+20,py+28);ctx.lineTo(px+29,py+13);ctx.stroke();
+        ctx.fillStyle='#b5fff4';ctx.fillRect(px+18,py+14,4,4);
+      }
+    } else {
+      ctx.fillStyle='#29475b';ctx.beginPath();ctx.moveTo(px+3,py+33);ctx.lineTo(px+9,py+6);ctx.lineTo(px+28,py+4);ctx.lineTo(px+38,py+29);ctx.closePath();ctx.fill();
+      if((h&7)===0){ctx.fillStyle='#62bfbd';ctx.beginPath();ctx.arc(px+20,py+17,3,0,Math.PI*2);ctx.fill();}
+    }
+  } else if(t===HF||t===HT) {
     ctx.fillStyle=h&1?'#54405e':'#493954';ctx.fillRect(px,py,T,T);
     if(t===HT) {
       ctx.strokeStyle='#242238';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(px+20,py+36);ctx.lineTo(px+18,py+6);ctx.moveTo(px+18,py+17);ctx.lineTo(px+5,py+8);ctx.moveTo(px+18,py+23);ctx.lineTo(px+33,py+10);ctx.stroke();
@@ -1634,6 +1812,7 @@ function render() {
   for (let y = y0; y <= y0 + cv.height / T + 1; y++) for (let x = x0; x <= x0 + cv.width / T + 1; x++)
     if (inb(x, y)) drawTile(tile(x,y), x, y, Math.round(x * T - camX), Math.round(y * T - camY));
   if (underground) { drawCaveScene(camX,camY,ppx,ppy); return; }
+  if(deepDiving){drawDeepSeaScene(camX,camY,ppx,ppy);return;}
   // Surface ambience is separate from the creatures that divers can encounter.
   if (!P.diving) {
   // frog heads popping out of the water
@@ -1764,8 +1943,9 @@ function drawHalloweenCavernDecorations(camX,camY) {
 }
 
 function drawCaveTreasures(camX,camY) {
-  for(const pile of caveTreasurePiles) {
-    const x=(pile.x+.5)*T-camX,y=(pile.y+.5)*T-camY,got=caveTreasures.collected[pile.id];
+  const {piles,treasures,location,title}=generatorContext();
+  for(const pile of piles) {
+    const x=(pile.x+.5)*T-camX,y=(pile.y+.5)*T-camY,got=treasures.collected[pile.id];
     if(x < -100 || y < -80 || x > cv.width+100 || y > cv.height+80)continue;
     ctx.fillStyle='#171e32';ctx.strokeStyle=got?'#658a78':pile.light;ctx.lineWidth=3;
     ctx.beginPath();ctx.roundRect(x-23,y-22,46,48,8);ctx.fill();ctx.stroke();
@@ -1781,15 +1961,32 @@ function drawCaveTreasures(camX,camY) {
     ctx.fillStyle=got?'#b3d8bc':'#ffffff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText((got?pile.name+' ✓':pile.name).toUpperCase(),x,y-33);
     if(!got){ctx.fillStyle=pile.light;ctx.font='bold 20px sans-serif';ctx.fillText('↓',x,y-56-Math.sin(time*3)*3);}
   }
-  const x=(caveGenerator.x+.5)*T-camX,y=(caveGenerator.y+.5)*T-camY;
+  const x=(location.x+.5)*T-camX,y=(location.y+.5)*T-camY;
   ctx.fillStyle='#202638';ctx.fillRect(x-26,y-28,52,54);ctx.strokeStyle='#99b4d2';ctx.lineWidth=3;ctx.strokeRect(x-26,y-28,52,54);
   ctx.fillStyle='#64829c';ctx.fillRect(x-18,y-44,36,14);ctx.fillStyle='#a6f6db';ctx.fillRect(x-17,y-20,34,22);
   ctx.fillStyle='#274658';ctx.font='bold 20px sans-serif';ctx.textAlign='center';ctx.fillText('⚡',x,y-2);
-  caveTreasurePiles.forEach((pile,i)=>{ctx.fillStyle=caveTreasures.generated[pile.id]?'#a4f5bd':caveTreasures.collected[pile.id]?pile.color:'#526172';ctx.beginPath();ctx.arc(x-14+i*14,y+13,4,0,Math.PI*2);ctx.fill();});
-  ctx.fillStyle='#e4f4ff';ctx.font='bold 12px sans-serif';ctx.fillText('DINOSAUR GENERATOR',x,y-54);
-  for(const sign of [{x:27,y:31},{x:41,y:30}]) {
+  piles.forEach((pile,i)=>{ctx.fillStyle=treasures.generated[pile.id]?'#a4f5bd':treasures.collected[pile.id]?pile.color:'#526172';ctx.beginPath();ctx.arc(x-14+i*14,y+13,4,0,Math.PI*2);ctx.fill();});
+  ctx.fillStyle='#e4f4ff';ctx.font='bold 12px sans-serif';ctx.fillText(title.toUpperCase(),x,y-54);
+  for(const sign of deepDiving?[]:[{x:27,y:31},{x:41,y:30}]) {
     const sx=(sign.x+.5)*T-camX,sy=(sign.y+.5)*T-camY;
     ctx.fillStyle='#292f48';ctx.fillRect(sx-53,sy-12,106,24);ctx.fillStyle='#f9dc95';ctx.fillText('← Entrance',sx,sy+4);
+  }
+}
+
+function drawDeepSeaScene(camX,camY,ppx,ppy) {
+  drawWaterWildlife(camX,camY);drawCaveTreasures(camX,camY);
+  const x=(deepEntrance.x+.5)*T-camX,y=(deepEntrance.y+.5)*T-camY;
+  ctx.strokeStyle='#a2e8ff';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(x,y,21,12,0,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle='#dbf8ff';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText('↑ SHALLOWS (V)',x-20,y+36);
+  for(const [tx,ty,label]of[[14,4,'MOONSTONES ←  ·  SUNSTONES →'],[10,17,'↓ ABYSS CRYSTALS'],[45,20,'↑ SUNSTONES'],[29,30,'↖ ENTRANCE GENERATOR']]) {
+    const sx=(tx+.5)*T-camX,sy=(ty+.5)*T-camY,w=ctx.measureText(label).width+16;
+    ctx.fillStyle='#0b253e';ctx.fillRect(sx-w/2,sy-12,w,24);ctx.fillStyle='#b8eef1';ctx.fillText(label,sx,sy+4);
+  }
+  drawPlayer(ppx-camX,ppy-camY);
+  ctx.strokeStyle='#bdeaff66';ctx.lineWidth=1;
+  for(let i=0;i<20;i++) {
+    const bx=(i*157+Math.sin(time+i)*9)%cv.width,by=(cv.height+(i*83-time*(8+i%4*3))%cv.height)%cv.height;
+    ctx.beginPath();ctx.arc(bx,by,2+i%3,0,Math.PI*2);ctx.stroke();
   }
 }
 
@@ -1806,7 +2003,7 @@ function refreshHalloweenSeason() {
     toast('🎃 Halloween Cavern has closed until next October. Your caught shinies are safe!');
   }
   spots=spots.filter(s=>[TG,WA,MT,SN,HF].includes(map[s.y]?.[s.x]));
-  if(!underground&&halloweenPatch.some(c=>c.x===P.x&&c.y===P.y)&&[TR,HT].includes(tile(P.x,P.y))) {
+  if(!underground&&!deepDiving&&halloweenPatch.some(c=>c.x===P.x&&c.y===P.y)&&[TR,HT].includes(tile(P.x,P.y))) {
     Object.assign(P,{x:7,y:5,fx:7,fy:5,prog:1});keys.clear();
   }
   hud();persist();
@@ -1838,5 +2035,5 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 hud();
-toast(halloweenCavern?'✨ Halloween Cavern: every creature is shiny! Return to the ladder to leave.':underground?'🕯️ Explore the caves; return to the ladder to leave.':P.diving ? '🤿 Swim into creatures to encounter them. V or Surface returns to your boat.' : 'Welcome! Space at the starting tunnel: explore underground 🕳️');
+toast(deepDiving?'🌊 Welcome back to the deep sea! V returns to the shallows.':halloweenCavern?'✨ Halloween Cavern: every creature is shiny! Return to the ladder to leave.':underground?'🕯️ Explore the caves; return to the ladder to leave.':P.diving ? '🤿 B dives deeper. V returns to your boat.' : 'Welcome! Space at the starting tunnel: explore underground 🕳️');
 requestAnimationFrame(loop);

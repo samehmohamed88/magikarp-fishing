@@ -1,6 +1,9 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 [hidden] { display: none !important; }
 #btn-dive { position: fixed; right: 16px; bottom: 145px; z-index: 2; background: #17627d; }
+#btn-depth, #btn-deep-action { position: fixed; right: 16px; bottom: 195px; z-index: 2; background: #244781; }
+#deep-quest { position: fixed; top: 122px; left: 50%; transform: translateX(-50%); max-width: calc(100vw - 24px); width: max-content; padding: 8px 14px; border-radius: 12px; font-size: 13px; pointer-events: none; }
+.enc-scene.deep-sea { background: radial-gradient(ellipse at 50% 0%, #3772ad, #152b51 65%, #31435f 66%); box-shadow: inset 0 0 24px #3db8d544; }
 #btn-tunnel { position: fixed; right: 16px; bottom: 195px; z-index: 2; background: #5b435e; }
 #btn-cave-action { position: fixed; right: 16px; bottom: 195px; z-index: 2; background: #594b82; }
 #cave-quest { position: fixed; top: 122px; left: 50%; transform: translateX(-50%); max-width: calc(100vw - 24px); width: max-content; padding: 8px 14px; border-radius: 12px; font-size: 13px; pointer-events: none; }

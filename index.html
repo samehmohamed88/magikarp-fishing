@@ -7,7 +7,7 @@
   <meta name="description" content="Explore rivers by boat, fish for Magikarp and catch wild animals in the tall grass." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=halloween-cavern-1" />
+  <link rel="stylesheet" href="style.css?v=deep-sea-1" />
 </head>
 <body>
   <main>
@@ -23,6 +23,9 @@
       <button id="btn-dex" class="btn">📖 Collection (C)</button>
     </header>
     <button id="btn-dive" class="btn" hidden>🤿 Dive (V)</button>
+    <button id="btn-depth" class="btn" hidden>🌊 Dive deeper (B)</button>
+    <button id="btn-deep-action" class="btn" hidden>⚡ Use deep sea generator (Space)</button>
+    <div id="deep-quest" class="glass" hidden aria-live="polite"></div>
     <button id="btn-tunnel" class="btn" hidden>🕳️ Enter tunnel (Space)</button>
     <button id="btn-cave-action" class="btn" hidden>⚡ Use generator (Space)</button>
     <div id="cave-quest" class="glass" hidden aria-live="polite"></div>
@@ -34,7 +37,7 @@
     <section id="generator" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="generator-title">
       <div class="generator-card glass">
         <div class="dex-head"><h2 id="generator-title">⚡ Dinosaur Generator</h2><button id="btn-generator-close" class="btn" aria-label="Close generator">✕</button></div>
-        <p>Put each collected pile into the generator to receive its dinosaur. You can earn all three!</p>
+        <p id="generator-description">Put each collected pile into the generator to receive its dinosaur. You can earn all three!</p>
         <div id="generator-list"></div>
         <p id="generator-message" role="status">Each pile makes one dinosaur. A full party sends your dinosaur to the Box.</p>
       </div>
@@ -106,6 +109,6 @@
       <button id="btn-a" class="abtn">🎣</button>
     </div>
   </main>
-  <script src="game.js?v=halloween-cavern-2"></script>
+  <script src="game.js?v=deep-sea-1"></script>
 </body>
 </html>

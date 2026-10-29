@@ -109,6 +109,9 @@ Build a party of up to six creatures, with extra catches stored in your Box.
 | --- | --- |
 | Move | Arrow keys or WASD |
 | Cast or reel in | Space while facing water |
+| Dive at a buoy / ascend one depth | V or the Dive / Shallows / Surface button |
+| Dive deeper from the shallows | B or **Dive deeper** |
+| Collect stones / use a nearby generator | Space or the on-screen action button |
 | Throw a ball during an encounter | Space or **Throw Ball** |
 | Attack during a trainer battle | Space or **Attack** |
 | Open or close Party | P |
@@ -156,6 +159,40 @@ have their alternate colors and a small star; their shiny form stays with them
 when encountered and caught. Press **V** or tap **Surface** anywhere underwater
 to return to your boat. There is no air timer. Normal fishing still works above
 water, and your diving position saves automatically.
+
+## Dive deeper: the Deep Sea
+
+While scuba diving, press **B** or tap **Dive deeper**. The deeper basin contains
+all the fishable river creatures and all seven diving-only creatures, plus:
+
+- **Giant Squid** and **Colossal Squid**
+- **Great White Shark** and **Tiger Shark**
+- **Orca**
+
+Swim into a creature to encounter it. Each new species has its own normal and
+shiny appearance. The five new species are found only in the deep sea.
+Press **V / Shallows** to return to the place where you descended, then V again
+to return to your boat. There is no air timer, and your depth and position save.
+
+![Deep-sea diving, glowing Moonstones, and the generator beside the entrance](docs/screenshots/deep-sea.png)
+
+The **Deep Sea Generator is right at the entrance**. Find the glowing stone piles
+at the sides of the area, swim onto them or press **Space / Collect**, and bring
+them back to the generator. Choose **Insert** to receive the matching creature:
+
+| Glowing stones | Location | Reward |
+| --- | --- | --- |
+| Moonstones | Left side | Mosasaurus |
+| Sunstones | Right side | Megalodon |
+| Abyss Crystals | Lower left side | Elasmosaurus |
+
+You can earn **all three**, once each per save, in any order. Collecting a stone
+alone does not award its creature. Rewards are level 10 and go to your Party or
+to your Box if the Party is full. These three creatures come from the deep-sea
+generator; they do not spawn as wild swimmers. Stone and reward progress saves
+immediately and is separate from the cave's dinosaur generator.
+
+![The five new deep-sea species and three prehistoric rewards, with their normal and shiny appearances](docs/screenshots/deep-sea-creatures.png)
 
 ## Underground caves
 

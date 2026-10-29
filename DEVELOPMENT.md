@@ -73,7 +73,7 @@ catch, preserving shiny state and saved Party/Box entries.
 The ten new woodland species share weight 20 each in the meadow encounter pool
 (16 total meadow species), including sparkling grass. They have no fishing weight
 and do not enter the separate winter or mountain pools. Verify distinct normal
-and shiny sprites for encounters, Party/Box, Collection (45 species), and battles,
+and shiny sprites for encounters, Party/Box, Collection (53 species), and battles,
 as well as catch/save/reload compatibility with existing saves.
 Fishing shiny probabilities: Alligator 75%; Shark, Catfish, Grunt, Spiny Dogfish,
 and Crocodile 50%; Magikarp and Frog retain 1/8. Sparkling casts guarantee a shiny
@@ -128,7 +128,7 @@ There are 18 cave creatures, three each of Mole, Ant, Spider, Cricket, Praying
 Mantis, and Cave Crawfish. They only encounter by contact underground. Crawfish
 stay in shallow pools; the others stay on dirt. All have distinct normal/shiny
 sprites. They never join surface, fishing, winter, mountain, or diving pools.
-Check movement and respawn boundaries, capture, Party/Box, Collection (45 species),
+Check movement and respawn boundaries, capture, Party/Box, Collection (53 species),
 preview sprites, and persistence. Cave encounters use a separate cave background.
 Old saves without underground default to the surface; cave saves reload on the
 cave layer, with invalid cave positions recovered at the ladder. Surface wildlife
@@ -191,8 +191,38 @@ the four species enters meadow, fishing, normal cave, or swimmer pools. Encounte
 also checks the calendar to prevent stale seasonal availability.
 
 Test all four normal/shiny sprite pairs, catching, and save/reload into November.
-Party, Box, and Collection (45 species) must keep seasonal catches after the event.
+Party, Box, and Collection (53 species) must keep seasonal catches after the event.
 An in-progress encounter may finish after midnight; only new spawns are gated.
+
+## Deep Sea validation
+
+From any valid shallow scuba position, B / Dive deeper enters a separate basin
+at (8,8). V / Shallows (or B) returns to the saved shallow position; V again
+surfaces. The deep generator at (9,8) is adjacent to the entrance and blocks
+movement onto its tile. Moonstones (3,10), Sunstones (56,12), and Abyss Crystals
+(3,34) are reachable along the basin sides. Space, the action button, and walking
+onto a pile collect it. Contextual controls and the quest tracker show progress.
+
+Deep wildlife contains three each of all eight fishing species, seven shallow
+diving-only species, and five deep-only species (60 swimmers total). Giant Squid,
+Colossal Squid, Great White Shark, Tiger Shark, and Orca have deepOnly=true and
+must not appear in fishing or shallow wildlife. All normal/shiny art differs.
+Surface sparkle coordinates must not affect deep-water shiny status. Rocks block
+movement; the entrance and stone/generator interactions protect against collisions.
+
+Generator rewards are Mosasaurus, Megalodon, and Elasmosaurus, each a normal
+level-10 creature with habitat=deep-generator and no wild/fishing eligibility.
+Each stone grants one independent reward; missing stones, duplicate insertion,
+and cross-generator stone IDs must not grant rewards. Full parties route to Box.
+Deep quest data saves as deepTreasures; caveTreasures remains separate. Deep
+location and return point save as deepDiving and shallowReturn. Invalid deep
+positions recover to the entrance; invalid return points use the first dive buoy.
+Existing shallow/cave saves retain their behavior.
+
+Verify keyboard and button depth transitions, all 20 species, collision/capture,
+respawns within bounds, all eight new sprite pairs, both generator workflows,
+save/reload between collection and reward, duplicate guards, Party/Box/Collection,
+and date rollover while deep diving. Update asset query versions when shipping.
 
 ## Halloween Cavern validation
 
