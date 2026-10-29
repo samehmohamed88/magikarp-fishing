@@ -42,6 +42,19 @@ your progress. After running or losing, walk away and approach again to retry.
 
 ![A trainer battle showing both creatures, HP bars, and Attack, Heal, and Run controls](docs/screenshots/trainer-battle.png)
 
+## Water wildlife
+
+Sharks, Catfish, Grunt, Spiny Dogfish, Crocodiles, and Alligators now swim in the
+rivers. Watch for their sprites from the bank or your boat. Face one and fish
+into its tile to encounter that species; casting elsewhere can find any of the
+six, along with Magikarp and Frog. Water creatures stay in the rivers and respawn
+over time. Crocodiles and Alligators are rarer catches.
+
+Each has its own drawn sprite and shiny colors, and can join your Party, Box,
+Collection, and trainer battles. Sparkling fishing spots still guarantee shinies.
+
+![A shark fishing encounter](docs/screenshots/shark.png)
+
 ## Play
 
 Once GitHub Pages is enabled, open **[Magikarp River Quest](https://samehmohamed88.github.io/magikarp-fishing/)**
@@ -81,12 +94,13 @@ Touch devices also have an on-screen direction pad and fishing button.
 Step from a dock into the water to board a boat; return to a dock to get out.
 When fishing, wait for the bite message, then press Space again quickly!
 
-Discover nine species, including Magikarp, Frog, Fox, Bouldersaur, and Snowy.
+Discover fifteen species, including Magikarp, Frog, Fox, Bouldersaur, Snowy,
+and the six new water creatures.
 Every species has a rare shiny form, including pink Bunny, blue Duck, purple
 Squirrel, blue Fox, and mint Hedgehog. Magikarp, Frog, and Bouldersaur keep their
 existing shiny colors. Check Collection to track your catches,
 and use Party to move creatures between your party and Box.
-In Collection, choose **✨ Preview shiny forms** to see all nine shiny designs
+In Collection, choose **✨ Preview shiny forms** to see all fifteen shiny designs
 without changing your catches or saved progress. Bunny, Duck, Squirrel, Fox,
 and Hedgehog use drawn sprites so their colors are consistent across devices.
 

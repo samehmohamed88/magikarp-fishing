@@ -57,6 +57,11 @@ Test manual Switch with multiple party members: switching costs one turn and
 preserves each creature's HP; canceling costs none. Active/fainted choices are
 disabled. After a faint, any surviving party member can take over regardless of
 party order. Check mouse, keyboard, and touch selection.
+Water wildlife must swim and respawn only on water. Fish into a visible creature's
+tile to target it; open-water fishing should include all eight fishing species.
+Verify each new aquatic creature has a distinct normal/shiny sprite in encounters,
+Collection, Party/Box, and battles, and survives save/reload. They must not appear
+in grass or winter encounter pools.
 
 Cloud tasks already have isolated checkouts. Use this checkout directly;
 do not create a Git worktree unless explicitly requested.

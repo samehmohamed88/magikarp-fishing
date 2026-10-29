@@ -6,17 +6,75 @@ const cv = $('world'), ctx = cv.getContext('2d');
 
 // ---------- Creatures ----------
 const SPECIES = [
-  { id: 'magikarp', name: 'Magikarp', water: true, rate: 0.8 },
+  { id: 'magikarp', name: 'Magikarp', water: true, fishingWeight: 30, rate: 0.8 },
   { id: 'bunny', name: 'Bunny', weight: 40, rate: 0.7, draw: (...a) => drawAnimal('bunny', ...a) },
   { id: 'duck', name: 'Duck', weight: 25, rate: 0.6, draw: (...a) => drawAnimal('duck', ...a) },
-  { id: 'frog', name: 'Frog', emoji: '🐸', weight: 45, rate: 0.55 },
+  { id: 'frog', name: 'Frog', emoji: '🐸', weight: 45, fishingWeight: 20, rate: 0.55 },
   { id: 'squirrel', name: 'Squirrel', weight: 12, rate: 0.5, draw: (...a) => drawAnimal('squirrel', ...a) },
   { id: 'fox', name: 'Fox', weight: 6, rate: 0.35, draw: (...a) => drawAnimal('fox', ...a) },
   { id: 'hedgehog', name: 'Hedgehog', weight: 2, rate: 0.25, draw: (...a) => drawAnimal('hedgehog', ...a) },
   { id: 'bouldersaur', name: 'Bouldersaur', weight: 4, rate: 0.2, draw: (...a) => drawBoulder(...a) },
   { id: 'snowy', name: 'Snowy', habitat: 'winter', rate: 0.55, draw: (...a) => drawSnowy(...a) },
+  { id: 'shark', name: 'Shark', water: true, fishingWeight: 8, rate: 0.35, draw: (...a) => drawWaterAnimal('shark', ...a) },
+  { id: 'catfish', name: 'Catfish', water: true, fishingWeight: 12, rate: 0.65, draw: (...a) => drawWaterAnimal('catfish', ...a) },
+  { id: 'grunt', name: 'Grunt', water: true, fishingWeight: 12, rate: 0.7, draw: (...a) => drawWaterAnimal('grunt', ...a) },
+  { id: 'spiny-dogfish', name: 'Spiny Dogfish', water: true, fishingWeight: 8, rate: 0.45, draw: (...a) => drawWaterAnimal('spiny-dogfish', ...a) },
+  { id: 'crocodile', name: 'Crocodile', water: true, fishingWeight: 5, rate: 0.3, draw: (...a) => drawWaterAnimal('crocodile', ...a) },
+  { id: 'alligator', name: 'Alligator', water: true, fishingWeight: 5, rate: 0.3, draw: (...a) => drawWaterAnimal('alligator', ...a) },
 ];
 const byId = id => SPECIES.find(s => s.id === id);
+
+function drawWaterAnimal(id, c, x, y, s, shiny = false, t = 0) {
+  const colors = {
+    shark: shiny ? ['#b47bea', '#e8d8ff'] : ['#688da9', '#d9edf1'],
+    catfish: shiny ? ['#e7ac42', '#fff0ad'] : ['#686c91', '#d4d5e5'],
+    grunt: shiny ? ['#ec77bb', '#ffdbef'] : ['#edd268', '#fff7ca'],
+    'spiny-dogfish': shiny ? ['#59cdbd', '#d9fff2'] : ['#718b91', '#d7e3e3'],
+    crocodile: shiny ? ['#deaa49', '#ffebae'] : ['#729950', '#d4dfa0'],
+    alligator: shiny ? ['#8c85d7', '#ddd7ff'] : ['#365b50', '#9ebd91'],
+  };
+  const [body, belly] = colors[id], reptile = id === 'crocodile' || id === 'alligator';
+  const dogfish = id === 'spiny-dogfish', shark = id === 'shark' || dogfish;
+  c.save(); c.translate(x, y); c.scale(s, s);
+  c.strokeStyle = '#263b46'; c.lineWidth = .045; c.lineJoin = 'round';
+  const oval = (x, y, rx, ry, color) => { c.fillStyle = color; c.beginPath(); c.ellipse(x,y,rx,ry,0,0,Math.PI*2); c.fill(); c.stroke(); };
+  const shape = (points, color) => { c.fillStyle=color;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();c.stroke(); };
+  const sway = Math.sin(t * 4) * .12;
+  if (reptile) {
+    shape([[.5,-.25],[1.55,.1+sway],[.5,.3]],body);
+    for (const px of [-.5,.5]) for (const side of [-1,1]) {
+      oval(px,side*.4,.2,.15,body);
+      for(let i=0;i<3;i++) {c.beginPath();c.moveTo(px-.12+i*.1,side*.43);c.lineTo(px-.12+i*.1,side*.6);c.stroke();}
+    }
+    oval(0,0,.9,.36,body);
+    // Crocodiles have a narrow pointed snout; alligators have a broad rounded one.
+    if(id==='crocodile') shape([[-.55,-.29],[-1.55,.02],[-.6,.3]],body);
+    else oval(-.94,.02,.58,.28,body);
+    c.beginPath();c.moveTo(-1.43,.13);c.lineTo(-.62,.18);c.stroke();
+    for(let i=0;i<5;i++) shape([[-1.35+i*.14,.13],[-1.29+i*.14,.23],[-1.23+i*.14,.14]],'#fff5d5');
+    for(let i=0;i<6;i++) shape([[-.4+i*.23,-.23],[-.3+i*.23,-.44],[-.2+i*.23,-.23]],belly);
+    oval(-.66,-.25,.12,.12,belly);oval(-.69,-.27,.045,.07,'#172b28');
+  } else {
+    shape([[.65,-.12],[1.38,-.62+sway],[1.13,sway],[1.38,.56+sway],[.65,.15]],body);
+    if(shark) {
+      shape([[-.22,-.2],[.05,-.98],[.45,-.22]],body);
+      shape([[.05,.15],[.6,.84],[.56,.15]],body);
+      if(dogfish){shape([[.55,-.12],[.78,-.6],[.95,-.12]],body);shape([[.01,-.65],[.05,-1.08],[.12,-.63]],'#f4e3b8');}
+    } else shape([[-.4,-.2],[0,-.77],[.55,-.2]],body);
+    oval(0,0,shark?1.05:.9,shark?.35:.53,body);
+    oval(-.15,.16,.68,shark?.13:.24,belly);
+    if(id==='grunt') for(let i=0;i<4;i++){c.strokeStyle='#83714b';c.beginPath();c.moveTo(-.44+i*.27,-.38);c.lineTo(-.62+i*.27,.31);c.stroke();}
+    c.strokeStyle='#263b46';
+    if(dogfish) for(const [px,py] of [[-.5,-.18],[0,-.22],[.45,-.13],[.2,.03]]) oval(px,py,.045,.045,'#ebf2e9');
+    if(shark) for(let i=0;i<3;i++){c.beginPath();c.moveTo(-.35+i*.12,-.16);c.lineTo(-.4+i*.12,.13);c.stroke();}
+    oval(-.65,-.13,.1,.1,'#fff');oval(-.69,-.13,.04,.055,'#182938');
+    c.beginPath();c.moveTo(-.98,.1);c.lineTo(-.59,.16);c.stroke();
+    if(id==='catfish') for(const side of [-1,1]) for(let i=0;i<2;i++) {
+      c.beginPath();c.moveTo(-.8,.06);c.quadraticCurveTo(-1.2-i*.12,side*.3,-1.48,side*(.4+i*.18));c.stroke();
+    }
+  }
+  c.restore();
+}
 
 // Preserve the frog's blue form by recoloring its green pixels.
 const emojiCache = {};
@@ -291,6 +349,43 @@ for (const trainer of TRAINERS) {
     if (inb(x, y) && ![WA, DK].includes(tile(x, y))) map[y][x] = ground;
 }
 
+const waterTiles = [];
+for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) if (tile(x, y) === WA) waterTiles.push({ x, y });
+const waterWildlife = ['shark', 'catfish', 'grunt', 'spiny-dogfish', 'crocodile', 'alligator'].map((id, i) => ({
+  id, ...[{ x: 19, y: 9 }, { x: 19, y: 16 }, { x: 19, y: 30 }, { x: 41, y: 10 }, { x: 41, y: 27 }, { x: 30, y: 23 }][i],
+  moveIn: 2 + i * .3, life: 45 + i * 5,
+}));
+function pickWaterAnimal() {
+  const pool = SPECIES.filter(sp => sp.fishingWeight), total = pool.reduce((sum, sp) => sum + sp.fishingWeight, 0);
+  let roll = Math.random() * total;
+  return pool.find(sp => (roll -= sp.fishingWeight) < 0) || pool[0];
+}
+function updateWaterWildlife(dt) {
+  for (const mon of waterWildlife) {
+    mon.life -= dt; mon.moveIn -= dt;
+    if (mon.life <= 0) {
+      const spot = waterTiles[Math.floor(R() * waterTiles.length)];
+      Object.assign(mon, spot); mon.life = 45 + R() * 30;
+    }
+    if (mon.moveIn <= 0) {
+      const [dx, dy] = [[0, 1], [0, -1], [1, 0], [-1, 0]][Math.floor(R() * 4)];
+      if (tile(mon.x + dx, mon.y + dy) === WA && !waterWildlife.some(other => other !== mon && other.x === mon.x + dx && other.y === mon.y + dy)) {
+        mon.x += dx; mon.y += dy;
+      }
+      mon.moveIn = 2 + R() * 2;
+    }
+  }
+}
+function drawWaterWildlife(camX, camY) {
+  for (const mon of waterWildlife) {
+    const x = (mon.x + .5) * T - camX, y = (mon.y + .5) * T - camY;
+    if (x < -T || y < -T || x > cv.width + T || y > cv.height + T) continue;
+    ctx.save(); ctx.globalAlpha = .9;
+    byId(mon.id).draw(ctx, x, y + Math.sin(time * 2 + mon.x) * 2, 13, false, time);
+    ctx.restore();
+  }
+}
+
 // ---------- State ----------
 const save = JSON.parse(localStorage.getItem('mkrq') || '{}');
 const dex = save.dex || {};
@@ -444,7 +539,7 @@ function drawBattle() {
   const draw = (mon, x, y) => {
     const sp = byId(mon.id);
     c.fillStyle = '#0003'; c.beginPath(); c.ellipse(x, y + 48, 70, 13, 0, 0, Math.PI * 2); c.fill();
-    if (sp.water) drawCarp(c, x, y, 38, mon.shiny, 0);
+    if (sp.id === 'magikarp') drawCarp(c, x, y, 38, mon.shiny, 0);
     else if (sp.draw) sp.draw(c, x, y, 44, mon.shiny, 0);
     else { const img = emojiCanvas(sp.emoji, 85, mon.shiny); c.drawImage(img, x - img.width / 2, y - img.height / 2); }
   };
@@ -514,18 +609,18 @@ function action() {
   if (modal) return;
   if (fishing) {
     if (fishing.bite) {
-      const sh = fishing.shiny;
+      const sh = fishing.shiny, fishingSpecies = fishing.species;
       if (sh) removeSpot(fishing.x, fishing.y);
       fishing = null;
-      const frog = Math.random() < 0.4;
-      startEncounter(byId(frog ? 'frog' : 'magikarp'), sh || Math.random() < 1 / 8, true, false);
+      const sp = byId(fishingSpecies);
+      startEncounter(sp, sh || Math.random() < 1 / 8, true, false);
     }
     else { fishing = null; toast('Too early... the fish swam off.'); }
     return;
   }
   const fx = P.x + P.dir[0], fy = P.y + P.dir[1];
   if (tile(fx, fy) !== WA) { toast(P.boat ? 'Face open water to fish!' : 'Face the water to cast your rod 🎣'); return; }
-  fishing = { x: fx, y: fy, wait: 1.5 + Math.random() * 3, bite: false, shiny: !!spotAt(fx, fy) };
+  fishing = { x: fx, y: fy, wait: 1.5 + Math.random() * 3, bite: false, shiny: !!spotAt(fx, fy), species: waterWildlife.find(mon => mon.x === fx && mon.y === fy)?.id || pickWaterAnimal().id };
   toast(fishing.shiny ? '✨ You cast into the sparkles! A shiny is biting!' : '🎣 Cast! Wait for a bite…');
 }
 
@@ -607,7 +702,7 @@ function drawEnc() {
   ectx.clearRect(0, 0, ec.width, ec.height);
   const bob = Math.sin(time * 3) * 6, cx = 160, cy = 120 + bob;
   ectx.fillStyle = '#0003'; ectx.beginPath(); ectx.ellipse(160, 185, 60, 12, 0, 0, Math.PI * 2); ectx.fill();
-  if (enc.sp.water) {
+  if (enc.sp.id === 'magikarp') {
     const hop = Math.abs(Math.sin(time * 4)) * 20;
     drawCarp(ectx, cx, cy - hop, 52, enc.shiny, time);
   } else if (enc.sp.draw) {
@@ -656,7 +751,7 @@ function openDex() {
     const shiny = previewShinies || d?.shiny > 0;
     el.className = 'dex-item' + (visible ? '' : ' unseen');
     const icon = document.createElement('div'); icon.className = 'icon';
-    if (s.water) { const c = document.createElement('canvas'); c.width = 90; c.height = 60; drawCarp(c.getContext('2d'), 48, 26, 17, shiny); icon.appendChild(c); }
+    if (s.id === 'magikarp') { const c = document.createElement('canvas'); c.width = 90; c.height = 60; drawCarp(c.getContext('2d'), 48, 26, 17, shiny); icon.appendChild(c); }
     else if (visible && s.draw) { const c = document.createElement('canvas'); c.width = 90; c.height = 60; s.draw(c.getContext('2d'), 45, 30, 22, shiny); icon.appendChild(c); }
     else if (visible) icon.appendChild(emojiEl(s.emoji, 40, shiny)); else icon.textContent = '❔';
     el.appendChild(icon);
@@ -677,7 +772,7 @@ $('btn-shiny-preview').onclick = () => {
 // ---------- Party ----------
 function monIcon(m, w = 70, h = 46) {
   const s = byId(m.id), el = document.createElement('div'); el.className = 'icon';
-  if (s.water) { const c = document.createElement('canvas'); c.width = w; c.height = h; drawCarp(c.getContext('2d'), w * .53, h * .42, h * .27, m.shiny); el.appendChild(c); }
+  if (s.id === 'magikarp') { const c = document.createElement('canvas'); c.width = w; c.height = h; drawCarp(c.getContext('2d'), w * .53, h * .42, h * .27, m.shiny); el.appendChild(c); }
   else if (s.draw) { const c = document.createElement('canvas'); c.width = w; c.height = h; s.draw(c.getContext('2d'), w * .5, h * .5, h * .36, m.shiny); el.appendChild(c); }
   else el.appendChild(emojiEl(s.emoji, h * 0.75, m.shiny));
   return el;
@@ -853,6 +948,7 @@ function render() {
     ctx.fillStyle = '#e63946'; ctx.beginPath(); ctx.arc(bx, by, 5, Math.PI, 0); ctx.fill();
   }
   drawSparkles(camX, camY);
+  drawWaterWildlife(camX, camY);
   drawTrainers(camX, camY);
   drawPlayer(ppx - camX, ppy - camY);
   // A sign at the entrance helps players find the new biome.
@@ -885,6 +981,7 @@ function loop(now) {
     }
     updateFishing(dt);
   }
+  if (!modal) updateWaterWildlife(dt);
   updateSpots(dt);
   render(); if (modal === 'enc') drawEnc();
   if ((saveT += dt) > 3) { saveT = 0; persist(); }
