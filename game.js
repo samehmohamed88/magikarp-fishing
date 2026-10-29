@@ -53,7 +53,10 @@ const SPECIES = [
   ...[['mosasaurus','Mosasaurus'],['megalodon','Megalodon'],['elasmosaurus','Elasmosaurus']].map(([id,name])=>({
     id,name,water:true,habitat:'deep-generator',rate:1,draw:(...a)=>drawDeepCreature(id,...a),
   })),
-  ...[['anglerfish','Anglerfish'],['gulper-eel','Gulper Eel'],['dumbo-octopus','Dumbo Octopus']].map(([id,name])=>({
+  ...[['anglerfish','Anglerfish'],['gulper-eel','Gulper Eel'],['dumbo-octopus','Dumbo Octopus'],
+    ['goblin-shark','Goblin Shark'],['frilled-shark','Frilled Shark'],['viperfish','Viperfish'],
+    ['dragonfish','Dragonfish'],['barreleye','Barreleye'],['vampire-squid','Vampire Squid'],
+    ['giant-isopod','Giant Isopod'],['nautilus','Nautilus'],['sea-pig','Sea Pig']].map(([id,name])=>({
     id,name,water:true,abyssOnly:true,rate:.95,draw:(...a)=>drawAbyssCreature(id,...a),
   })),
 ];
@@ -202,11 +205,21 @@ function drawCaveCreature(id, c, x, y, s, shiny = false, t = 0) {
 function drawAbyssCreature(id,c,x,y,s,shiny=false,t=0) {
   const palettes={anglerfish:['#596394','#a7d6e8','#c081c4','#fbe2a1'],
     'gulper-eel':['#435e73','#9dc5ca','#9762be','#e5bfff'],
-    'dumbo-octopus':['#e8aa87','#ffe0b9','#81b4e0','#d8f7ff']};
+    'dumbo-octopus':['#e8aa87','#ffe0b9','#81b4e0','#d8f7ff'],
+    'goblin-shark':['#d395a5','#f9d4d5','#76bac9','#d4f9ef'],
+    'frilled-shark':['#8d8c70','#d6cfb0','#ad79cb','#ecd3ff'],
+    viperfish:['#7698af','#d9f4fb','#ddad53','#fff0bd'],
+    dragonfish:['#3b4e68','#75e4db','#a65b90','#ffcc78'],
+    barreleye:['#587b98','#a1ebcb','#ac82c5','#ffda85'],
+    'vampire-squid':['#9e435e','#ed8b83','#597ad3','#b2e4ff'],
+    'giant-isopod':['#9f9baf','#d3d2e2','#d59c6a','#ffe0b4'],
+    nautilus:['#f1d1a5','#b87955','#9bdfcd','#438ca5'],
+    'sea-pig':['#eda6be','#ffd9e3','#8fc9ac','#d8ffe1']};
   const p=palettes[id],body=p[shiny?2:0],light=p[shiny?3:1],sway=Math.sin(t*3)*.12;
   c.save();c.translate(x,y);c.scale(s,s);c.strokeStyle='#1b2440';c.lineWidth=.045;c.lineJoin='round';c.lineCap='round';
   const oval=(x,y,rx,ry,color,angle=0)=>{c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,angle,0,Math.PI*2);c.fill();c.stroke();};
   const shape=(points,color)=>{c.fillStyle=color;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();c.stroke();};
+  const line=(points,color,width=.045)=>{c.strokeStyle=color;c.lineWidth=width;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();c.strokeStyle='#1b2440';c.lineWidth=.045;};
   const eye=(x,y)=>{oval(x,y,.13,.15,'#fff');oval(x-.02,y,.055,.08,'#17263b');};
   if(id==='anglerfish') {
     shape([[.48,-.2],[1.16,-.5+sway],[1,.05],[1.16,.5+sway],[.48,.25]],body);
@@ -224,7 +237,7 @@ function drawAbyssCreature(id,c,x,y,s,shiny=false,t=0) {
     oval(-.52,.1,.67,.4,body);shape([[-1.16,.02],[-.65,.22],[-.17,.13],[-.48,.63]],light);
     c.beginPath();c.moveTo(-1.15,.04);c.lineTo(-.55,.24);c.lineTo(-.18,.13);c.stroke();
     eye(-.76,-.08);oval(1.14,-.25+sway,.065,.065,'#f7e8a4');
-  } else {
+  } else if(id==='dumbo-octopus') {
     for(let i=0;i<8;i++) {
       const x=-.55+i*.16;c.strokeStyle='#1b2440';c.lineWidth=.17;c.beginPath();c.moveTo(x,.25);
       c.quadraticCurveTo(x*1.6,.9+sway,x*1.75,.72+Math.sin(t*3+i)*.08);c.stroke();c.strokeStyle=body;c.lineWidth=.11;c.stroke();
@@ -233,6 +246,86 @@ function drawAbyssCreature(id,c,x,y,s,shiny=false,t=0) {
     oval(-.68,-.42,.4,.27,body,-.4-sway);oval(.68,-.42,.4,.27,body,.4+sway);
     oval(0,-.08,.6,.69,body);oval(.17,-.35,.15,.23,light,-.4);
     eye(-.23,.1);eye(.23,.1);oval(0,.35,.1,.065,light);
+  } else if(id==='goblin-shark') {
+    shape([[.55,-.13],[1.35,-.7+sway],[1.08,.03],[1.3,.34+sway],[.55,.2]],body);
+    shape([[.1,-.2],[.35,-.67],[.6,-.17]],body);
+    oval(.05,.03,.84,.34,body);oval(.03,.19,.59,.14,light);
+    shape([[-.48,-.23],[-1.45,-.35],[-1.27,-.12],[-.5,.04]],body);
+    shape([[-.55,.01],[-1.18,.12],[-.86,.4],[-.43,.26]],light);
+    line([[-1.13,.14],[-.78,.24],[-.5,.12]],'#1b2440');
+    for(let i=0;i<3;i++)shape([[-1.08+i*.15,.16],[-1+i*.15,.29],[-.94+i*.15,.19]],'#fff9dc');
+    shape([[.03,.15],[.47,.68+sway],[.51,.2]],body);eye(-.48,-.08);
+    for(let i=0;i<3;i++)line([[-.19+i*.12,-.07],[-.25+i*.12,.12]],'#75586d',.03);
+  } else if(id==='frilled-shark') {
+    c.strokeStyle='#1b2440';c.lineWidth=.37;c.beginPath();c.moveTo(-.6,-.03);c.bezierCurveTo(.15,-.4,.17,.5,.73,.38);c.quadraticCurveTo(1.35,.3,1.16,-.39+sway);c.stroke();
+    c.strokeStyle=body;c.lineWidth=.28;c.stroke();c.strokeStyle='#1b2440';c.lineWidth=.045;
+    shape([[.7,.33],[.82,.03],[1.2,.14]],light);
+    shape([[-.13,.13],[.11,.59],[.29,.21]],body);
+    oval(-.77,-.06,.47,.24,body);eye(-.87,-.13);
+    line([[-1.18,.04],[-.79,.12]],'#1b2440');
+    for(let i=0;i<6;i++)line([[-.5+i*.09,-.19],[-.55+i*.09,-.01],[-.48+i*.09,.17]],light,.045);
+    for(let i=0;i<3;i++)shape([[-1.17+i*.11,.05],[-1.11+i*.11,.16],[-1.06+i*.11,.08]],'#fff5d9');
+  } else if(id==='viperfish'||id==='dragonfish') {
+    const dragon=id==='dragonfish';
+    shape([[.61,-.12],[1.36,-.39+sway],[1.15,.02],[1.36,.34+sway],[.61,.17]],body);
+    shape([[-.05,-.16],[.29,dragon?-.47:-.64],[.66,-.1]],light);
+    oval(-.07,0,.98,dragon?.22:.32,body);
+    shape([[-1.08,.01],[-.62,.03],[-.39,.32],[-.99,.24]],'#1d293e');
+    for(let i=0;i<3;i++)shape([[-1.02+i*.17,.04],[-.95+i*.17,dragon?.28:.43],[-.88+i*.17,.06]],'#f4f7dd');
+    eye(-.73,-.13);
+    for(let i=0;i<7;i++)oval(-.36+i*.18,.12,.033,.033,dragon?light:'#a4ffef');
+    shape([[.08,.14],[.42,.48],[.49,.15]],body);
+    if(dragon){line([[-.88,.25],[-.96,.61],[-.64,.74+sway]],light,.03);oval(-.64,.74+sway,.09,.09,light);}
+    else {line([[.2,-.32],[.36,-.94],[.01,-1.02]],light,.025);oval(.01,-1.02,.055,.055,'#a4ffef');}
+  } else if(id==='barreleye') {
+    shape([[.55,-.19],[1.18,-.51+sway],[1.05,0],[1.18,.51+sway],[.55,.2]],light);
+    oval(.06,.1,.85,.38,body);
+    oval(-.49,-.2,.58,.53,shiny?'#dcb5ed88':'#c2fff488');
+    for(const x of[-.69,-.36]){oval(x,-.23,.13,.28,light,-.15);oval(x-.02,-.42,.09,.07,shiny?'#fff2ac':'#deffb4');}
+    c.strokeStyle='#d8ffff';c.lineWidth=.025;c.beginPath();c.ellipse(-.49,-.2,.58,.53,0,Math.PI,Math.PI*1.6);c.stroke();c.strokeStyle='#1b2440';c.lineWidth=.045;
+    oval(-.88,.12,.04,.04,'#25304a');line([[-.98,.25],[-.73,.29]],'#1b2440',.03);
+    shape([[.01,.19],[.35,.65],[.6,.23]],light);
+  } else if(id==='vampire-squid') {
+    const hem=.85+sway;
+    shape([[0,-.2],[-1.04,hem],[-.73,hem-.13],[-.48,hem+.12],[-.23,hem-.04],[0,hem+.18],[.23,hem-.04],[.48,hem+.12],[.73,hem-.13],[1.04,hem]],body);
+    for(const end of[-.95,-.48,0,.48,.95]){
+      line([[end*.18,.13],[end,hem]],light,.04);
+      oval(end,hem,.045,.045,light);
+    }
+    oval(-.53,-.44,.33,.17,light,-.5-sway);oval(.53,-.44,.33,.17,light,.5+sway);
+    oval(0,-.2,.49,.64,body);oval(.15,-.5,.1,.17,light,-.3);
+    eye(-.23,.04);eye(.23,.04);
+  } else if(id==='giant-isopod') {
+    for(let i=0;i<7;i++)for(const side of[-1,1]){
+      const x=-.5+i*.19;line([[x,side*.2],[x+.13,side*(.55+sway*.3)],[x-.05,side*.72]],light,.085);
+    }
+    shape([[.69,-.2],[1.13,-.32],[1.27,0],[1.13,.32],[.69,.2]],light);
+    oval(.08,0,.87,.5,body);
+    for(let i=0;i<6;i++){
+      const x=-.44+i*.21;c.strokeStyle=light;c.lineWidth=.055;c.beginPath();c.moveTo(x,-.42);c.quadraticCurveTo(x+.24,0,x,.42);c.stroke();
+    }
+    c.strokeStyle='#1b2440';c.lineWidth=.045;oval(-.68,0,.34,.35,body);
+    for(const side of[-1,1]){line([[-.87,side*.14],[-1.17,side*.34],[-1.35,side*(.24+sway)]],light,.035);oval(-.82,side*.17,.06,.07,'#17263b');}
+  } else if(id==='nautilus') {
+    for(let i=0;i<8;i++){
+      const y=(i-3.5)*.11;line([[-.51,.2],[-.99,y+.18],[-1.28-Math.sin(i)*.08,y+.3+sway]],body,.06);
+    }
+    oval(.17,-.06,.77,.76,body);
+    for(let i=0;i<11;i++){
+      const a=i*.5;line([[.17+Math.cos(a)*.55,-.06+Math.sin(a)*.55],[.17+Math.cos(a+.12)*.73,-.06+Math.sin(a+.12)*.73]],light,.085);
+    }
+    c.strokeStyle=light;c.lineWidth=.055;c.beginPath();
+    for(let i=0;i<=100;i++){const a=i*.15,r=.03+i*.0056;const px=.17+Math.cos(a)*r,py=-.06+Math.sin(a)*r;i?c.lineTo(px,py):c.moveTo(px,py);}c.stroke();
+    c.strokeStyle='#1b2440';c.lineWidth=.045;
+    oval(-.53,.27,.32,.25,light);eye(-.63,.2);
+  } else if(id==='sea-pig') {
+    for(let i=0;i<5;i++)for(const side of[-1,1])oval(-.62+i*.31,side*.4,.11,.27,light,side*.2+sway);
+    for(const x of[-.45,.4]){
+      line([[x,-.24],[x-.08,-.78+sway],[x+.03,-.9+sway]],body,.09);oval(x+.03,-.9+sway,.075,.065,light);
+    }
+    oval(0,.02,.95,.44,body);oval(.1,-.14,.55,.13,light,-.08);
+    for(let i=0;i<4;i++)oval(-.35+i*.22,.17,.055,.055,light);
+    oval(-.8,.1,.17,.2,light);line([[-.94,.08],[-1.07,.02],[-1.13,.13]],body,.055);
   }
   if(shiny){c.strokeStyle='#fff2a6';c.lineWidth=.045;c.beginPath();c.moveTo(.8,-.85);c.lineTo(1.04,-.85);c.moveTo(.92,-.97);c.lineTo(.92,-.73);c.stroke();}
   c.restore();
@@ -934,11 +1027,13 @@ for(const [cx,cy]of[[22,10],[15,24],[32,22]])
   for(let y=cy-2;y<=cy+2;y++)for(let x=cx-1;x<=cx+1;x++)abyssMap[y][x]=CW;
 const abyssTiles=[],abyssWildlife=[],abyssRandom=rng(3003);
 for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(abyssMap[y][x]===WA)abyssTiles.push({x,y});
-const abyssFirstSpawns={'anglerfish':{x:13,y:8},'gulper-eel':{x:15,y:13},'dumbo-octopus':{x:9,y:14}};
+const abyssFirstSpawns={'anglerfish':{x:13,y:8},'gulper-eel':{x:15,y:13},'dumbo-octopus':{x:9,y:14},
+  'goblin-shark':{x:18,y:6},'frilled-shark':{x:26,y:8},viperfish:{x:18,y:16},dragonfish:{x:26,y:15},
+  barreleye:{x:10,y:20},'vampire-squid':{x:25,y:27},'giant-isopod':{x:36,y:14},nautilus:{x:35,y:29},'sea-pig':{x:8,y:29}};
 for(const sp of SPECIES.filter(s=>s.abyssOnly))for(let i=0;i<5;i++) {
   const free=abyssTiles.filter(p=>Math.hypot(p.x-abyssEntrance.x,p.y-abyssEntrance.y)>3 &&
     !abyssWildlife.some(m=>m.x===p.x&&m.y===p.y));
-  const first=abyssFirstSpawns[sp.id],spot=(i===0&&free.find(p=>p.x===first.x&&p.y===first.y))||free[Math.floor(abyssRandom()*free.length)];
+  const first=abyssFirstSpawns[sp.id],spot=(i===0&&first&&free.find(p=>p.x===first.x&&p.y===first.y))||free[Math.floor(abyssRandom()*free.length)];
   abyssWildlife.push({id:sp.id,...spot,fx:spot.x,fy:spot.y,progress:1,shiny:abyssRandom()<1/8,moveIn:2+abyssRandom()*2,life:60+abyssRandom()*40});
 }
 function currentDiveLayer() {
@@ -1203,7 +1298,7 @@ function toggleDepth() {
   const destination=currentDiveLayer().entrance;
   Object.assign(P,{...destination,fx:destination.x,fy:destination.y,prog:1,diving:true,boat:false});
   fishing=null;keys.clear();ignoredTrainer=null;diveGrace=encounterGrace=4;
-  toast(abyssDiving?'🌌 The Abyss: level 3! Find Anglerfish, Gulper Eels, and Dumbo Octopuses.':'🌊 Deep Sea: level 2! Meet diver trainers, find stones, or press B to explore the Abyss.');
+  toast(abyssDiving?'🌌 The Abyss: level 3! Discover 12 species, including Goblin Sharks, Vampire Squid, and Sea Pigs.':'🌊 Deep Sea: level 2! Meet diver trainers, find stones, or press B to explore the Abyss.');
   hud();persist();
 }
 function toggleDive() {

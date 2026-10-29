@@ -128,7 +128,7 @@ that chance, and a second ball always succeeds if your party is still in the fig
 Creatures won't run away after breaking free, but they may knock out your party.
 You have four seconds to reel in after a bite.
 
-Discover 56 species across the meadows, rivers, caves, seasonal forest, and three
+Discover 65 species across the meadows, rivers, caves, seasonal forest, and three
 diving levels, including Magikarp, Bouldersaur, Orca, and Anglerfish.
 Every species has a shiny form, including pink Bunny, blue Duck, purple
 Squirrel, blue Fox, and mint Hedgehog. Magikarp, Frog, and Bouldersaur keep their
@@ -138,7 +138,7 @@ You can move even the last creature into the Box, or choose **Move all to Box**
 to empty your party at once. Your creatures and Collection progress stay saved.
 Click any creature in the Box to add it back. Put at least one in your party
 before approaching a trainer to battle.
-In Collection, choose **✨ Preview shiny forms** to see all 56 shiny designs
+In Collection, choose **✨ Preview shiny forms** to see all 65 shiny designs
 without changing your catches or saved progress. Bunny, Duck, Squirrel, Fox,
 and Hedgehog use drawn sprites so their colors are consistent across devices.
 
@@ -209,9 +209,20 @@ divers show a check mark. Your party recovers after the battle.
 ## The Abyss — diving level 3
 
 From the Deep Sea, press **B / Dive to Abyss** to reach the third and deepest level.
-Explore glowing coral and underwater vents, and swim into **Anglerfish, Gulper
-Eels, and Dumbo Octopuses**. These three species appear only here, each with a
-distinct shiny form. Your catches and position save automatically.
+Explore glowing coral and underwater vents to find **12 species** exclusive to
+this level:
+
+- **Anglerfish, Gulper Eel, and Dumbo Octopus**
+- **Goblin Shark, Frilled Shark, and Viperfish**
+- **Dragonfish, Barreleye, and Vampire Squid**
+- **Giant Isopod, Nautilus, and Sea Pig**
+
+There are 60 roaming creatures, five of each species. Swim into one to encounter
+it, weaken it with Attack, and throw a ball to catch it. Every species has its own
+sprite and shiny colors, visible while swimming, in encounters, in your Party or
+Box, in Collection, and in trainer battles. Look for the star beside shiny swimmers!
+Your catches and position save automatically, and existing saves gain the new
+creatures as soon as the updated game loads.
 
 ![The Abyss with glowing deep-sea creatures and a return marker](docs/screenshots/abyss.png)
 
@@ -220,7 +231,7 @@ Press V again for the shallows and once more for your boat. B always goes down
 one level; V goes up one level. The stone generator and diver trainers are on
 level 2. There is no oxygen timer.
 
-![Normal and shiny Anglerfish, Gulper Eel, and Dumbo Octopus](docs/screenshots/abyss-creatures.png)
+![All twelve Abyss species, each shown in normal and shiny colors](docs/screenshots/abyss-creatures.png)
 
 ## Weakening and wild-creature battles
 
