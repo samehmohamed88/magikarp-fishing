@@ -9,7 +9,7 @@ const SPECIES = [
   { id: 'magikarp', name: 'Magikarp', water: true, fishingWeight: 5, rate: 0.98 },
   { id: 'bunny', name: 'Bunny', weight: 40, rate: 0.97, draw: (...a) => drawAnimal('bunny', ...a) },
   { id: 'duck', name: 'Duck', weight: 25, rate: 0.96, draw: (...a) => drawAnimal('duck', ...a) },
-  { id: 'frog', name: 'Frog', emoji: '🐸', weight: 45, fishingWeight: 5, rate: 0.955 },
+  { id: 'frog', name: 'Frog', draw: (...a) => drawFrog(...a), emoji: '🐸', weight: 45, fishingWeight: 5, rate: 0.955 },
   { id: 'squirrel', name: 'Squirrel', weight: 12, rate: 0.95, draw: (...a) => drawAnimal('squirrel', ...a) },
   { id: 'fox', name: 'Fox', weight: 6, rate: 0.935, draw: (...a) => drawAnimal('fox', ...a) },
   { id: 'hedgehog', name: 'Hedgehog', weight: 2, rate: 0.925, draw: (...a) => drawAnimal('hedgehog', ...a) },
@@ -33,6 +33,23 @@ const SPECIES = [
   { id: 'red-panda', name: 'Red Panda', weight: 20, rate: 0.95, draw: (...a) => drawLandAnimal('red-panda', ...a) },
 ];
 const byId = id => SPECIES.find(s => s.id === id);
+
+// Fixed colors keep the shiny frog visibly blue even without color emoji fonts.
+function drawFrog(c, x, y, s, shiny = false, t = 0) {
+  c.save(); c.translate(x, y + Math.sin(t * 3) * s * .03); c.scale(s, s);
+  c.strokeStyle = '#243b42'; c.lineWidth = .05;
+  const oval = (x, y, rx, ry, color) => {
+    c.fillStyle = color; c.beginPath(); c.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+  };
+  const body = shiny ? '#479bff' : '#68bb54', dark = shiny ? '#2753b5' : '#34853b';
+  oval(-.65, .5, .4, .24, dark); oval(.65, .5, .4, .24, dark);
+  oval(0, .25, .68, .55, body); oval(0, .4, .42, .3, shiny ? '#b6e5ff' : '#dcf0a4');
+  oval(0, -.2, .85, .5, body);
+  for (const side of [-1, 1]) {
+    oval(side * .48, -.57, .29, .31, body); oval(side * .48, -.58, .18, .21, '#fff'); oval(side * .48, -.57, .08, .13, '#192b36');
+  }
+  c.beginPath(); c.arc(0, -.25, .4, .2, Math.PI - .2); c.stroke(); c.restore();
+}
 
 function drawLandAnimal(id, c, x, y, s, shiny = false, t = 0) {
   const palette = {
@@ -438,14 +455,20 @@ for (const trainer of TRAINERS) {
 
 const waterTiles = [];
 for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) if (tile(x, y) === WA) waterTiles.push({ x, y });
-const waterSpecies = ['shark', 'catfish', 'grunt', 'spiny-dogfish', 'crocodile', 'alligator'];
+const waterSpecies = SPECIES.filter(sp => sp.fishingWeight).map(sp => sp.id);
+const diveSites = [{ x: 19, y: 9 }, { x: 41, y: 13 }, { x: 30, y: 23 }];
+const isDiveWater = (x, y) => tile(x, y) === WA &&
+  ((x >= 18 && x <= 20 && y >= 6 && y <= 38) ||
+   (x >= 40 && x <= 42 && y >= 8 && y <= 36) ||
+   (x >= 21 && x <= 39 && y >= 22 && y <= 24));
 const waterWildlife = [];
 for (let i = 0; i < 24; i++) {
   const start = i < 6 ? [{ x: 19, y: 9 }, { x: 19, y: 16 }, { x: 19, y: 30 }, { x: 41, y: 10 }, { x: 41, y: 27 }, { x: 30, y: 23 }][i]
     : waterTiles[Math.floor((i - 6 + .5) * waterTiles.length / 18)];
   const occupied = spot => waterWildlife.some(mon => mon.x === spot.x && mon.y === spot.y);
   const spot = occupied(start) ? waterTiles.find(candidate => !occupied(candidate)) : start;
-  waterWildlife.push({ id: waterSpecies[i % waterSpecies.length], ...spot, moveIn: 2 + i * .1, life: 45 + i });
+  waterWildlife.push({ id: waterSpecies[i % waterSpecies.length], ...spot, fx: spot.x, fy: spot.y, progress: 1,
+    shiny: R() < 1 / 8, moveIn: 2 + i * .1, life: 45 + i });
 }
 function pickWaterAnimal(excludeId = null) {
   const pool = SPECIES.filter(sp => sp.fishingWeight && sp.id !== excludeId), total = pool.reduce((sum, sp) => sum + sp.fishingWeight, 0);
@@ -460,27 +483,40 @@ function pickFishingAnimal(x, y) {
 }
 function updateWaterWildlife(dt) {
   for (const mon of waterWildlife) {
+    mon.progress = Math.min(1, mon.progress + dt / .7);
     mon.life -= dt; mon.moveIn -= dt;
     if (mon.life <= 0) {
-      const available = waterTiles.filter(spot => !waterWildlife.some(other => other !== mon && other.x === spot.x && other.y === spot.y));
+      const available = waterTiles.filter(spot => (spot.x !== P.x || spot.y !== P.y) && !waterWildlife.some(other => other !== mon && other.x === spot.x && other.y === spot.y));
       const spot = available[Math.floor(R() * available.length)];
-      Object.assign(mon, spot); mon.life = 45 + R() * 30;
+      Object.assign(mon, spot, { fx: spot.x, fy: spot.y, progress: 1, shiny: R() < 1 / 8 }); mon.life = 45 + R() * 30;
     }
     if (mon.moveIn <= 0) {
       const [dx, dy] = [[0, 1], [0, -1], [1, 0], [-1, 0]][Math.floor(R() * 4)];
       if (tile(mon.x + dx, mon.y + dy) === WA && !waterWildlife.some(other => other !== mon && other.x === mon.x + dx && other.y === mon.y + dy)) {
+        mon.fx = mon.x; mon.fy = mon.y; mon.progress = 0;
         mon.x += dx; mon.y += dy;
       }
       mon.moveIn = 2 + R() * 2;
     }
   }
 }
+function drawSwimmer(mon, c, x, y, scale) {
+  const sp = byId(mon.id), shiny = mon.shiny || !!spotAt(mon.x, mon.y);
+  if (sp.id === 'magikarp') drawCarp(c, x, y, scale * .75, shiny, time);
+  else if (sp.draw) sp.draw(c, x, y, scale, shiny, time);
+  else { const img = emojiCanvas(sp.emoji, scale * 2, shiny); c.drawImage(img, x - img.width / 2, y - img.height / 2); }
+}
 function drawWaterWildlife(camX, camY) {
   for (const mon of waterWildlife) {
-    const x = (mon.x + .5) * T - camX, y = (mon.y + .5) * T - camY;
+    if (P.diving && !isDiveWater(mon.x, mon.y)) continue;
+    const x = (mon.fx + (mon.x - mon.fx) * mon.progress + .5) * T - camX;
+    const y = (mon.fy + (mon.y - mon.fy) * mon.progress + .5) * T - camY;
     if (x < -T || y < -T || x > cv.width + T || y > cv.height + T) continue;
     ctx.save(); ctx.globalAlpha = .9;
-    byId(mon.id).draw(ctx, x, y + Math.sin(time * 2 + mon.x) * 2, 13, false, time);
+    drawSwimmer(mon, ctx, x, y + Math.sin(time * 2 + mon.x) * 2, P.diving ? 16 : 13);
+    if (mon.shiny || spotAt(mon.x, mon.y)) {
+      ctx.fillStyle = '#fff29b'; ctx.font = 'bold 17px sans-serif'; ctx.fillText('✦', x + 14, y - 12);
+    }
     ctx.restore();
   }
 }
@@ -489,19 +525,47 @@ function drawWaterWildlife(camX, camY) {
 const save = JSON.parse(localStorage.getItem('mkrq') || '{}');
 const dex = save.dex || {};
 const P = { x: save.x ?? 5, y: save.y ?? 5, fx: 0, fy: 0, prog: 1, dir: [0, 1], boat: !!save.boat };
+P.diving = !!save.diving && isDiveWater(P.x, P.y);
+if (P.diving) P.boat = false;
 P.fx = P.x; P.fy = P.y;
 let fishing = null, modal = null, time = 0;
 const keys = new Set();
 const party = save.party || [], box = save.box || [];
 const trainerWins = save.trainerWins || {};
-const persist = () => localStorage.setItem('mkrq', JSON.stringify({ dex, party, box, trainerWins, x: P.x, y: P.y, boat: P.boat }));
+const persist = () => localStorage.setItem('mkrq', JSON.stringify({ dex, party, box, trainerWins, x: P.x, y: P.y, boat: P.boat, diving: P.diving }));
+
+let diveGrace = 0;
+function toggleDive() {
+  if (modal || P.prog < 1) return;
+  if (!P.diving && (!P.boat || !diveSites.some(site => site.x === P.x && site.y === P.y))) {
+    toast('🤿 Sail to a marked dive buoy, then press V or Dive!'); return;
+  }
+  P.diving = !P.diving; P.boat = !P.diving; fishing = null; keys.clear(); diveGrace = 1.5;
+  toast(P.diving ? '🤿 Swim into creatures to encounter them! V or Surface returns to your boat.' : '⛵ Back in your boat!');
+  hud(); persist();
+}
+function checkDiveEncounter() {
+  if (!P.diving || modal || P.prog < 1 || diveGrace > 0) return;
+  const mon = waterWildlife.find(m => Math.hypot(
+    m.fx + (m.x - m.fx) * m.progress - P.x,
+    m.fy + (m.y - m.fy) * m.progress - P.y) < .65);
+  if (!mon) return;
+  const shiny = mon.shiny || !!spotAt(mon.x, mon.y);
+  removeSpot(mon.x, mon.y);
+  const sp = byId(mon.id);
+  // Remove this swimmer immediately; it returns elsewhere on the next update.
+  mon.x = mon.y = mon.fx = mon.fy = -100; mon.life = 0; diveGrace = 1.5;
+  startEncounter(sp, shiny, true);
+}
 
 let toastT;
 function toast(msg) { const el = $('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2200); }
 function hud() {
   $('hud-caught').textContent = 'Caught: ' + Object.values(dex).reduce((a, d) => a + d.count, 0);
-  $('hud-mode').textContent = P.boat ? '⛵ Boating' : '🚶 On foot';
-  $('hud-biome').textContent = tile(P.x, P.y) === SN ? '❄ Winter Area' : P.x >= 44 ? '🏔️ Mountains' : '🌿 Meadows';
+  $('hud-mode').textContent = P.diving ? '🤿 Diving' : P.boat ? '⛵ Boating' : '🚶 On foot';
+  $('btn-dive').textContent = P.diving ? '↑ Surface (V)' : '🤿 Dive (V)';
+  $('btn-dive').hidden = !P.diving && !(P.boat && diveSites.some(site => site.x === P.x && site.y === P.y));
+  $('hud-biome').textContent = P.diving ? '🫧 Underwater' : tile(P.x, P.y) === SN ? '❄ Winter Area' : P.x >= 44 ? '🏔️ Mountains' : '🌿 Meadows';
   renderPartyBar();
 }
 
@@ -511,13 +575,15 @@ function tryMove(dx, dy) {
   const nx = P.x + dx, ny = P.y + dy, t = tile(nx, ny), cur = tile(P.x, P.y);
   if (TRAINERS.some(trainer => trainer.x === nx && trainer.y === ny)) return;
   let ok;
-  if (P.boat) ok = t === WA || t === DK;
+  if (P.diving) ok = isDiveWater(nx, ny);
+  else if (P.boat) ok = t === WA || t === DK;
   else ok = t === G || t === TG || t === SA || t === DK || t === MT || t === SN || (t === WA && cur === DK);
   if (!ok) return;
   P.fx = P.x; P.fy = P.y; P.x = nx; P.y = ny; P.prog = 0;
 }
 function arrive() {
   const t = tile(P.x, P.y);
+  if (P.diving) { checkDiveEncounter(); hud(); return; }
   if (challengeTrainer()) { hud(); return; }
   if (t === WA && !P.boat) { P.boat = true; toast('⛵ You hopped into a boat!'); }
   else if (t === DK && P.boat) { P.boat = false; toast('🟫 You docked the boat.'); }
@@ -706,6 +772,7 @@ $('battle-run').onclick = closeBattle;
 // ---------- Fishing ----------
 function action() {
   if (modal) return;
+  if (P.diving) { toast('🤿 Swim into a creature to encounter it. Press V or Surface to go up.'); return; }
   if (fishing) {
     if (fishing.bite) {
       const sh = fishing.shiny, fishingSpecies = fishing.species;
@@ -719,7 +786,8 @@ function action() {
   }
   const fx = P.x + P.dir[0], fy = P.y + P.dir[1];
   if (tile(fx, fy) !== WA) { toast(P.boat ? 'Face open water to fish!' : 'Face the water to cast your rod 🎣'); return; }
-  fishing = { x: fx, y: fy, wait: 1.5 + Math.random() * 3, bite: false, shiny: !!spotAt(fx, fy), species: pickFishingAnimal(fx, fy).id };
+  const swimmer = waterWildlife.find(mon => mon.x === fx && mon.y === fy);
+  fishing = { x: fx, y: fy, wait: 1.5 + Math.random() * 3, bite: false, shiny: !!spotAt(fx, fy) || !!swimmer?.shiny, species: pickFishingAnimal(fx, fy).id };
   toast(fishing.shiny ? '✨ You cast into the sparkles! A shiny is biting!' : '🎣 Cast! Wait for a bite…');
 }
 
@@ -790,7 +858,7 @@ function startEncounter(sp, shiny, inWater = false, inMountain = false, inWinter
   $('encounter').classList.remove('hidden');
   $('enc-scene').className = 'enc-scene ' + (inWater ? 'water' : inWinter ? 'winter' : (inMountain ? 'mountain' : 'land'));
   ec.classList.remove('gone'); $('ball').className = 'ball hidden';
-  setText(`${inWater ? 'You fished up' : inWinter ? 'In the snow, a wild' : (inMountain ? 'From the crags appeared' : 'A wild')} ${enc.shiny ? '✨SHINY✨ ' : ''}${sp.name} (Lv ${enc.lv})${inWater ? '!' : ' appeared!'}`);
+  setText(`${inWater ? (P.diving ? 'You swam into' : 'You fished up') : inWinter ? 'In the snow, a wild' : (inMountain ? 'From the crags appeared' : 'A wild')} ${enc.shiny ? '✨SHINY✨ ' : ''}${sp.name} (Lv ${enc.lv})${inWater ? '!' : ' appeared!'}`);
   setBtns(true);
 }
 const setText = s => $('enc-text').textContent = s;
@@ -913,6 +981,7 @@ $('btn-party-store-all').onclick = () => {
 // ---------- Input ----------
 const DIRS = { ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1], ArrowLeft: [-1, 0], KeyA: [-1, 0], ArrowRight: [1, 0], KeyD: [1, 0] };
 addEventListener('keydown', e => {
+  if (e.code === 'KeyV' && !e.repeat && (P.diving || (P.boat && diveSites.some(site => site.x === P.x && site.y === P.y)))) { e.preventDefault(); toggleDive(); return; }
   if (modal === 'battle') {
     if (e.code === 'Space' && !e.target.closest('button')) { e.preventDefault(); if (!e.repeat) battleTurn(); }
     if (e.code === 'Escape') battle.switching ? toggleBattleSwitch() : closeBattle();
@@ -930,6 +999,7 @@ document.querySelectorAll('.dpad button').forEach(b => {
   b.onpointerup = b.onpointerleave = () => keys.delete(b.dataset.k);
 });
 $('btn-a').onclick = () => modal === 'battle' ? battleTurn() : action();
+$('btn-dive').onclick = toggleDive;
 
 // ---------- Render ----------
 function resize() { cv.width = innerWidth; cv.height = innerHeight; }
@@ -987,6 +1057,17 @@ function drawTile(t, x, y, px, py) {
 
 function drawPlayer(px, py) {
   const cx = px + T / 2, cy = py + T / 2;
+  if (P.diving) {
+    const bob = Math.sin(time * 4) * 2;
+    ctx.fillStyle = '#f6d04d'; ctx.fillRect(cx - 14, cy + 10 + bob, 10, 5); ctx.fillRect(cx + 4, cy + 10 - bob, 10, 5);
+    ctx.fillStyle = '#193e64'; ctx.fillRect(cx - 8, cy - 5, 16, 19);
+    ctx.fillStyle = '#bac9d3'; ctx.fillRect(cx + 6, cy - 6, 7, 17);
+    ctx.fillStyle = '#ffd7b0'; ctx.beginPath(); ctx.arc(cx, cy - 9, 9, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#76f3ff'; ctx.fillRect(cx - 9, cy - 13, 18, 7);
+    ctx.strokeStyle = '#173449'; ctx.lineWidth = 2; ctx.strokeRect(cx - 9, cy - 13, 18, 7);
+    ctx.strokeStyle = '#b8f5ff'; ctx.beginPath(); ctx.arc(cx + 15, cy - 20 - (time * 15 % 22), 3, 0, Math.PI * 2); ctx.stroke();
+    return;
+  }
   if (P.boat) {
     const rock = Math.sin(time * 3) * 2;
     ctx.fillStyle = '#7a4a22'; ctx.beginPath(); ctx.ellipse(cx, cy + 8 + rock, 19, 10, 0, 0, Math.PI); ctx.fill();
@@ -1024,6 +1105,8 @@ function render() {
   const x0 = Math.floor(camX / T), y0 = Math.floor(camY / T);
   for (let y = y0; y <= y0 + cv.height / T + 1; y++) for (let x = x0; x <= x0 + cv.width / T + 1; x++)
     if (inb(x, y)) drawTile(map[y][x], x, y, Math.round(x * T - camX), Math.round(y * T - camY));
+  // Surface ambience is separate from the creatures that divers can encounter.
+  if (!P.diving) {
   // frog heads popping out of the water
   for (let i = 0; i < 8; i++) {
     const ph = (time * 0.35 + i * 0.29) % 2.5;
@@ -1044,6 +1127,7 @@ function render() {
       drawCarp(ctx, k[0] * T + T / 2 - camX, k[1] * T + T / 2 - camY - hop, 7, false, time);
     }
   }
+  }
   // fishing line & bobber
   if (fishing) {
     const bx = fishing.x * T + T / 2 - camX, by = fishing.y * T + T / 2 - camY + (fishing.bite ? Math.sin(time * 30) * 4 + 4 : Math.sin(time * 3) * 2);
@@ -1052,8 +1136,23 @@ function render() {
     ctx.fillStyle = '#e63946'; ctx.beginPath(); ctx.arc(bx, by, 5, Math.PI, 0); ctx.fill();
   }
   drawSparkles(camX, camY);
+  if (P.diving) {
+    ctx.fillStyle = '#062c49cc'; ctx.fillRect(0, 0, cv.width, cv.height);
+    for (const tilePos of waterTiles) {
+      if (!isDiveWater(tilePos.x, tilePos.y)) continue;
+      const x = tilePos.x * T - camX, y = tilePos.y * T - camY;
+      if (x < -T || y < -T || x > cv.width || y > cv.height) continue;
+      ctx.fillStyle = hash(tilePos.x, tilePos.y) & 1 ? '#167c91' : '#187489'; ctx.fillRect(x, y, T, T);
+      ctx.strokeStyle = '#73e1af'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x + 9, y + 37); ctx.quadraticCurveTo(x + 20 + Math.sin(time + tilePos.y) * 6, y + 25, x + 12, y + 15); ctx.stroke();
+    }
+  }
+  for (const site of diveSites) {
+    const x = (site.x + .5) * T - camX, y = (site.y + .5) * T - camY;
+    ctx.strokeStyle = '#8dfff3'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, 17 + Math.sin(time * 3) * 2, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(P.diving ? '↑' : 'DIVE', x, y + 4);
+  }
   drawWaterWildlife(camX, camY);
-  drawTrainers(camX, camY);
+  if (!P.diving) drawTrainers(camX, camY);
   drawPlayer(ppx - camX, ppy - camY);
   // A sign at the entrance helps players find the new biome.
   const signX = 5*T + T/2 - camX, signY = 27*T - camY;
@@ -1085,12 +1184,12 @@ function loop(now) {
     }
     updateFishing(dt);
   }
-  if (!modal) updateWaterWildlife(dt);
+  if (!modal) { updateWaterWildlife(dt); diveGrace = Math.max(0, diveGrace - dt); checkDiveEncounter(); }
   updateSpots(dt);
   render(); if (modal === 'enc') drawEnc();
   if ((saveT += dt) > 3) { saveT = 0; persist(); }
   requestAnimationFrame(loop);
 }
 hud();
-toast('Welcome! Find a river and press Space to fish for Magikarp 🎣');
+toast(P.diving ? '🤿 Swim into creatures to encounter them. V or Surface returns to your boat.' : 'Welcome! Space: fish · V at glowing DIVE buoys: scuba 🤿');
 requestAnimationFrame(loop);

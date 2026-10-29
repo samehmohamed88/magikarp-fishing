@@ -62,7 +62,7 @@ tile to target it; open-water fishing should include all eight fishing species.
 Verify each new aquatic creature has a distinct normal/shiny sprite in encounters,
 Collection, Party/Box, and battles, and survives save/reload. They must not appear
 in grass or winter encounter pools.
-There should be 24 visible swimmers, four per new species, with no shared tiles.
+There should be 24 visible swimmers, three per fishing species, with no shared tiles.
 Open-water weights total 100: Catfish 20, each other new water creature 14,
 Magikarp 5, and Frog 5. Visible-swimmer targeting overrides these weights.
 Catch difficulty: every species has a first-ball rate of at least 92%, second
@@ -89,3 +89,19 @@ parties cannot start battles and receive guidance to add a boxed creature.
 
 Cloud tasks already have isolated checkouts. Use this checkout directly;
 do not create a Git worktree unless explicitly requested.
+
+## Scuba validation
+
+Dive buoys are at map tiles (19,9), (41,13), and (30,23). In a boat, press V
+or tap Dive at a buoy. Entry elsewhere is refused. Underwater movement is limited
+to the marked river regions; V or Surface returns to a boat anywhere within them.
+Check both keyboard and touch. Space provides guidance underwater rather than
+casting a rod. Surface fishing, trainer battles, and WASD retain their controls.
+
+All eight fishing species swim smoothly and show their actual shiny colors.
+Swim into a creature, or let it swim into you, to start an encounter with that
+species and shiny flag. After catching or running, the swimmer respawns elsewhere;
+a short grace period prevents immediate repeat encounters. Collision encounters
+only happen while diving. There is no oxygen timer. Dive state saves under mkrq
+and old saves without it remain compatible. The frog uses a drawn green/blue
+sprite so its shiny no longer depends on the operating system's emoji font.

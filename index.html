@@ -7,7 +7,7 @@
   <meta name="description" content="Explore rivers by boat, fish for Magikarp and catch wild animals in the tall grass." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=water-creatures-1" />
+  <link rel="stylesheet" href="style.css?v=scuba-1" />
 </head>
 <body>
   <main>
@@ -22,10 +22,11 @@
       <button id="btn-party" class="btn">🎒 Party (P)</button>
       <button id="btn-dex" class="btn">📖 Collection (C)</button>
     </header>
+    <button id="btn-dive" class="btn" hidden>🤿 Dive (V)</button>
     <div id="party-bar" class="party-bar glass" title="Open party"></div>
 
     <div id="toast" class="toast glass"></div>
-    <div class="hint glass">Arrows/WASD: move · Space: fish · ❄ South: Winter Area (Snowy) · 🏔️ East: Mountains · ✨ Sparkles = Shiny!</div>
+    <div class="hint glass">Arrows/WASD: move · Space: fish · V at DIVE buoys: scuba · Swim into creatures underwater · ✨ Sparkles = Shiny!</div>
 
     <section id="encounter" class="modal hidden" aria-live="polite">
       <div class="enc-card glass">
@@ -93,6 +94,6 @@
       <button id="btn-a" class="abtn">🎣</button>
     </div>
   </main>
-  <script src="game.js?v=empty-party-1"></script>
+  <script src="game.js?v=scuba-1"></script>
 </body>
 </html>

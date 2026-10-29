@@ -137,6 +137,19 @@ In Collection, choose **✨ Preview shiny forms** to see all twenty-five shiny d
 without changing your catches or saved progress. Bunny, Duck, Squirrel, Fox,
 and Hedgehog use drawn sprites so their colors are consistent across devices.
 
+## Scuba diving
+
+Look for glowing **DIVE** buoys in the western river (just south of the northern
+docks), the eastern river, and the middle river crossing. Sail onto a buoy and
+press **V** or tap **Dive**. Swim with the arrow keys or WASD and touch a swimming
+creature to encounter it—no fishing rod needed underwater!
+
+All eight fishing species swim here, including Magikarp and Frog. Shiny swimmers
+have their alternate colors and a small star; their shiny form stays with them
+when encountered and caught. Press **V** or tap **Surface** anywhere underwater
+to return to your boat. There is no air timer. Normal fishing still works above
+water, and your diving position saves automatically.
+
 ## Saved progress
 
 Progress saves automatically in your browser. Use the same browser, device, and
