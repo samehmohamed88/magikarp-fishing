@@ -49,6 +49,10 @@ Run `node --check game.js` for a syntax check. With the server running, verify
 that the world renders, WASD/arrows move, P opens/closes Party, C opens/closes
 Collection, and Space casts/reels when facing water. Catch a creature and refresh
 to check persistence. Touch controls are also available on small screens.
+With at least one caught creature, walk next to a trainer marked ! to test battle
+startup, Attack/Space, the one-use Heal, retreat, and party switching. A win gives
+every party member a level and saves a check mark on that trainer. Verify it stays
+after refreshing. Losing or retreating must leave caught creatures and saves intact.
 
 Cloud tasks already have isolated checkouts. Use this checkout directly;
 do not create a Git worktree unless explicitly requested.

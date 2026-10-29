@@ -20,6 +20,23 @@ Party or Box. Its shiny form is also visible in Collection's preview.
 
 ![Shiny Snowy with an ice-blue hood, purple trim, and pink eyes](docs/screenshots/shiny-snowy.png)
 
+## Trainer battles
+
+Eight trainers are waiting in small clearings across the meadows, river routes,
+mountains, and Winter Area. Look for people with a **!** over their heads.
+Walk onto a neighboring tile to start a battle automatically. Catch at least one
+creature first: your current party is your battle team.
+
+Choose **Attack** (or press Space), use **Heal** once per battle, or **Run**
+(Escape). When a creature faints, the next party member takes over. Beat every
+creature on the trainer's team to win and give each of your party creatures a level.
+Your party recovers after every battle, including a loss or retreat.
+
+Defeated trainers show a **✓** and will not challenge you again; wins save with
+your progress. After running or losing, walk away and approach again to retry.
+
+![A trainer battle showing both creatures, HP bars, and Attack, Heal, and Run controls](docs/screenshots/trainer-battle.png)
+
 ## Play
 
 Once GitHub Pages is enabled, open **[Magikarp River Quest](https://samehmohamed88.github.io/magikarp-fishing/)**
@@ -50,6 +67,7 @@ Build a party of up to six creatures, with extra catches stored in your Box.
 | Move | Arrow keys or WASD |
 | Cast or reel in | Space while facing water |
 | Throw a ball during an encounter | Space or **Throw Ball** |
+| Attack during a trainer battle | Space or **Attack** |
 | Open or close Party | P |
 | Open or close Collection | C |
 | Close a menu or run from an encounter | Escape |

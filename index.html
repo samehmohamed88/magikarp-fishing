@@ -7,7 +7,7 @@
   <meta name="description" content="Explore rivers by boat, fish for Magikarp and catch wild animals in the tall grass." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=winter-1" />
+  <link rel="stylesheet" href="style.css?v=trainers-1" />
 </head>
 <body>
   <main>
@@ -41,6 +41,23 @@
       </div>
     </section>
 
+    <section id="battle" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="battle-title">
+      <div class="battle-card glass">
+        <h2 id="battle-title">Trainer battle</h2>
+        <div class="battle-stats">
+          <div><b id="ally-name"></b><progress id="ally-bar" aria-label="Your creature's health"></progress><small id="ally-hp"></small></div>
+          <div><b id="foe-name"></b><progress id="foe-bar" aria-label="Opponent's health"></progress><small id="foe-hp"></small></div>
+        </div>
+        <canvas id="battle-canvas" width="520" height="240"></canvas>
+        <p id="battle-text" role="status" aria-live="polite"></p>
+        <div class="battle-actions">
+          <button id="battle-attack" class="btn primary">Attack (Space)</button>
+          <button id="battle-heal" class="btn">Heal (1)</button>
+          <button id="battle-run" class="btn">Run</button>
+        </div>
+      </div>
+    </section>
+
     <section id="dex" class="modal hidden">
       <div class="dex-card glass">
         <div class="dex-head"><h2>📖 Collection</h2><button id="btn-dex-close" class="btn">✕</button></div>
@@ -68,6 +85,6 @@
       <button id="btn-a" class="abtn">🎣</button>
     </div>
   </main>
-  <script src="game.js?v=winter-1"></script>
+  <script src="game.js?v=trainers-1"></script>
 </body>
 </html>

@@ -273,6 +273,24 @@ for (let y = 28; y <= 42; y++) for (let x = 2; x <= 15; x++) map[y][x] = SN;
 // A clear path from the starting clearing to the winter entrance.
 for (let y = 8; y < 28; y++) if (tile(5, y) === TR) map[y][5] = G;
 
+// A handful of stationary rivals, leaving most of the map free to explore.
+const TRAINERS = [
+  { id: 'mia', name: 'Scout Mia', x: 10, y: 8, color: '#ed957e', team: [{ id: 'bunny', lv: 3 }] },
+  { id: 'leo', name: 'Angler Leo', x: 12, y: 20, color: '#70c9e8', team: [{ id: 'magikarp', lv: 4 }] },
+  { id: 'ivy', name: 'Ranger Ivy', x: 29, y: 10, color: '#9bce78', team: [{ id: 'frog', lv: 5 }, { id: 'duck', lv: 4 }] },
+  { id: 'kit', name: 'Explorer Kit', x: 31, y: 31, color: '#ce9ae8', team: [{ id: 'fox', lv: 6 }] },
+  { id: 'ash', name: 'Hiker Ash', x: 46, y: 12, color: '#f2b85b', team: [{ id: 'bouldersaur', lv: 6 }] },
+  { id: 'sage', name: 'Climber Sage', x: 51, y: 32, color: '#ef839d', team: [{ id: 'hedgehog', lv: 6 }, { id: 'bouldersaur', lv: 7 }] },
+  { id: 'noa', name: 'Snow Scout Noa', x: 8, y: 34, color: '#8ccbe8', team: [{ id: 'snowy', lv: 5 }] },
+  { id: 'elle', name: 'Skier Elle', x: 12, y: 40, color: '#d5a3ef', team: [{ id: 'bunny', lv: 6 }, { id: 'snowy', lv: 7 }] },
+];
+for (const trainer of TRAINERS) {
+  // Small clearings keep rivals visible and accessible without changing rivers.
+  const ground = trainer.x >= 44 ? MT : trainer.y >= 28 && trainer.x <= 15 ? SN : G;
+  for (let y = trainer.y - 1; y <= trainer.y + 1; y++) for (let x = trainer.x - 1; x <= trainer.x + 1; x++)
+    if (inb(x, y) && ![WA, DK].includes(tile(x, y))) map[y][x] = ground;
+}
+
 // ---------- State ----------
 const save = JSON.parse(localStorage.getItem('mkrq') || '{}');
 const dex = save.dex || {};
@@ -281,7 +299,8 @@ P.fx = P.x; P.fy = P.y;
 let fishing = null, modal = null, time = 0;
 const keys = new Set();
 const party = save.party || [], box = save.box || [];
-const persist = () => localStorage.setItem('mkrq', JSON.stringify({ dex, party, box, x: P.x, y: P.y, boat: P.boat }));
+const trainerWins = save.trainerWins || {};
+const persist = () => localStorage.setItem('mkrq', JSON.stringify({ dex, party, box, trainerWins, x: P.x, y: P.y, boat: P.boat }));
 
 let toastT;
 function toast(msg) { const el = $('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2200); }
@@ -296,6 +315,7 @@ function hud() {
 function tryMove(dx, dy) {
   P.dir = [dx, dy];
   const nx = P.x + dx, ny = P.y + dy, t = tile(nx, ny), cur = tile(P.x, P.y);
+  if (TRAINERS.some(trainer => trainer.x === nx && trainer.y === ny)) return;
   let ok;
   if (P.boat) ok = t === WA || t === DK;
   else ok = t === G || t === TG || t === SA || t === DK || t === MT || t === SN || (t === WA && cur === DK);
@@ -304,6 +324,7 @@ function tryMove(dx, dy) {
 }
 function arrive() {
   const t = tile(P.x, P.y);
+  if (challengeTrainer()) { hud(); return; }
   if (t === WA && !P.boat) { P.boat = true; toast('⛵ You hopped into a boat!'); }
   else if (t === DK && P.boat) { P.boat = false; toast('🟫 You docked the boat.'); }
   else if (t === SN && spotAt(P.x, P.y)) {
@@ -339,6 +360,111 @@ function pickAnimal() {
   const land = SPECIES.filter(s => !s.water && s.id !== 'bouldersaur' && !s.habitat), tot = land.reduce((a, s) => a + s.weight, 0);
   let r = Math.random() * tot; for (const s of land) if ((r -= s.weight) < 0) return s; return land[0];
 }
+
+// ---------- Trainer battles ----------
+let battle = null, ignoredTrainer = null;
+const maxHP = mon => 24 + mon.lv * 5;
+function challengeTrainer() {
+  if (P.boat || modal) return false;
+  if (ignoredTrainer && TRAINERS.some(t => t.id === ignoredTrainer && Math.abs(t.x - P.x) + Math.abs(t.y - P.y) > 1)) ignoredTrainer = null;
+  const trainer = TRAINERS.find(t => !trainerWins[t.id] && t.id !== ignoredTrainer && Math.abs(t.x - P.x) + Math.abs(t.y - P.y) === 1);
+  if (!trainer) return false;
+  fishing = null; keys.clear();
+  if (!party.length) {
+    ignoredTrainer = trainer.id;
+    toast(`${trainer.name}: Catch a creature first, then come back to battle!`);
+    return true;
+  }
+  battle = {
+    trainer, allies: party.map(mon => ({ ...mon, hp: maxHP(mon) })),
+    foes: trainer.team.map(mon => ({ ...mon, hp: maxHP(mon) })),
+    ally: 0, foe: 0, healed: false, over: false,
+  };
+  modal = 'battle';
+  clearTimeout(toastT); $('toast').classList.remove('show');
+  $('battle').classList.remove('hidden');
+  $('battle-title').textContent = `${trainer.name} challenges you!`;
+  $('battle-run').textContent = 'Run';
+  updateBattle(`Go, ${byId(battle.allies[0].id).name}!`);
+  $('battle-attack').focus();
+  return true;
+}
+function updateBattle(message) {
+  const ally = battle.allies[battle.ally], foe = battle.foes[battle.foe];
+  for (const [side, mon] of [['ally', ally], ['foe', foe]]) {
+    $(side + '-name').textContent = `${mon.shiny ? '✨ ' : ''}${byId(mon.id).name} · Lv ${mon.lv}`;
+    $(side + '-hp').textContent = `HP ${mon.hp} / ${maxHP(mon)}`;
+    $(side + '-bar').max = maxHP(mon); $(side + '-bar').value = mon.hp;
+  }
+  $('battle-text').textContent = message;
+  $('battle-attack').disabled = battle.over;
+  $('battle-heal').disabled = battle.over || battle.healed || ally.hp === maxHP(ally);
+  $('battle-heal').textContent = battle.healed ? 'Heal used' : 'Heal (1)';
+  drawBattle();
+}
+function drawBattle() {
+  const c = $('battle-canvas').getContext('2d');
+  c.clearRect(0, 0, 520, 240);
+  const draw = (mon, x, y) => {
+    const sp = byId(mon.id);
+    c.fillStyle = '#0003'; c.beginPath(); c.ellipse(x, y + 48, 70, 13, 0, 0, Math.PI * 2); c.fill();
+    if (sp.water) drawCarp(c, x, y, 38, mon.shiny, 0);
+    else if (sp.draw) sp.draw(c, x, y, 44, mon.shiny, 0);
+    else { const img = emojiCanvas(sp.emoji, 85, mon.shiny); c.drawImage(img, x - img.width / 2, y - img.height / 2); }
+  };
+  draw(battle.allies[battle.ally], 130, 145);
+  draw(battle.foes[battle.foe], 390, 90);
+}
+function battleTurn(heal = false) {
+  if (!battle || battle.over) return;
+  const ally = battle.allies[battle.ally], foe = battle.foes[battle.foe];
+  let message;
+  if (heal) {
+    if (battle.healed || ally.hp === maxHP(ally)) return;
+    ally.hp = Math.min(maxHP(ally), ally.hp + Math.ceil(maxHP(ally) / 2));
+    battle.healed = true; message = `${byId(ally.id).name} recovered HP. `;
+  } else {
+    const damage = 7 + ally.lv * 2 + Math.floor(Math.random() * 4);
+    foe.hp = Math.max(0, foe.hp - damage);
+    message = `${byId(ally.id).name} dealt ${damage} damage! `;
+    if (!foe.hp) {
+      message += `${byId(foe.id).name} fainted. `;
+      if (battle.foe + 1 === battle.foes.length) {
+        battle.over = true; trainerWins[battle.trainer.id] = true;
+        party.forEach(mon => { mon.lv = Math.min(100, mon.lv + 1); });
+        persist(); hud(); $('battle-run').textContent = 'Back to exploring';
+        updateBattle(`You beat ${battle.trainer.name}! Each party creature gained a level. Everyone is healed!`);
+        return;
+      }
+      battle.foe++;
+      updateBattle(message + `${battle.trainer.name} sends out ${byId(battle.foes[battle.foe].id).name}!`);
+      return;
+    }
+  }
+  const damage = 4 + foe.lv + Math.floor(Math.random() * 3);
+  ally.hp = Math.max(0, ally.hp - damage);
+  message += `${byId(foe.id).name} dealt ${damage} damage.`;
+  if (!ally.hp) {
+    message += ` ${byId(ally.id).name} fainted.`;
+    if (battle.ally + 1 === battle.allies.length) {
+      battle.over = true; $('battle-run').textContent = 'Back to exploring';
+      updateBattle('Your party is out of HP. Everyone has been healed—catch more creatures or try again!');
+      return;
+    }
+    battle.ally++;
+    message += ` Go, ${byId(battle.allies[battle.ally].id).name}!`;
+  }
+  updateBattle(message);
+}
+function closeBattle() {
+  if (!battle) return;
+  ignoredTrainer = battle.trainer.id;
+  battle = null; modal = null; keys.clear();
+  $('battle').classList.add('hidden');
+}
+$('battle-attack').onclick = () => battleTurn();
+$('battle-heal').onclick = () => battleTurn(true);
+$('battle-run').onclick = closeBattle;
 
 // ---------- Fishing ----------
 function action() {
@@ -479,7 +605,7 @@ $('btn-run').onclick = () => { if (enc && !enc.busy) { closeEnc(); toast('Got aw
 // ---------- Collection ----------
 let previewShinies = false;
 function openDex() {
-  if (modal === 'enc') return;
+  if (modal === 'enc' || modal === 'battle') return;
   modal = 'dex'; keys.clear();
   const list = $('dex-list'); list.innerHTML = '';
   for (const s of SPECIES) {
@@ -538,13 +664,18 @@ function renderPartyBar() {
     if (party[i]) slot.appendChild(monIcon(party[i], 44, 30)); bar.appendChild(slot);
   }
 }
-function openParty() { if (modal === 'enc') return; if (modal === 'dex') closeDex(); modal = 'party'; keys.clear(); renderParty(); $('party').classList.remove('hidden'); }
+function openParty() { if (modal === 'enc' || modal === 'battle') return; if (modal === 'dex') closeDex(); modal = 'party'; keys.clear(); renderParty(); $('party').classList.remove('hidden'); }
 const closeParty = () => { $('party').classList.add('hidden'); modal = null; };
 $('btn-party').onclick = openParty; $('btn-party-close').onclick = closeParty; $('party-bar').onclick = openParty;
 
 // ---------- Input ----------
 const DIRS = { ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1], ArrowLeft: [-1, 0], KeyA: [-1, 0], ArrowRight: [1, 0], KeyD: [1, 0] };
 addEventListener('keydown', e => {
+  if (modal === 'battle') {
+    if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) battleTurn(); }
+    if (e.code === 'Escape') closeBattle();
+    return;
+  }
   if (DIRS[e.code]) { keys.add(e.code); e.preventDefault(); }
   if (e.code === 'Space' || e.code === 'KeyE' || e.code === 'KeyF') { e.preventDefault(); if (modal === 'enc') throwBall(); else action(); }
   if (e.code === 'KeyC' && modal !== 'party') modal === 'dex' ? closeDex() : openDex();
@@ -556,7 +687,7 @@ document.querySelectorAll('.dpad button').forEach(b => {
   b.onpointerdown = e => { e.preventDefault(); keys.add(b.dataset.k); };
   b.onpointerup = b.onpointerleave = () => keys.delete(b.dataset.k);
 });
-$('btn-a').onclick = action;
+$('btn-a').onclick = () => modal === 'battle' ? battleTurn() : action();
 
 // ---------- Render ----------
 function resize() { cv.width = innerWidth; cv.height = innerHeight; }
@@ -626,6 +757,22 @@ function drawPlayer(px, py) {
   ctx.fillStyle = '#222'; if (P.dir[1] >= 0 || P.dir[0]) { ctx.fillRect(cx - 4 + P.dir[0] * 3, by - 9, 2, 3); ctx.fillRect(cx + 2 + P.dir[0] * 3, by - 9, 2, 3); }
 }
 
+function drawTrainers(camX, camY) {
+  for (const trainer of TRAINERS) {
+    const x = trainer.x * T + T / 2 - camX, y = trainer.y * T + T / 2 - camY;
+    if (x < -60 || y < -60 || x > cv.width + 60 || y > cv.height + 60) continue;
+    ctx.fillStyle = '#0004'; ctx.beginPath(); ctx.ellipse(x, y + 15, 12, 4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#27364f'; ctx.fillRect(x - 8, y + 8, 6, 10); ctx.fillRect(x + 2, y + 8, 6, 10);
+    ctx.fillStyle = trainer.color; ctx.fillRect(x - 9, y - 4, 18, 17);
+    ctx.fillStyle = '#f4caa1'; ctx.beginPath(); ctx.arc(x, y - 10, 8, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#304361'; ctx.fillRect(x - 9, y - 18, 18, 6);
+    ctx.fillStyle = '#27364f'; ctx.fillRect(x - 4, y - 11, 2, 3); ctx.fillRect(x + 3, y - 11, 2, 3);
+    ctx.textAlign = 'center'; ctx.font = 'bold 18px sans-serif';
+    ctx.fillStyle = trainerWins[trainer.id] ? '#a6f4b4' : '#ffd166';
+    ctx.fillText(trainerWins[trainer.id] ? '✓' : '!', x, y - 25);
+  }
+}
+
 function render() {
   const t = P.prog < 1 ? P.prog : 1;
   const ppx = (P.fx + (P.x - P.fx) * t) * T, ppy = (P.fy + (P.y - P.fy) * t) * T;
@@ -663,6 +810,7 @@ function render() {
     ctx.fillStyle = '#e63946'; ctx.beginPath(); ctx.arc(bx, by, 5, Math.PI, 0); ctx.fill();
   }
   drawSparkles(camX, camY);
+  drawTrainers(camX, camY);
   drawPlayer(ppx - camX, ppy - camY);
   // A sign at the entrance helps players find the new biome.
   const signX = 5*T + T/2 - camX, signY = 27*T - camY;
