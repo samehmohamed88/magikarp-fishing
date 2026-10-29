@@ -21,8 +21,95 @@ const SPECIES = [
   { id: 'spiny-dogfish', name: 'Spiny Dogfish', water: true, fishingWeight: 14, rate: 0.945, draw: (...a) => drawWaterAnimal('spiny-dogfish', ...a) },
   { id: 'crocodile', name: 'Crocodile', water: true, fishingWeight: 14, rate: 0.93, draw: (...a) => drawWaterAnimal('crocodile', ...a) },
   { id: 'alligator', name: 'Alligator', water: true, fishingWeight: 14, rate: 0.93, draw: (...a) => drawWaterAnimal('alligator', ...a) },
+  { id: 'deer', name: 'Deer', weight: 20, rate: 0.96, draw: (...a) => drawLandAnimal('deer', ...a) },
+  { id: 'bear', name: 'Bear', weight: 20, rate: 0.94, draw: (...a) => drawLandAnimal('bear', ...a) },
+  { id: 'raccoon', name: 'Raccoon', weight: 20, rate: 0.96, draw: (...a) => drawLandAnimal('raccoon', ...a) },
+  { id: 'badger', name: 'Badger', weight: 20, rate: 0.95, draw: (...a) => drawLandAnimal('badger', ...a) },
+  { id: 'skunk', name: 'Skunk', weight: 20, rate: 0.96, draw: (...a) => drawLandAnimal('skunk', ...a) },
+  { id: 'turtle', name: 'Turtle', weight: 20, rate: 0.97, draw: (...a) => drawLandAnimal('turtle', ...a) },
+  { id: 'owl', name: 'Owl', weight: 20, rate: 0.95, draw: (...a) => drawLandAnimal('owl', ...a) },
+  { id: 'mouse', name: 'Mouse', weight: 20, rate: 0.98, draw: (...a) => drawLandAnimal('mouse', ...a) },
+  { id: 'porcupine', name: 'Porcupine', weight: 20, rate: 0.95, draw: (...a) => drawLandAnimal('porcupine', ...a) },
+  { id: 'red-panda', name: 'Red Panda', weight: 20, rate: 0.95, draw: (...a) => drawLandAnimal('red-panda', ...a) },
 ];
 const byId = id => SPECIES.find(s => s.id === id);
+
+function drawLandAnimal(id, c, x, y, s, shiny = false, t = 0) {
+  const palette = {
+    deer: ['#b87c4f','#734c31','#f9dfb4','#78cce0','#417aaf'],
+    bear: ['#8c613e','#503b30','#e1b985','#c7a3ee','#7252a8'],
+    raccoon: ['#9a9c9c','#343f49','#f4ead7','#7dd0c4','#356e83'],
+    badger: ['#717b85','#273441','#f3eee0','#e8b96e','#96623f'],
+    skunk: ['#414652','#252936','#f8eee5','#ae82da','#604a91'],
+    turtle: ['#70a060','#3f6850','#edcf83','#70badf','#395ca5'],
+    owl: ['#b28c64','#634934','#f6dfaf','#ec9cb8','#985c9b'],
+    mouse: ['#a9a3ab','#716775','#f1c9ce','#9ecb80','#557c55'],
+    porcupine: ['#b18b60','#674b36','#f3ddb0','#ecb683','#a45c70'],
+    'red-panda': ['#d77b43','#713c34','#fff0cf','#879ee4','#454f96'],
+  }[id];
+  const [normal, darkNormal, cream, bright, darkBright] = palette;
+  const body = shiny ? bright : normal, dark = shiny ? darkBright : darkNormal;
+  c.save();c.translate(x,y+Math.sin(t*3)*s*.025);c.scale(s,s);
+  c.strokeStyle='#28303c';c.lineWidth=.045;c.lineJoin='round';c.lineCap='round';
+  const oval=(x,y,rx,ry,color,angle=0)=>{c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,angle,0,Math.PI*2);c.fill();c.stroke();};
+  const shape=(points,color)=>{c.fillStyle=color;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();c.stroke();};
+  if(id==='raccoon'||id==='red-panda'){
+    oval(.72,.2,.27,.75,body,-.5);
+    for(let i=0;i<4;i++)oval(.44+i*.13,-.28+i*.24,.22,.07,dark,-.5);
+  }
+  if(id==='skunk'){
+    oval(.6,-.3,.42,.78,body,.35);oval(.6,-.36,.17,.65,cream,.35);
+  }
+  if(id==='mouse'){
+    c.strokeStyle=cream;c.lineWidth=.075;c.beginPath();c.moveTo(.45,.6);c.bezierCurveTo(1.35,.9,1.25,-.1,.8,.2);c.stroke();c.strokeStyle='#28303c';c.lineWidth=.045;
+  }
+  if(id==='porcupine')for(let i=0;i<17;i++){
+    const a=Math.PI+i/16*Math.PI;
+    shape([[Math.cos(a)*.6,Math.sin(a)*.5],[Math.cos(a)*1.03,Math.sin(a)*1.08],[Math.cos(a+.12)*.6,Math.sin(a+.12)*.5]],i%2?dark:cream);
+  }
+  if(id==='turtle'){
+    for(const [px,py] of [[-.6,.52],[.6,.52],[-.6,-.05],[.6,-.05]])oval(px,py,.23,.18,body);
+    oval(0,.2,.74,.65,dark);oval(0,.18,.56,.48,body);
+    shape([[-.22,.04],[0,-.12],[.25,.04],[.25,.32],[0,.48],[-.22,.32]],dark);
+    for(const [px,py] of [[-.5,-.03],[.5,-.03],[-.5,.43],[.5,.43]]){c.beginPath();c.moveTo(px,py);c.lineTo(px*.4,.19);c.stroke();}
+    oval(0,-.57,.38,.35,body);
+  }else{
+    oval(-.35,.73,.24,.13,dark);oval(.35,.73,.24,.13,dark);
+    oval(0,.22,id==='bear'?.73:.6,id==='owl'?.65:.58,body);
+    oval(0,.35,.38,.38,cream);
+    if(id==='deer'){
+      c.strokeStyle=dark;c.lineWidth=.08;
+      for(const side of [-1,1]){
+        c.beginPath();c.moveTo(side*.28,-.67);c.lineTo(side*.45,-1.2);c.lineTo(side*.7,-1.35);c.moveTo(side*.45,-1.2);c.lineTo(side*.3,-1.4);c.stroke();
+      }c.strokeStyle='#28303c';c.lineWidth=.045;
+      oval(-.56,-.65,.27,.14,body,-.5);oval(.56,-.65,.27,.14,body,.5);
+      for(const side of [-1,1])oval(side*.37,.27,.06,.08,cream);
+    }else if(['bear','mouse','raccoon','red-panda'].includes(id)){
+      for(const side of [-1,1]){oval(side*.43,-.77,id==='mouse'?.31:.22,id==='mouse'?.34:.23,body);oval(side*.43,-.77,.12,.13,cream);}
+    }
+    oval(0,-.36,id==='badger'?.61:.53,.47,body);
+    if(id==='owl'){
+      for(const side of [-1,1]){
+        shape([[side*.18,-.67],[side*.54,-1.02],[side*.5,-.42]],dark);
+        oval(side*.28,-.37,.26,.3,cream);oval(side*.56,.2,.19,.43,dark,side*-.3);
+      }
+      shape([[-.1,-.18],[.1,-.18],[0,.02]],'#eab44c');
+    }else{
+      if(id==='raccoon')for(const side of [-1,1])oval(side*.23,-.4,.24,.16,dark,side*.2);
+      if(id==='badger')for(const side of [-1,1])shape([[side*.12,-.78],[side*.42,-.65],[side*.32,-.1],[side*.12,-.12]],cream);
+      if(id==='skunk')oval(0,-.56,.12,.29,cream);
+      if(id==='red-panda')for(const side of [-1,1])oval(side*.3,-.27,.19,.16,cream,-side*.3);
+      oval(0,-.08,.26,.18,cream);oval(0,-.15,.08,.06,dark);
+    }
+  }
+  for(const side of [-1,1]){
+    const ey=id==='turtle'?-.63:-.42, ex=id==='owl'?.28:.22;
+    oval(side*ex,ey,id==='owl'?.105:.07,.09,'#1c2532');
+    oval(side*ex-.02,ey-.025,.022,.027,'#fff');
+  }
+  if(shiny){c.strokeStyle='#fff09c';for(const [px,py] of [[-.92,-.7],[.9,.45]]){c.beginPath();c.moveTo(px-.1,py);c.lineTo(px+.1,py);c.moveTo(px,py-.12);c.lineTo(px,py+.12);c.stroke();}}
+  c.restore();
+}
 
 function drawWaterAnimal(id, c, x, y, s, shiny = false, t = 0) {
   const colors = {

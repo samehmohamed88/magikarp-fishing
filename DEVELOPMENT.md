@@ -69,6 +69,11 @@ Catch difficulty: every species has a first-ball rate of at least 92%, second
 throws always succeed, and failed catches cannot make creatures flee. The fishing
 bite window is four seconds. Verify a forced first failure followed by a second
 catch, preserving shiny state and saved Party/Box entries.
+The ten new woodland species share weight 20 each in the meadow encounter pool
+(16 total meadow species), including sparkling grass. They have no fishing weight
+and do not enter the separate winter or mountain pools. Verify distinct normal
+and shiny sprites for encounters, Party/Box, Collection (25 species), and battles,
+as well as catch/save/reload compatibility with existing saves.
 
 Cloud tasks already have isolated checkouts. Use this checkout directly;
 do not create a Git worktree unless explicitly requested.

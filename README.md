@@ -59,6 +59,21 @@ Collection, and trainer battles. Sparkling fishing spots still guarantee shinies
 
 ![A shark fishing encounter](docs/screenshots/shark.png)
 
+## More woodland creatures
+
+Ten new creatures live in the tall grass: **Deer, Bear, Raccoon, Badger, Skunk,
+Turtle, Owl, Mouse, Porcupine, and Red Panda**. Walk through grass to encounter
+them, or step into sparkling grass for a guaranteed shiny encounter.
+Together, the ten newcomers make up about 61% of meadow encounters.
+
+Each has its own drawn sprite and shiny palette. Catch them with the same easy
+catching rules, put them in your Party or Box, and use them in trainer battles.
+Collection's **Preview shiny forms** shows all ten without needing to catch them.
+The new land creatures won't appear while fishing or replace the Winter Area's
+Snowy encounters.
+
+![A Deer encounter in the meadows](docs/screenshots/deer.png)
+
 ## Play
 
 Once GitHub Pages is enabled, open **[Magikarp River Quest](https://samehmohamed88.github.io/magikarp-fishing/)**
@@ -102,13 +117,13 @@ Catching is forgiving: every species has at least a 92% chance on the first ball
 and the second ball always succeeds. Creatures won't run away after breaking free.
 You have four seconds to reel in after a bite.
 
-Discover fifteen species, including Magikarp, Frog, Fox, Bouldersaur, Snowy,
+Discover twenty-five species, including Magikarp, Frog, Fox, Bouldersaur, Snowy,
 and the six new water creatures.
 Every species has a rare shiny form, including pink Bunny, blue Duck, purple
 Squirrel, blue Fox, and mint Hedgehog. Magikarp, Frog, and Bouldersaur keep their
 existing shiny colors. Check Collection to track your catches,
 and use Party to move creatures between your party and Box.
-In Collection, choose **✨ Preview shiny forms** to see all fifteen shiny designs
+In Collection, choose **✨ Preview shiny forms** to see all twenty-five shiny designs
 without changing your catches or saved progress. Bunny, Duck, Squirrel, Fox,
 and Hedgehog use drawn sprites so their colors are consistent across devices.
 
