@@ -223,7 +223,7 @@ catch, preserving shiny state and saved Party/Box entries.
 The ten new woodland species share weight 20 each in the meadow encounter pool
 (16 total meadow species), including sparkling grass. They have no fishing weight
 and do not enter the separate winter or mountain pools. Verify distinct normal
-and shiny sprites for encounters, Party/Box, Collection (99 species), and battles,
+and shiny sprites for encounters, Party/Box, Collection (102 species), and battles,
 as well as catch/save/reload compatibility with existing saves.
 Fishing shiny probabilities: Alligator 75%; Shark, Catfish, Grunt, Spiny Dogfish,
 and Crocodile 50%; Magikarp and Frog retain 1/8. Sparkling casts guarantee a shiny
@@ -278,7 +278,7 @@ There are 18 cave creatures, three each of Mole, Ant, Spider, Cricket, Praying
 Mantis, and Cave Crawfish. They only encounter by contact underground. Crawfish
 stay in shallow pools; the others stay on dirt. All have distinct normal/shiny
 sprites. They never join surface, fishing, winter, mountain, or diving pools.
-Check movement and respawn boundaries, capture, Party/Box, Collection (99 species),
+Check movement and respawn boundaries, capture, Party/Box, Collection (102 species),
 preview sprites, and persistence. Cave encounters use a separate cave background.
 Old saves without underground default to the surface; cave saves reload on the
 cave layer, with invalid cave positions recovered at the ladder. Surface wildlife
@@ -341,7 +341,7 @@ the four species enters meadow, fishing, normal cave, or swimmer pools. Encounte
 also checks the calendar to prevent stale seasonal availability.
 
 Test all four normal/shiny sprite pairs, catching, and save/reload into November.
-Party, Box, and Collection (99 species) must keep seasonal catches after the event.
+Party, Box, and Collection (102 species) must keep seasonal catches after the event.
 An in-progress encounter may finish after midnight; only new spawns are gated.
 
 ## Deep Sea validation
@@ -391,7 +391,7 @@ collision capture; saved shiny catches; and exclusion from other wildlife pools.
 Load a pre-expansion Abyss save to verify old catches, generator rewards, trainer
 wins, and both return points survive while all new species become available.
 Catch new species into both Party and a full-party Box, reload, and use one in a
-diver battle. Collection must list 99 species and preview every shiny form.
+diver battle. Collection must list 102 species and preview every shiny form.
 No stone piles, generator interactions, or level-2 trainers appear in the Abyss.
 
 Level-2 diver trainers have separate IDs in trainerWins. Their tiles block movement
@@ -454,3 +454,25 @@ habitats, full-party Box storage, reloading an older save, mobile travel, and
 returning to the meadow. Also check the Halloween sparkle guarantee, October 31
 Ghost restriction, and all three diving levels. New art uses the same draw
 functions for encounters, Collection, Party/Box, and battles.
+
+## Roaming land creatures
+
+`ground.js` loads before `game.js` and adds Fire Bird, Garbage Hunk, and Seabird.
+It keeps four of each on reachable surface terrain: Ember Highlands, western
+meadows/marsh, and sand beside rivers respectively. Ground creatures avoid
+trainers, markets, gyms, doors, and cave entrances. They move on land, pause in
+menus, return 20 seconds after encounters, and refresh habitat candidates when
+the seasonal map changes. Catch/save/Box/battle handling uses the shared species
+registry; no save migration is needed. All three have distinct shiny palettes.
+
+Collision encounters require being on foot, completing movement, and clearing
+the existing four-second encounter grace period. Flying, boating, diving,
+and underground exploration cannot trigger ground encounters. Surface sparkles
+on a creature's tile color its map sprite and guarantee the same shiny encounter.
+
+Run `GAME_URL=http://127.0.0.1:8000 node tests/ground-smoke.cjs` with Playwright
+available. Optional `PLAYWRIGHT_MODULE` and `CHROMIUM_PATH` select installed
+runtimes. This checks keyboard collisions and catches for all three species,
+normal/shiny art, save compatibility, Collection, collision guards, movement,
+respawns, and seasonal rollover. The existing dragon-flight suite covers the
+shared surface and flying paths. The local launchers require `ground.js`.

@@ -4,6 +4,25 @@ A browser adventure made for exploring, fishing, and collecting creatures. Wande
 through tall grass, hop into boats at the docks, and explore the eastern mountains
 in search of Bouldersaur. Watch for sparkles—you might find a shiny!
 
+## Roaming creatures on land
+
+Three more creatures now walk around visibly on the ground. Walk into one while
+on foot to encounter and catch it:
+
+| Creature | Where to find it | Shiny colors |
+| --- | --- | --- |
+| Fire Bird | Ember Highlands; use **Explore (M)** to travel there | Blue flames and pale cyan feathers |
+| Garbage Hunk | Meadows and Mushroom Marsh | Purple body with a golden lid |
+| Seabird | Sandy riverbanks | Lavender feathers and mint-colored feet |
+
+Four of each roam the map and return after encounters. Their normal and shiny
+colors are visible before you meet them, and stay with them when caught.
+These are encounters on foot; look on land beside the rivers for Seabirds.
+In **Collection (C)**, select **Roaming land creatures** for their locations.
+Fire Bird is a separate creature from Phoenix. Existing catches stay saved.
+
+![Fire Bird, Garbage Hunk, and Seabird, with normal colors above their shiny forms](docs/screenshots/ground-creatures.png)
+
 ## 🏅 Markets, six gyms, and the Champion Door
 
 Press **G** or tap **Gyms & Markets** to find every market and gym. Travel there
@@ -180,7 +199,7 @@ caught with the same balls as other creatures.
 
 ![A shiny Moon Unicorn encounter in the Moonlit Grove](docs/screenshots/moon-unicorn.png)
 
-Collection now has **99 species**, a discovery counter, and filters for the new
+Collection now has **102 species**, a discovery counter, and filters for the new
 areas. Your existing catches, shiny forms, trainer wins, and generator rewards
 stay saved. The limited-edition Ghost still appears **only on October 31**.
 Return to land before using fast travel; it is unavailable during encounters.
@@ -318,7 +337,7 @@ if your party is still in the fight.
 Creatures won't run away after breaking free, but they may knock out your party.
 You have four seconds to reel in after a bite.
 
-Discover 99 species across the five new biomes, meadows, rivers, caves, seasonal forest, and three
+Discover 102 species across the five new biomes, meadows, rivers, caves, seasonal forest, and three
 diving levels, including Magikarp, Bouldersaur, Orca, and Anglerfish.
 Every species has a shiny form, including pink Bunny, blue Duck, purple
 Squirrel, blue Fox, and mint Hedgehog. Magikarp, Frog, and Bouldersaur keep their
@@ -328,7 +347,7 @@ You can move even the last creature into the Box, or choose **Move all to Box**
 to empty your party at once. Your creatures and Collection progress stay saved.
 Click any creature in the Box to add it back. Put at least one in your party
 before approaching a trainer to battle.
-In Collection, choose **✨ Preview shiny forms** to see all 99 shiny designs
+In Collection, choose **✨ Preview shiny forms** to see all 102 shiny designs
 without changing your catches or saved progress. Bunny, Duck, Squirrel, Fox,
 and Hedgehog use drawn sprites so their colors are consistent across devices.
 

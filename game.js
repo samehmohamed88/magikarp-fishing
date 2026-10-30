@@ -60,7 +60,7 @@ const SPECIES = [
     id,name,water:true,abyssOnly:true,rate:.95,draw:(...a)=>drawAbyssCreature(id,...a),
   })),
 ];
-SPECIES.push(...BIOME_SPECIES,FIRE_DRAGON,...DRAGON_CHAMPIONS);
+SPECIES.push(...BIOME_SPECIES,FIRE_DRAGON,...DRAGON_CHAMPIONS,...GROUND_SPECIES);
 const byId = id => SPECIES.find(s => s.id === id);
 
 // Seasonal events follow the player's device calendar and recur each year.
@@ -1481,6 +1481,7 @@ function arrive() {
   if(eliteFourUnlocked()&&P.x===CHAMPION_DOOR.x&&P.y===CHAMPION_DOOR.y){enterEliteFour();return;}
   if(leagueSafeTile(P.x,P.y)){hud();return;}
   if (challengeTrainer()) { hud(); return; }
+  if (checkGroundEncounter()) { hud(); return; }
   const biome=newBiomeByTile(t), forestSparkle = t === HF && spotAt(P.x, P.y);
   const biomeSparkle=biome&&spotAt(P.x,P.y);
   if (encounterGrace > 0 && t !== WA && t !== DK && !forestSparkle && !biomeSparkle) { hud(); return; }
@@ -2016,6 +2017,10 @@ function openDex() {
     const biome=newBiomeById(s.habitat);
     if(s.id==='fire-dragon'&&!visible)el.querySelector('small').textContent='🔥 Cave after Elite Four · ✨ Sky while riding · Lv 70';
     if(s.championWild&&!visible)el.querySelector('small').textContent='🐉 Defeat or catch the Fire Dragon · Cave · Lv 100';
+    if(s.habitat==='ground') {
+      const habitat=document.createElement('p');habitat.className='dex-habitat';habitat.textContent=s.location;el.appendChild(habitat);
+      if(!visible)el.querySelector('small').textContent='Walk into a roaming creature on land';
+    }
     if(biome) {
       const habitat=document.createElement('p');habitat.className='dex-habitat';habitat.textContent=`${biome.icon} ${biome.name}${s.special?' · Rare':''}`;
       el.appendChild(habitat);
@@ -2377,6 +2382,7 @@ function render() {
     ctx.font='11px sans-serif';ctx.fillText('6 creatures · Sparkles = Shiny',sx,sy+10);
   }
   drawLeagueSites(camX,camY);
+  drawGroundWildlife(camX,camY);
   drawSkyWildlife(camX,camY);
   drawPlayer(ppx - camX, ppy - camY);
   // A sign at the entrance helps players find the new biome.
@@ -2520,6 +2526,7 @@ function refreshHalloweenSeason() {
   const next=halloweenCalendar();
   if(next.key===halloweenSeason.key)return;
   halloweenSeason=next;applyHalloweenMap();
+  refreshGroundHabitats();
   syncHalloweenCavernWildlife();
   if(halloweenCavern&&!next.open) {
     if(modal==='enc')closeEnc();
@@ -2553,7 +2560,7 @@ function loop(now) {
   }
   if (!modal) {
     if(underground)updateCaveWildlife(dt);
-    else {updateWaterWildlife(dt);diveGrace=Math.max(0,diveGrace-dt);checkDiveEncounter();if(!P.diving&&!modal)updateSkyWildlife(dt);}
+    else {updateWaterWildlife(dt);diveGrace=Math.max(0,diveGrace-dt);checkDiveEncounter();if(!P.diving&&!modal)updateSkyWildlife(dt);if(!modal)updateGroundWildlife(dt);}
   }
   updateSpots(dt);
   render(); if (modal === 'enc') drawEnc();
@@ -2562,6 +2569,7 @@ function loop(now) {
 }
 syncDragonChampions();
 initializeSky();
+initializeGroundWildlife();
 hud();
 toast(P.flying?'☁️ Welcome back to the sky! Fly into shiny dragons; press 3 over clear ground to land.':dragonCave?(dragonChampionsUnlocked()?dragonChampionMessage:'🔥 Welcome back to Fire Dragon Cave! Follow the signs to the lair.'):abyssDiving?'🌌 Welcome back to the Abyss! V returns to the Deep Sea.':deepDiving?'🌊 B explores the Abyss. V returns to the shallows.':halloweenCavern?'✨ Halloween Cavern: every creature is shiny! Return to the ladder to leave.':underground?'🕯️ Explore the caves; return to the ladder to leave.':P.diving ? '🤿 B dives deeper. V returns to your boat.' : 'Welcome! Space at the starting tunnel: explore underground 🕳️');
 requestAnimationFrame(loop);
